@@ -28,7 +28,7 @@ This project relies on a centralized **Supabase (PostgreSQL)** backend that prov
 
 ### **System Architecture Diagram**
 
-```text
+
 ┌─────────────────────────┐               ┌─────────────────────────┐
 │       Flutter App       │               │   ASP.NET Web Admin     │
 │   (Parents & Teachers)  │               │     (School Admin)      │
