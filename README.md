@@ -4,7 +4,7 @@ A mobile and web platform designed to streamline secure, real-time communication
 
 ---
 
-## 🛠️ Tech Stack & Architecture
+## Tech Stack & Architecture
 
 ### **Architecture Overview**
 This project relies on a centralized **Supabase (PostgreSQL)** backend that provides direct authentication, data persistence, and Row Level Security (RLS).
@@ -47,7 +47,7 @@ This project relies on a centralized **Supabase (PostgreSQL)** backend that prov
 ```
 ---
 
-## 🚀 Key Features
+## Key Features
 
 * **Role-Based Portals:** Distinct interfaces and permissions for Admin, Teachers, and Parents.
 * **Student Activity Updates:** Real-time progress reports, attendance notes, and event scheduling.
@@ -55,7 +55,7 @@ This project relies on a centralized **Supabase (PostgreSQL)** backend that prov
 
 ---
 
-## 📦 Getting Started
+## Getting Started
 
 ### Prerequisites
 
