@@ -1,0 +1,23 @@
+# --- General & IDE ---
+.DS_Store
+.vscode/
+.idea/
+
+# --- Flutter / Dart (apps/mobile) ---
+apps/mobile/.dart_tool/
+apps/mobile/.flutter-plugins
+apps/mobile/.flutter-plugin-dependencies
+apps/mobile/build/
+apps/mobile/.pub-cache/
+apps/mobile/.pub/
+
+# --- ASP.NET Core / C# (apps/web) ---
+apps/web/bin/
+apps/web/obj/
+apps/web/out/
+apps/web/appsettings.Development.json
+apps/web/appsettings.json
+
+# --- Environment Variables ---
+.env
+*.env
