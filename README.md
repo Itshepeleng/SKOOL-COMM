@@ -172,11 +172,15 @@ SKOOL-COMM
 │   └── aspnet/
 │
 ├── docs/
+│   ├── Meeting_Evidence.pdf
+│   ├── README.md
+│   ├── Supabase_Screenshots.pdf
+│   └── Phase-1-Group-Reflection.pdf
 │
 ├── .gitignore
 │
 └── README.md
-```
+```text
 
 The repository will be updated throughout the project as development and documentation progress.
 
