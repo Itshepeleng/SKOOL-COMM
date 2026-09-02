@@ -63,7 +63,7 @@ The web application will be used by teachers and administrators to:
 * Track parent engagement where applicable.
 * Manage users.
 * Manage learner and parent information.
-* Generate reports.
+* Generate Reports.
 
 ### Supabase Backend
 
