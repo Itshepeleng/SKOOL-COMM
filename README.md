@@ -33,6 +33,7 @@ This fragmented approach can result in:
 * No digital year plan.
 * Manual recording of learner information.
 * Difficulty for some parents, particularly elderly parents, when using existing communication platforms.
+* Demerit recording is done manually by educators
 
 Skool-Comm aims to provide a centralised and easier-to-use solution for school-parent communication.
 
