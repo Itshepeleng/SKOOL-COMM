@@ -1,11 +1,12 @@
-# Documentation Index
+# Skool-Comm Project Documentation
 
-This folder contains supporting documentation and evidence for Phase 1 of the SKOOL-COMM project (ITC327W).
+This folder contains the supporting documents and evidence for the Skool-Comm project.
 
-| File | Description |
-|------|-------------|
-| `Supabase_Screenshots.pdf` | Screenshots of the Supabase project dashboard and access settings, confirming backend setup and team access. |
-| `Meeting_Evidence.pdf` | Notes and photos from group planning meetings, showing role assignments and stakeholder interview preparation. |
-| `Phase-1-Group-Reflection.pdf` | The group's written reflection on Phase 1: challenges, decisions, and lessons learned. |
+## Documents
 
-All documents in this folder relate to Phase 1 (Planning, Requirements and Feasibility). No confidential stakeholder information or credentials are included here.
+* **Meeting_Evidence.pdf** — Evidence of stakeholder and group meetings.
+* **Phase-1-Group-Reflection.pdf** — Group reflection on the work completed during Phase 1.
+* **Supabase_Screenshots.pdf** — Evidence of the Supabase project and backend setup.
+* **Stakeholder_Requirement_Scope_Confirmation (1).pdf** — Signed stakeholder confirmation of the agreed project requirements and scope.
+
+These documents provide supporting evidence for the project's requirements, stakeholder engagement, planning, and technical setup.
