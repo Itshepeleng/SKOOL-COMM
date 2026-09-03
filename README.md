@@ -2,7 +2,7 @@
 
 ## Project Information
 
-**Project Name:** Skool-Comm – School-Parent Communication App
+**Project Name:** Skool-Comm – School-Parent Communication Application
 **Module:** ITC327W – Work Integrated Learning
 **Institution:** Central University of Technology (CUT)
 **Stakeholder:** Wilgehof Primary School
