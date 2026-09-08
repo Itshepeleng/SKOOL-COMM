@@ -118,6 +118,12 @@ Supabase will provide the shared backend for both applications, including:
 
 Both the Flutter mobile application and ASP.NET web application will connect to the same Supabase backend to share and manage project data.
 
+## Prerequisites
+
+Before you begin setting up the project, ensure you have the following installed and configured on your local machine:
+
+(Mobile App) Flutter SDK: Latest Stable Channel
+(Web App) .NET 10 SDK: The .NET 10 runtime and software development kit
 ---
 
 ## Project Scope
