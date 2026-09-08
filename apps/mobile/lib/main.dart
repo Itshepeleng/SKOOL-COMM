@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+Future<void> main() async {
+
+  await Supabase.initialize(
+    url:'https://xiflaqtouxzyioteejpj.supabase.co',
+    publishableKey: 'sb_publishable_ig_7vV5JLU5bz-IDVNcHTQ_9juI-8oc',
+  );
+  
   runApp(const SkoolCommApp());
 }
 
@@ -51,7 +58,7 @@ class ComingSoonScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Parent Portal App',
+              'SKOOL-COMM Communication App',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
