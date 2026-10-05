@@ -8,5 +8,7 @@ This folder contains the supporting documents and evidence for the Skool-Comm pr
 * **Phase-1-Group-Reflection.pdf** — Group reflection on the work completed during Phase 1.
 * **Supabase_Screenshots.pdf** — Evidence of the Supabase project and backend setup.
 * **Stakeholder_Requirement_Scope_Confirmation (1).pdf** — Signed stakeholder confirmation of the agreed project requirements and scope.
+* **Project Risk Register** * - The assessed risk of the project.
+* **Feasibility Study** * - The feasibility of the project.
 
 These documents provide supporting evidence for the project's requirements, stakeholder engagement, planning, and technical setup.
