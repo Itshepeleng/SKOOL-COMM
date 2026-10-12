@@ -6,7 +6,7 @@
 **Module:** ITC327W – Work Integrated Learning
 **Institution:** Central University of Technology (CUT)
 **Stakeholder:** Wilgehof Primary School
-**Project Phase:** Phase 1 – Planning, Requirements and Feasibility
+**Project Phase:** Phase 2 – System Architecture and Design
 
 ---
 
@@ -63,7 +63,6 @@ The web application will be used by teachers and administrators to:
 * Track parent engagement where applicable.
 * Manage users.
 * Manage learner and parent information.
-* Generate Reports.
 
 ### Supabase Backend
 
@@ -195,24 +194,21 @@ The repository will be updated throughout the project as development and documen
 
 ## Project Status
 
-**Current Phase:** Phase 1 – Planning, Requirements and Feasibility
+**Current Phase:** Phase 2 – System Architecture and Design
 
-Completed Phase 1 activities include:
 
-* Stakeholder identification and engagement.
-* Requirements gathering.
-* Current process and problem analysis.
-* Software Requirements Specification.
-* Requirements prioritisation.
-* Requirements change management.
-* Refined project scope.
-* Feasibility study.
-* Project risk register.
-* Microsoft Project schedule.
-* GitHub repository setup.
-* Supabase project setup.
+Completed Phase 2 activities include:
 
-The project will next move into system architecture and design.
+* System Architecture Design.
+* UML Design -  Use Case Diagram and Sequence Diagrams.
+* Database Design: Entity Relationship Diagram (ERD).
+* Updated Software Requirements Specification.
+* User Interface design and design alignment (Flutter and ASP.NET).
+* Microsoft Project schedule updates.
+* GitHub documentation updates.
+* Progress Tracker Updates
+
+The project will next move into system development, implementation and final demonstration.
 
 ---
 
