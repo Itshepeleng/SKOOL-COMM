@@ -62,43 +62,27 @@ Supabase will provide the shared backend for both applications, including:
 ---
 
 ## System Architecture
-
-┌─────────────────────────────┐          ┌──────────────────────────────────┐
-│    Flutter Mobile App       │          │      ASP.NET Web Application     │
-│    (Parent / Guardian)      │          │      (Staff: Admin / Teacher)    │
-│                             │          │                                  │
-│ • Register / log in         │          │ • Publish announcements          │
-│ • View announcements        │          │ • Record attendance & behaviour  │
-│ • View attendance & points  │          │   points                         │
-│ • View reminders & year plan│          │ • Manage events & year plan      │
-│ • Update contact details    │          │ • Track parent engagement        │
-│                             │          │ • Generate reports               │
-│                             │          │ • Admin: approve/reject learner  │
-│                             │          │   profiles, manage users         │
-└──────────────┬──────────────┘          └────────────────┬─────────────────┘
-               │  ▲                                       │  ▲
-   API request │  │ JSON response            API request  │  │ JSON response
-     (HTTPS)   │  │                            (HTTPS)    │  │
-               ▼  │                                       ▼  │
-┌──────────────────────────────────────────────────────────────────────────┐
-│                           SUPABASE BACKEND                               │
-│                                                                          │
-│  ┌──────────────────┐   ┌──────────────────────────────────────────┐     │
-│  │  Authentication  │   │  PostgreSQL Database                     │     │
-│  │  (User auth &    │   │  (with Row Level Security - RLS)         │     │
-│  │   roles)         │   │                                          │     │
-│  └──────────────────┘   └──────────────────────────────────────────┘     │
-│                                                                          │
-│  ┌──────────────────────────────┐   ┌────────────────────────────────┐   │
-│  │  Storage                     │   │  Realtime                      │   │
-│  │  (Profile pictures &         │   │  (Live updates & in-app        │   │
-│  │   announcement attachments)  │   │   notifications)               │   │
-│  └──────────────────────────────┘   └────────────────────────────────┘   │
-└──────────────────────────────────────────────────────────────────────────┘
-               │
-               └──► Realtime pushes live updates / in-app notifications
-                    back to the Flutter Mobile App
-
+                   ┌───────────────────────┐
+                    │   Flutter Mobile App  │
+                    │       Parents         │
+                    └───────────┬───────────┘
+                                │
+                                │
+                                ▼
+                     ┌────────────────────┐
+                     │      SUPABASE      │
+                     │ Authentication     │
+                     │ Database           │
+                     │ Real-time Services │
+                     │ Access Control     │
+                     └─────────┬──────────┘
+                               │
+                               │
+                               ▼
+                    ┌───────────────────────┐
+                    │  ASP.NET Web Dashboard │
+                    │ Teachers & Administrators │
+                    └───────────────────────┘
 
 ```
 
