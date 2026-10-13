@@ -151,6 +151,18 @@ Before you begin setting up the project, ensure you have the following installed
 
 ```text
 ## Repository Structure
+## Documentation
+
+The following documents provide evidence of the project's requirements, planning, stakeholder engagement and technical setup.
+
+- [Software Requirements Specification (SRS)](docs/New_SRS_2%20%282%29.docx) — Project requirements and system functionality.
+- [Feasibility Study](docs/Feasibility%20Study.docx) — Project feasibility assessment.
+- [Project Risk Register](docs/Project%20Risk%20Register%20Final.xlsb.xlsx) — Identified project risks and planned responses.
+- [Stakeholder Requirement and Scope Confirmation](docs/Stakeholder_Requirement_Scope_Confirmation%20%281%29.pdf) — Stakeholder confirmation of requirements and scope.
+- [Meeting Evidence](docs/Meeting_Evidence.pdf) — Evidence of stakeholder and group meetings.
+- [Meeting Plan](docs/Meeting%20plan.jpeg) — Planned meeting arrangements.
+- [Phase 1 Group Reflection](docs/Phase-1-Group-Reflection.pdf) — Reflection on Phase 1 activities.
+- [Supabase Screenshots](docs/Supabase_Screenshots.pdf) — Evidence of the Supabase backend setup.
 
 ```text
 SKOOL-COMM/
