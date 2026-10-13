@@ -84,7 +84,7 @@ Supabase will provide the shared backend for both applications, including:
                     │ Teachers & Administrators │
                     └───────────────────────┘
 
-```
+
 
 Both the Flutter mobile application and ASP.NET web application will connect to the same Supabase backend to share and manage project data.
 
