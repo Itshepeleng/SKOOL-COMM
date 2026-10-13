@@ -95,42 +95,38 @@ Before you begin setting up the project, ensure you have the following installed
 (Mobile App) Flutter SDK: Latest Stable Channel
 (Web App) .NET 10 SDK: The .NET 10 runtime and software development kit
 ---
-
 ## Project Scope
 
-### Must Have
-- Secure parent and staff registration and login.
-- Parent profile registration and administrator approval or rejection.
-- Linking approved parent profiles to the correct learners.
-- Viewing learner attendance records.
-- Viewing learner behavioural points.
-- Viewing school announcements and reminders.
-- Viewing school events and the year plan.
-- Creating and managing school announcements.
-- Recording and managing learner attendance.
-- Recording and managing learner behavioural points through the teacher role.
-- Managing school events and the year plan.
-- Tracking parent engagement with announcements.
-- Updating parent contact information.
-- Managing user accounts and access permissions.
-- Role-based access control to protect learner and parent information.
-- In-app updates and notifications where supported by the approved design.
+### Must-Have Features
 
-### Should Have
+- Secure registration, login and role-based access (parent, teacher, administrator).
+- Parent profile registration, with administrator approval or rejection.
+- User management by administrators.
+- Create, update and manage school announcements.
+- Reminders for parents.
+- Record learner attendance (web) and view attendance (mobile).
+- Record learner behavioural points (teacher role) and view them (mobile).
+- Manage and view school events and the year plan.
+- Parents can update their contact information.
+- Digital record-keeping of communication.
+- Report generation for staff (attendance, behavioural points and parent engagement).
 
-- Realtime updates where supported by the shared Supabase backend.
+### Should-Have Features
 
-### Could Have
-- A link to an external school uniform or stationery supplier, if time permits.
+- Parent engagement tracking (whether announcements have been viewed).
+- Real-time updates and in-app notifications.
+- Profile pictures and announcement attachments (Supabase Storage).
 
-### Out of Scope for the Current Prototype
-- Viewing academic results.
-- Online school statement viewing or payment processing.
-- SMS and email notifications.
-- Direct messaging between parents and staff.
-- AI-powered features.
-- External payment-system integrations.
+### Could-Have Features
 
+- Uniform or stationery supplier link.
+
+### Out of Scope for the Prototype
+
+- Academic progress and marks recording or viewing.
+- Online statements.
+
+The project scope has been refined to ensure that the prototype remains achievable within the available semester.
 
 ## Group Members and Roles
 
