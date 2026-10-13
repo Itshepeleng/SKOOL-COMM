@@ -1,79 +1,51 @@
 # SKOOL-COMM – School-Parent Communication App
 
-## Project Information
-
-**Project Name:** Skool-Comm – School-Parent Communication Application
-**Module:** ITC327W – Work Integrated Learning
-**Institution:** Central University of Technology (CUT)
-**Stakeholder:** Wilgehof Primary School
-**Project Phase:** Phase 2 – System Architecture and Design
-
----
-
 ## Project Overview
 
-Skool-Comm is an integrated mobile and web prototype designed to improve communication between Wilgehof Primary School and parents or guardians.
+Skool-Comm is a school-parent communication system designed for Wilgehof Primary School. It consists of a Flutter mobile application for parents and guardians, an ASP.NET Core web application for teachers and administrators, and a shared Supabase backend.
 
-The project aims to provide a centralised platform where parents can access important school information, including academic progress, attendance information, announcements, reminders and the school year plan.
+The system aims to centralise school communication by allowing parents and guardians to view announcements, attendance records, behavioural points, reminders, school events and the year plan. Parents can also update their contact information and register their profiles for approval.
 
-Teachers and school administrators will use a web-based dashboard to manage communication and learner information, while parents will use a Flutter mobile application to access relevant school updates.
-
----
-
-## Problem Statement
-
-Wilgehof Primary School currently uses multiple communication methods, including WhatsApp, Facebook, letters and phone calls.
-
-This fragmented approach can result in:
-
-* Parents missing important messages.
-* Short notice about school events and meetings.
-* No central communication record.
-* No reminders for parents.
-* No digital year plan.
-* Manual recording of learner information.
-* Difficulty for some parents, particularly elderly parents, when using existing communication platforms.
-* Demerit recording is done manually by educators
-
-Skool-Comm aims to provide a centralised and easier-to-use solution for school-parent communication.
-
----
+Teachers and administrators use the web application to manage school announcements, attendance and school events, while teachers record behavioural points. Administrators manage user accounts and approve or reject parent profiles. The system also supports parent engagement tracking to help the school monitor whether announcements have been viewed.
 
 ## Proposed Solution
 
-The Skool-Comm prototype consists of three integrated components:
+The Skool-Comm prototype consists of three integrated components.
 
 ### Flutter Mobile Application
 
-The mobile application will be used by parents or guardians to:
+The mobile application will allow parents or guardians to:
 
-* View academic progress.
-* View attendance information.
-* View school events and announcements.
-* Receive reminders.
-* View the school year plan.
-* Update contact information.
+- Register and log in securely.
+- View school announcements and reminders.
+- View learner attendance records.
+- View learner behavioural points.
+- View school events and the year plan.
+- Update their contact information.
+- View relevant school updates for their linked learners.
 
-### ASP.NET Web Application
+### ASP.NET Core Web Application
 
-The web application will be used by teachers and administrators to:
+The web application will allow teachers and administrators to:
 
-* Create, update and delete announcements.
-* Manage communication.
-* Track parent engagement where applicable.
-* Manage users.
-* Manage learner and parent information.
+- Create, update and manage school announcements.
+- Record and manage learner attendance.
+- Record learner behavioural points through the teacher role.
+- Manage school events and the year plan.
+- Track parent engagement with announcements.
+- Generate reports where required by the approved requirements.
+
+Administrators will also be able to manage user accounts and approve or reject parent profiles.
 
 ### Supabase Backend
 
 Supabase will provide the shared backend for both applications, including:
 
-* Authentication.
-* Database storage.
-* Role-based access control.
-* Communication records.
-* Real-time synchronisation where applicable.
-
+- Authentication and user identity management.
+- PostgreSQL database storage.
+- Row Level Security (RLS) to help protect authorised access to data.
+- Storage for approved files and attachments, where required.
+- Realtime services for live updates where applicable.
 ---
 
 ## Technology Stack
@@ -91,28 +63,43 @@ Supabase will provide the shared backend for both applications, including:
 
 ## System Architecture
 
-```text
-                    ┌───────────────────────┐
-                    │   Flutter Mobile App  │
-                    │       Parents         │
-                    └───────────┬───────────┘
-                                │
-                                │
-                                ▼
-                     ┌────────────────────┐
-                     │      SUPABASE      │
-                     │ Authentication     │
-                     │ Database           │
-                     │ Real-time Services │
-                     │ Access Control     │
-                     └─────────┬──────────┘
-                               │
-                               │
-                               ▼
-                    ┌───────────────────────┐
-                    │  ASP.NET Web Dashboard │
-                    │ Teachers & Administrators │
-                    └───────────────────────┘
+┌─────────────────────────────┐          ┌──────────────────────────────────┐
+│    Flutter Mobile App       │          │      ASP.NET Web Application     │
+│    (Parent / Guardian)      │          │      (Staff: Admin / Teacher)    │
+│                             │          │                                  │
+│ • Register / log in         │          │ • Publish announcements          │
+│ • View announcements        │          │ • Record attendance & behaviour  │
+│ • View attendance & points  │          │   points                         │
+│ • View reminders & year plan│          │ • Manage events & year plan      │
+│ • Update contact details    │          │ • Track parent engagement        │
+│                             │          │ • Generate reports               │
+│                             │          │ • Admin: approve/reject learner  │
+│                             │          │   profiles, manage users         │
+└──────────────┬──────────────┘          └────────────────┬─────────────────┘
+               │  ▲                                       │  ▲
+   API request │  │ JSON response            API request  │  │ JSON response
+     (HTTPS)   │  │                            (HTTPS)    │  │
+               ▼  │                                       ▼  │
+┌──────────────────────────────────────────────────────────────────────────┐
+│                           SUPABASE BACKEND                               │
+│                                                                          │
+│  ┌──────────────────┐   ┌──────────────────────────────────────────┐     │
+│  │  Authentication  │   │  PostgreSQL Database                     │     │
+│  │  (User auth &    │   │  (with Row Level Security - RLS)         │     │
+│  │   roles)         │   │                                          │     │
+│  └──────────────────┘   └──────────────────────────────────────────┘     │
+│                                                                          │
+│  ┌──────────────────────────────┐   ┌────────────────────────────────┐   │
+│  │  Storage                     │   │  Realtime                      │   │
+│  │  (Profile pictures &         │   │  (Live updates & in-app        │   │
+│  │   announcement attachments)  │   │   notifications)               │   │
+│  └──────────────────────────────┘   └────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────────────┘
+               │
+               └──► Realtime pushes live updates / in-app notifications
+                    back to the Flutter Mobile App
+
+
 ```
 
 Both the Flutter mobile application and ASP.NET web application will connect to the same Supabase backend to share and manage project data.
@@ -127,31 +114,39 @@ Before you begin setting up the project, ensure you have the following installed
 
 ## Project Scope
 
-### Must-Have Features
+### Must Have
+- Secure parent and staff registration and login.
+- Parent profile registration and administrator approval or rejection.
+- Linking approved parent profiles to the correct learners.
+- Viewing learner attendance records.
+- Viewing learner behavioural points.
+- Viewing school announcements and reminders.
+- Viewing school events and the year plan.
+- Creating and managing school announcements.
+- Recording and managing learner attendance.
+- Recording and managing learner behavioural points through the teacher role.
+- Managing school events and the year plan.
+- Tracking parent engagement with announcements.
+- Updating parent contact information.
+- Managing user accounts and access permissions.
+- Role-based access control to protect learner and parent information.
+- In-app updates and notifications where supported by the approved design.
 
-* Academic progress viewing.
-* Attendance viewing.
-* School events and announcements.
-* Create, update and delete announcements.
-* Reminders.
-* Year plan.
-* Digital record-keeping.
-* Secure authentication and authorised access.
-* User management.
+### Should Have
 
-### Should-Have Features
+- Realtime updates where supported by the shared Supabase backend.
 
-* Parent engagement tracking.
-* Learner points tracking.
+### Could Have
+- A link to an external school uniform or stationery supplier, if time permits.
 
-### Could-Have Features
+### Out of Scope for the Current Prototype
+- Viewing academic results.
+- Online school statement viewing or payment processing.
+- SMS and email notifications.
+- Direct messaging between parents and staff.
+- AI-powered features.
+- External payment-system integrations.
 
-* Online statements.
-* Uniform or stationery supplier link.
-
-The project scope has been refined to ensure that the prototype remains achievable within the available semester.
-
----
 
 ## Group Members and Roles
 
