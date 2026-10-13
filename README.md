@@ -163,11 +163,9 @@ The following documents provide evidence of the project's requirements, planning
 ```text
 SKOOL-COMM/
 ├── apps/
-│   ├── mobile/
-│   │   └── Flutter mobile application
+│   ├── mobile/             # Flutter mobile application
 │   └── web/
-│       └── SkoolComm.Web/
-│           └── ASP.NET Core web application
+│       └── SkoolComm.Web/         
 ├── docs/
 │   ├── Feasibility Study.docx
 │   ├── Meeting plan.jpeg
