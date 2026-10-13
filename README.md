@@ -150,21 +150,31 @@ Before you begin setting up the project, ensure you have the following installed
 ## Repository Structure
 
 ```text
-SKOOL-COMM
-│
+## Repository Structure
+
+```text
+SKOOL-COMM/
 ├── apps/
-│   ├── flutter/
-│   └── aspnet/
-│
+│   ├── mobile/
+│   │   └── Flutter mobile application
+│   └── web/
+│       └── SkoolComm.Web/
+│           └── ASP.NET Core web application
 ├── docs/
+│   ├── Feasibility Study.docx
+│   ├── Meeting plan.jpeg
 │   ├── Meeting_Evidence.pdf
+│   ├── New_SRS_2 (2).docx
+│   ├── Phase-1-Group-Reflection.pdf
+│   ├── Project Risk Register Final.xlsb.xlsx
 │   ├── README.md
-│   ├── Supabase_Screenshots.pdf
-│   └── Phase-1-Group-Reflection.pdf
-│
+│   ├── Stakeholder_Requirement_Scope_Confirmation (1).pdf
+│   └── Supabase_Screenshots.pdf
 ├── .gitignore
-│
 └── README.md
+```
+
+The repository structure will be maintained as development progresses. The `apps` directory contains the mobile and web applications, while `docs` contains project documentation and supporting evidence.
 ```text
 
 The repository will be updated throughout the project as development and documentation progress.
