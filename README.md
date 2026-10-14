@@ -4,208 +4,85 @@
 
 Skool-Comm is a school-parent communication system designed for Wilgehof Primary School. It consists of a Flutter mobile application for parents and guardians, an ASP.NET Core web application for teachers and administrators, and a shared Supabase backend.
 
-The system aims to centralise school communication by allowing parents and guardians to view announcements, attendance records, behavioural points, reminders, school events and the year plan. Parents can also update their contact information and register their profiles for approval.
+The system centralises school communication by allowing parents and guardians to view announcements, attendance records, behavioural points, reminders, school events and the year plan. Parents can also update their contact information and register their profiles for approval.
 
-Teachers and administrators use the web application to manage school announcements, attendance and school events, while teachers record behavioural points. Administrators manage user accounts and approve or reject parent profiles. The system also supports parent engagement tracking to help the school monitor whether announcements have been viewed.
+Teachers and administrators use the web application to manage announcements, attendance and school events. Teachers record behavioural points, while administrators manage user accounts and approve or reject parent profiles. The system also supports parent engagement tracking to monitor announcement views.
 
 ## Proposed Solution
 
-The Skool-Comm prototype consists of three integrated components.
-
 ### Flutter Mobile Application
 
-The mobile application will allow parents or guardians to:
-
-- Register and log in securely.
-- View school announcements and reminders.
-- View learner attendance records.
-- View learner behavioural points.
+The mobile application allows parents or guardians to:
+- Register and log in.
+- View school announcements and in-app reminders.
+- View learner attendance records and behavioural points.
 - View school events and the year plan.
 - Update their contact information.
-- View relevant school updates for their linked learners.
+- View information for their linked learners.
 
 ### ASP.NET Core Web Application
 
-The web application will allow teachers and administrators to:
-
-- Create, update and manage school announcements.
+The web application allows teachers and administrators to:
+- Create, update and manage announcements.
 - Record and manage learner attendance.
 - Record learner behavioural points through the teacher role.
 - Manage school events and the year plan.
 - Track parent engagement with announcements.
-- Generate reports where required by the approved requirements.
+- Generate reports according to the approved requirements.
 
-Administrators will also be able to manage user accounts and approve or reject parent profiles.
+Administrators can also manage user accounts and approve or reject parent profiles.
 
 ### Supabase Backend
 
-Supabase will provide the shared backend for both applications, including:
-
+Supabase provides the shared backend for both applications, including:
 - Authentication and user identity management.
-- PostgreSQL database storage.
-- Row Level Security (RLS) to help protect authorised access to data.
-- Storage for approved files and attachments, where required.
-- Realtime services for live updates where applicable.
+- PostgreSQL database.
+- Row Level Security (RLS) to restrict access to authorised data.
+- Realtime services for live updates and in-app notifications.
+- Storage for approved files and attachments, if required by the final scope.
+
 ---
 
 ## Technology Stack
 
-| Component            | Technology              |
-| -------------------- | ----------------------- |
-| Mobile Application   | Flutter (Dart)          |
-| Web Application      | ASP.NET Core (C#)       |
-| Backend and Database | Supabase                |
-| Database             | PostgreSQL              |
-| Authentication       | Supabase Authentication |
-| Source Control       | GitHub                  |
+| Component | Technology |
+|---|---|
+| Mobile Application | Flutter (Dart) |
+| Web Application | ASP.NET Core (C#) |
+| Backend Platform | Supabase |
+| Database | PostgreSQL |
+| Authentication | Supabase Authentication |
+| Source Control | GitHub |
 
 ---
 
 ## System Architecture
-                   ┌───────────────────────┐
-                    │   Flutter Mobile App  │
-                    │       Parents         │
-                    └───────────┬───────────┘
-                                │
-                                │
-                                ▼
-                     ┌────────────────────┐
-                     │      SUPABASE      │
-                     │ Authentication     │
-                     │ Database           │
-                     │ Real-time Services │
-                     │ Access Control     │
-                     └─────────┬──────────┘
-                               │
-                               │
-                               ▼
-                    ┌───────────────────────┐
-                    │  ASP.NET Web Dashboard │
-                    │ Teachers & Administrators │
-                    └───────────────────────┘
 
+The Flutter mobile application and ASP.NET Core web application connect to the same Supabase backend.
 
+- **Flutter:** Parents and guardians register, log in and view school information.
+- **ASP.NET Core:** Teachers and administrators manage school information and user accounts.
+- **Supabase:** Provides authentication, database services, access control and realtime updates.
 
-Both the Flutter mobile application and ASP.NET web application will connect to the same Supabase backend to share and manage project data.
+The detailed architecture diagram is available in the [Section B – System Design](docs/section-b-design/README.md) folder.
+
+---
 
 ## Prerequisites
 
-Before you begin setting up the project, ensure you have the following installed and configured on your local machine:
+Before setting up the project, install the following:
 
-(Mobile App) Flutter SDK: Latest Stable Channel
-(Web App) .NET 10 SDK: The .NET 10 runtime and software development kit
+- **Flutter SDK:** Stable release.
+- **.NET SDK:** .NET 10 SDK.
+- **Git:** For version control and repository management.
+
+Project-specific configuration, including Supabase settings, must be supplied separately. Do not commit passwords, secret keys or other credentials to GitHub.
+
 ---
+
 ## Project Scope
 
-### Must-Have Features
-
-- Secure registration, login and role-based access (parent, teacher, administrator).
-- Parent profile registration, with administrator approval or rejection.
-- User management by administrators.
-- Create, update and manage school announcements.
-- Reminders for parents.
-- Record learner attendance (web) and view attendance (mobile).
-- Record learner behavioural points (teacher role) and view them (mobile).
-- Manage and view school events and the year plan.
-- Parents can update their contact information.
-- Digital record-keeping of communication.
-- Report generation for staff (attendance, behavioural points and parent engagement).
-
-### Should-Have Features
-
-- Parent engagement tracking (whether announcements have been viewed).
-- Real-time updates and in-app notifications.
-- Profile pictures and announcement attachments (Supabase Storage).
-
-### Could-Have Features
-
-- Uniform or stationery supplier link.
-
-### Out of Scope for the Prototype
-
-- Academic progress and marks recording or viewing.
-- Online statements.
-
-The project scope has been refined to ensure that the prototype remains achievable within the available semester.
-
-## Group Members and Roles
-
-| Group Member              | Role                     |
-| ------------------------- | ------------------------ |
-| Avhasei Rambulana         | Project Manager          |
-| Precious Mchunu           | Database Administrator   |
-| Lesego Mochai             | Communications Officer   |
-| Kwanele Mdolo             | Technical Lead           |
-| Itshepeleng Karabo Lerato | Technical Lead           |
-| Nothabile Jokazi          | Quality Assurance Tester |
-| Tsietsi Sebogodi          | Quality Assurance Tester |
-| Lebohang Seekoei          | Risk Manager             |
-
----
-
-## Repository Structure
-
-```text
-## Repository Structure
-## Documentation
-
-The following documents provide evidence of the project's requirements, planning, stakeholder engagement and technical setup.
-
-- [Software Requirements Specification (SRS)](docs/New_SRS_2%20%282%29.docx) — Project requirements and system functionality.
-- [Feasibility Study](docs/Feasibility%20Study.docx) — Project feasibility assessment.
-- [Project Risk Register](docs/Project%20Risk%20Register%20Final.xlsb.xlsx) — Identified project risks and planned responses.
-- [Stakeholder Requirement and Scope Confirmation](docs/Stakeholder_Requirement_Scope_Confirmation%20%281%29.pdf) — Stakeholder confirmation of requirements and scope.
-- [Meeting Evidence](docs/Meeting_Evidence.pdf) — Evidence of stakeholder and group meetings.
-- [Meeting Plan](docs/Meeting%20plan.jpeg) — Planned meeting arrangements.
-- [Phase 1 Group Reflection](docs/Phase-1-Group-Reflection.pdf) — Reflection on Phase 1 activities.
-- [Supabase Screenshots](docs/Supabase_Screenshots.pdf) — Evidence of the Supabase backend setup.
-
-```text
-SKOOL-COMM/
-├── apps/
-│   ├── mobile/             # Flutter mobile application
-│   └── web/
-│       └── SkoolComm.Web/         
-├── docs/
-│   ├── Feasibility Study.docx
-│   ├── Meeting plan.jpeg
-│   ├── Meeting_Evidence.pdf
-│   ├── New_SRS_2 (2).docx
-│   ├── Phase-1-Group-Reflection.pdf
-│   ├── Project Risk Register Final.xlsb.xlsx
-│   ├── README.md
-│   ├── Stakeholder_Requirement_Scope_Confirmation (1).pdf
-│   └── Supabase_Screenshots.pdf
-├── .gitignore
-└── README.md
-```
-
-The repository structure will be maintained as development progresses. The `apps` directory contains the mobile and web applications, while `docs` contains project documentation and supporting evidence.
-```text
-
-The repository will be updated throughout the project as development and documentation progress.
-
----
-
-## Project Status
-
-**Current Phase:** Phase 2 – System Architecture and Design
-
-
-Completed Phase 2 activities include:
-
-* System Architecture Design.
-* UML Design -  Use Case Diagram and Sequence Diagrams.
-* Database Design: Entity Relationship Diagram (ERD).
-* Updated Software Requirements Specification.
-* User Interface design and design alignment (Flutter and ASP.NET).
-* Microsoft Project schedule updates.
-* GitHub documentation updates.
-* Progress Tracker Updates
-
-The project will next move into system development, implementation and final demonstration.
-
----
+### Must
 
 ## Security Notice
 
