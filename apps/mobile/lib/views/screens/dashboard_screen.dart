@@ -29,7 +29,7 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 const Expanded(
                   child: Text(
-                    'Wilgehof Primary',
+                    'Wilgehof Primary School',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -80,13 +80,13 @@ class DashboardScreen extends StatelessWidget {
                   childAspectRatio: 1.7,
                   children: [
                     _ActionTile(
-                      title: 'Behavioural points',
+                      title: 'Behavioural Points',
                       icon: Icons.workspace_premium_outlined,
                       tint: SchoolTheme.paleGreen,
                       onTap: onOpenPoints,
                     ),
                     _ActionTile(
-                      title: 'Attendance records',
+                      title: 'Attendance Records',
                       icon: Icons.event_available_outlined,
                       tint: SchoolTheme.paleOrange,
                       onTap: () => _showNotice(context, 'Attendance Records'),
