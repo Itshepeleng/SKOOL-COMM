@@ -1,30 +1,29 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-/* 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:mobile/main.dart';
+import 'package:mobile/viewmodels/dashboard_view_model.dart';
+import 'package:mobile/views/screens/welcome_screen.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('welcome screen offers sign in and account creation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: WelcomeScreen()));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Skool-Comm'), findsOneWidget);
+    expect(find.text('Login'), findsOneWidget);
+    expect(find.text('Create Account'), findsOneWidget);
   });
-} */
+
+  test('dashboard view model updates filters and selected tab', () {
+    final viewModel = DashboardViewModel();
+    addTearDown(viewModel.dispose);
+
+    viewModel.selectTab(2);
+    viewModel.selectPointFilter(PointFilter.positive);
+    viewModel.selectMessageFolder(MessageFolder.archived);
+
+    expect(viewModel.selectedTab, 2);
+    expect(viewModel.pointFilter, PointFilter.positive);
+    expect(viewModel.messageFolder, MessageFolder.archived);
+  });
+}

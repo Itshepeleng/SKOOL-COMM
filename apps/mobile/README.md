@@ -15,3 +15,18 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Email confirmation during web development
+
+Run the web app on a stable local port:
+
+```powershell
+flutter run -d chrome --web-port=3966
+```
+
+In Supabase Dashboard, open **Authentication → URL Configuration** and add
+`http://localhost:3966/**` to **Redirect URLs**. Keep **Site URL** set to the
+deployed app URL for production. New web sign-ups return to the origin that
+served the app; Supabase Flutter handles the confirmation code on app startup.
+For other local ports or deployed environments, add the app's corresponding
+origin to Supabase's allowed Redirect URLs.
