@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../app/school_theme.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({
+    required this.parentName,
     required this.onOpenPoints,
     required this.onOpenMessages,
+    required this.onOpenAttendance,
+    required this.onOpenReminders,
+    required this.onOpenSettings,
+    required this.onOpenCalendar,
     super.key,
   });
 
+  final String parentName;
   final VoidCallback onOpenPoints;
   final VoidCallback onOpenMessages;
+  final VoidCallback onOpenAttendance;
+  final VoidCallback onOpenReminders;
+  final VoidCallback onOpenSettings;
+  final VoidCallback onOpenCalendar;
 
   @override
   Widget build(BuildContext context) {
-    final user = Supabase.instance.client.auth.currentUser;
-    final parentName =
-        user?.userMetadata?['full_name'] as String? ?? 'Parent';
-
     return SafeArea(
       child: Column(
         children: [
@@ -89,13 +93,13 @@ class DashboardScreen extends StatelessWidget {
                       title: 'Attendance Records',
                       icon: Icons.event_available_outlined,
                       tint: SchoolTheme.paleOrange,
-                      onTap: () => _showNotice(context, 'Attendance Records'),
+                      onTap: onOpenAttendance,
                     ),
                     _ActionTile(
                       title: 'Reminders',
                       icon: Icons.notifications_none,
                       tint: const Color(0xFFFFEEEE),
-                      onTap: () => _showNotice(context, 'Reminders'),
+                      onTap: onOpenReminders,
                     ),
                     _ActionTile(
                       title: 'Messages',
@@ -107,13 +111,13 @@ class DashboardScreen extends StatelessWidget {
                       title: 'Settings',
                       icon: Icons.settings_outlined,
                       tint: SchoolTheme.paleGreen,
-                      onTap: () => _showNotice(context, 'Settings'),
+                      onTap: onOpenSettings,
                     ),
                     _ActionTile(
                       title: 'Calendar',
                       icon: Icons.calendar_month_outlined,
                       tint: SchoolTheme.paleGreen,
-                      onTap: () => _showNotice(context, 'Calendar'),
+                      onTap: onOpenCalendar,
                     ),
                   ],
                 ),
@@ -145,11 +149,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  void _showNotice(BuildContext context, String title) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$title screen is coming soon.')),
-    );
-  }
 }
 
 class _ActionTile extends StatelessWidget {
