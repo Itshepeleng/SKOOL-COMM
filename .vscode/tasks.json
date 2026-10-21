@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Flutter Web",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'D:\\SKOOL-COMM\\apps\\mobile'; flutter run -d web-server --web-hostname 127.0.0.1 --web-port 52011"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Flutter in Chrome",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location 'D:\\SKOOL-COMM\\apps\\mobile'; flutter run -d chrome"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}

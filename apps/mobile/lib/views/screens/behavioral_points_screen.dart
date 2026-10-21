@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../app/school_theme.dart';
+import '../../models/school_models.dart';
+import '../../viewmodels/attendance_view_model.dart';
 import '../../viewmodels/dashboard_view_model.dart';
 
 class BehavioralPointsScreen extends StatelessWidget {
@@ -8,50 +10,44 @@ class BehavioralPointsScreen extends StatelessWidget {
 
   final DashboardViewModel viewModel;
 
-  static const _records = [
-    _PointRecord(
-      date: '30 Sep 2026 08:40',
-      title: 'Disrupting class / not following instructions',
-      detail: 'Level 2 · infringement',
-      points: -10,
-      initials: 'NP',
-    ),
-    _PointRecord(
-      date: '16 Sep 2026 11:40',
-      title: 'Late for class',
-      detail: 'Level 2 · infringement',
-      points: -10,
-      initials: 'AT',
-    ),
-    _PointRecord(
-      date: '12 Sep 2026 08:30',
-      title: 'Fighting / physical aggression',
-      detail: 'Level 2 · infringement',
-      points: -10,
-      initials: 'LM',
-    ),
-    _PointRecord(
-      date: '05 Sep 2026 10:15',
-      title: 'Lining a cellphone in class',
-      detail: 'Level 2 · infringement',
-      points: -10,
-      initials: 'NP',
-    ),
-    _PointRecord(
-      date: '02 Sep 2026 09:00',
-      title: 'Helping a classmate',
-      detail: 'Positive contribution',
-      points: 10,
-      initials: 'AT',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: viewModel,
       builder: (context, _) {
-        final records = _records.where((record) {
+        final selectedPoint = viewModel.selectedPoint;
+        if (selectedPoint != null) {
+          return _PointDetails(
+            record: selectedPoint,
+            onBack: viewModel.clearSelectedPoint,
+          );
+        }
+        return _PointList(viewModel: viewModel);
+      },
+    );
+  }
+}
+
+class _PointList extends StatelessWidget {
+  const _PointList({required this.viewModel});
+
+  final DashboardViewModel viewModel;
+
+  @override
+  Widget build(BuildContext context) {
+    final weekStart = AttendanceViewModel.weekStartFor(DateTime.now());
+    final weekEnd = weekStart.add(const Duration(days: 7));
+    final weeklyRecords = PointRecord.samples.where((record) {
+      return !record.date.isBefore(weekStart) && record.date.isBefore(weekEnd);
+    }).toList();
+    final positive = weeklyRecords
+        .where((record) => record.points > 0)
+        .fold<int>(0, (sum, record) => sum + record.points);
+    final negative = weeklyRecords
+        .where((record) => record.points < 0)
+        .fold<int>(0, (sum, record) => sum + record.points);
+
+    final records = PointRecord.samples.where((record) {
       return switch (viewModel.pointFilter) {
         PointFilter.all => true,
         PointFilter.positive => record.points > 0,
@@ -77,27 +73,86 @@ class BehavioralPointsScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.person,
-                          color: SchoolTheme.green,
-                        ),
+                        child: Icon(Icons.person, color: SchoolTheme.green),
                       ),
                       SizedBox(width: 12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Learner profile',
+                            'Thabo Mokoena',
                             style: TextStyle(fontWeight: FontWeight.w700),
                           ),
                           Text(
-                            'Grade 5A  ·  Term 3, 2026',
+                            'Grade 5B  ·  Term 3, 2026',
                             style: TextStyle(
                               color: SchoolTheme.muted,
                               fontSize: 12,
                             ),
                           ),
                         ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: SchoolTheme.paleGreen,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Weekly Summary',
+                        style: TextStyle(
+                          color: SchoolTheme.darkGreen,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        '${AttendanceViewModel.formatDate(weekStart)} - '
+                        '${AttendanceViewModel.formatDate(weekEnd.subtract(const Duration(days: 1)))}',
+                        style: const TextStyle(
+                          color: SchoolTheme.muted,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _WeeklyPointMetric(
+                              label: 'Positive',
+                              value: '+$positive',
+                            ),
+                          ),
+                          Expanded(
+                            child: _WeeklyPointMetric(
+                              label: 'Negative',
+                              value: '$negative',
+                            ),
+                          ),
+                          Expanded(
+                            child: _WeeklyPointMetric(
+                              label: 'Net points',
+                              value: '${positive + negative}',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        weeklyRecords.isEmpty
+                            ? 'No points recorded this week.'
+                            : '${weeklyRecords.length} point record${weeklyRecords.length == 1 ? '' : 's'} this week.',
+                        style: const TextStyle(
+                          color: SchoolTheme.muted,
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),
@@ -121,7 +176,10 @@ class BehavioralPointsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 for (final record in records) ...[
-                  _PointCard(record: record),
+                  _PointCard(
+                    record: record,
+                    onTap: () => viewModel.selectPoint(record),
+                  ),
                   const SizedBox(height: 10),
                 ],
                 if (records.isEmpty)
@@ -133,13 +191,30 @@ class BehavioralPointsScreen extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: FilledButton.tonalIcon(
-                    onPressed: () => _showSummary(context),
-                    icon: const Icon(Icons.summarize_outlined),
-                    label: const Text('Summary'),
-                  ),
+                Row(
+                  children: [
+                    IconButton(
+                      tooltip: 'Download PDF summary',
+                      onPressed: () => _showExportNotice(context),
+                      icon: const Icon(
+                        Icons.picture_as_pdf_outlined,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Download spreadsheet summary',
+                      onPressed: () => _showExportNotice(context),
+                      icon: const Icon(
+                        Icons.table_view_outlined,
+                        color: SchoolTheme.green,
+                      ),
+                    ),
+                    const Spacer(),
+                    FilledButton(
+                      onPressed: () => _showSummary(context),
+                      child: const Text('Summary'),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -147,17 +222,32 @@ class BehavioralPointsScreen extends StatelessWidget {
         ],
       ),
     );
-      },
-    );
   }
 
-  static void _showSummary(BuildContext context) {
+  void _showSummary(BuildContext context) {
+    final weekStart = AttendanceViewModel.weekStartFor(DateTime.now());
+    final weekEnd = weekStart.add(const Duration(days: 7));
+    final weeklyRecords = PointRecord.samples.where((record) {
+      return !record.date.isBefore(weekStart) && record.date.isBefore(weekEnd);
+    });
+    final positive = weeklyRecords
+        .where((record) => record.points > 0)
+        .fold<int>(0, (sum, record) => sum + record.points);
+    final negative = weeklyRecords
+        .where((record) => record.points < 0)
+        .fold<int>(0, (sum, record) => sum + record.points);
+
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Points summary'),
-        content: const Text(
-          'Behavioural records shown here are sample prototype data.',
+        title: const Text('Weekly points summary'),
+        content: Text(
+          '${AttendanceViewModel.formatDate(weekStart)} - '
+          '${AttendanceViewModel.formatDate(weekEnd.subtract(const Duration(days: 1)))}\n\n'
+          'Positive points: +$positive\n'
+          'Negative points: $negative\n'
+          'Net points: ${positive + negative}\n\n'
+          'These are sample prototype records for the selected week.',
         ),
         actions: [
           TextButton(
@@ -168,94 +258,348 @@ class BehavioralPointsScreen extends StatelessWidget {
       ),
     );
   }
+
+  void _showExportNotice(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Reports will be available when points are connected.'),
+      ),
+    );
+  }
 }
 
-class _PointRecord {
-  const _PointRecord({
-    required this.date,
-    required this.title,
-    required this.detail,
-    required this.points,
-    required this.initials,
-  });
+class _WeeklyPointMetric extends StatelessWidget {
+  const _WeeklyPointMetric({required this.label, required this.value});
 
-  final String date;
-  final String title;
-  final String detail;
-  final int points;
-  final String initials;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(color: SchoolTheme.muted, fontSize: 11),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          value,
+          style: const TextStyle(
+            color: SchoolTheme.darkGreen,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
-class _PointCard extends StatelessWidget {
-  const _PointCard({required this.record});
+class _PointDetails extends StatelessWidget {
+  const _PointDetails({required this.record, required this.onBack});
 
-  final _PointRecord record;
+  final PointRecord record;
+  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
     final positive = record.points > 0;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE0E7E2)),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
+    final date = record.date;
+    return SafeArea(
+      child: Column(
         children: [
-          Icon(
-            positive ? Icons.add_circle : Icons.remove_circle,
-            color: positive ? SchoolTheme.green : Colors.redAccent,
+          AppBar(
+            title: const Text('Points Details'),
+            leading: IconButton(
+              tooltip: 'Back',
+              onPressed: onBack,
+              icon: const Icon(Icons.arrow_back),
+            ),
           ),
-          const SizedBox(width: 9),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
               children: [
-                Text(
-                  record.date,
-                  style: const TextStyle(
-                    color: SchoolTheme.muted,
-                    fontSize: 11,
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xFFE0E7E2)),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            positive ? Icons.add_circle : Icons.remove_circle,
+                            color: positive ? SchoolTheme.green : Colors.red,
+                            size: 32,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${record.points > 0 ? '+' : ''}${record.points}',
+                            style: TextStyle(
+                              color: positive ? SchoolTheme.green : Colors.red,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const Spacer(),
+                          Chip(
+                            label: Text(
+                              positive ? 'Positive' : 'Level 2 Offence',
+                              style: TextStyle(
+                                color: positive
+                                    ? SchoolTheme.green
+                                    : Colors.red.shade700,
+                                fontSize: 11,
+                              ),
+                            ),
+                            backgroundColor: positive
+                                ? SchoolTheme.paleGreen
+                                : const Color(0xFFFFEEEE),
+                            side: BorderSide.none,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        record.title,
+                        style: const TextStyle(
+                          color: SchoolTheme.darkGreen,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Icon(Icons.calendar_month_outlined, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${date.day.toString().padLeft(2, '0')} '
+                            '${_monthName(date.month)} ${date.year}',
+                          ),
+                          const SizedBox(width: 16),
+                          const Icon(Icons.access_time, size: 18),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${date.hour.toString().padLeft(2, '0')}:'
+                            '${date.minute.toString().padLeft(2, '0')}',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      _InfoPanel(
+                        icon: Icons.notes,
+                        title: "Teacher's note",
+                        text: record.teacherNote,
+                      ),
+                      const SizedBox(height: 14),
+                      Card(
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(color: Color(0xFFE0E7E2)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: SchoolTheme.paleGreen,
+                            child: Text(record.teacherInitials),
+                          ),
+                          title: Text(
+                            record.teacherName,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          subtitle: const Text('Teacher'),
+                          trailing: const Icon(Icons.chevron_right),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      _InfoPanel(
+                        icon: Icons.info_outline,
+                        title: record.detail,
+                        text: positive
+                            ? 'Positive behaviour is recognised as part of the learner points record.'
+                            : 'Level 2 offences are more serious behavioural issues and may result in additional consequences.',
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  record.title,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                Text(
-                  record.detail,
-                  style: const TextStyle(
-                    color: SchoolTheme.muted,
-                    fontSize: 11,
+                const SizedBox(height: 14),
+                SizedBox(
+                  height: 48,
+                  child: FilledButton(
+                    onPressed: onBack,
+                    child: const Text('Back to Behavioural Points'),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          Column(
-            children: [
-              CircleAvatar(
-                radius: 14,
-                backgroundColor: SchoolTheme.paleGreen,
-                child: Text(
-                  record.initials,
-                  style: const TextStyle(fontSize: 9),
+        ],
+      ),
+    );
+  }
+
+  String _monthName(int month) => const [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ][month - 1];
+}
+
+class _InfoPanel extends StatelessWidget {
+  const _InfoPanel({
+    required this.icon,
+    required this.title,
+    required this.text,
+  });
+
+  final IconData icon;
+  final String title;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: SchoolTheme.paleGreen,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: SchoolTheme.green, size: 19),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                '${record.points > 0 ? '+' : ''}${record.points}',
-                style: TextStyle(
-                  color: positive ? SchoolTheme.green : Colors.redAccent,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                Text(text, style: const TextStyle(height: 1.35)),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+class _PointCard extends StatelessWidget {
+  const _PointCard({required this.record, required this.onTap});
+
+  final PointRecord record;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final positive = record.points > 0;
+    final date = record.date;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFFE0E7E2)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              positive ? Icons.add_circle : Icons.remove_circle,
+              color: positive ? SchoolTheme.green : Colors.redAccent,
+            ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${date.day.toString().padLeft(2, '0')} '
+                    '${_shortMonth(date.month)} ${date.year} '
+                    '${date.hour.toString().padLeft(2, '0')}:'
+                    '${date.minute.toString().padLeft(2, '0')}',
+                    style: const TextStyle(
+                      color: SchoolTheme.muted,
+                      fontSize: 11,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    record.title,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  Text(
+                    record.detail,
+                    style: const TextStyle(
+                      color: SchoolTheme.muted,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              children: [
+                CircleAvatar(
+                  radius: 14,
+                  backgroundColor: SchoolTheme.paleGreen,
+                  child: Text(
+                    record.teacherInitials,
+                    style: const TextStyle(fontSize: 9),
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  '${record.points > 0 ? '+' : ''}${record.points}',
+                  style: TextStyle(
+                    color: positive ? SchoolTheme.green : Colors.redAccent,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 3),
+            const Icon(Icons.chevron_right, color: SchoolTheme.muted),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _shortMonth(int month) => const [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ][month - 1];
 }

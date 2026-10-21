@@ -43,7 +43,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (!_acceptedTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please accept the terms and conditions.')),
+        const SnackBar(
+          content: Text('Please accept the terms and conditions.'),
+        ),
       );
       return;
     }
@@ -55,13 +57,47 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       password: _passwordController.text,
     );
     if (!mounted) return;
-    if (response?.session != null) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => const ChildProfileScreen(),
+    if (response == null) return;
+    if (response.user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).colorScheme.error,
+          content: Text(
+            'Account creation did not return a Supabase Auth user ID.',
+            style: TextStyle(color: Theme.of(context).colorScheme.onError),
+          ),
+        ),
+      );
+      return;
+    }
+
+    final needsEmailConfirmation = response.session == null;
+    if (needsEmailConfirmation) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Your account is registered. Confirm your email to log in later.',
+          ),
         ),
       );
     }
+    final parentName = _nameController.text.trim().split(RegExp(r'\s+'));
+    final parentFirstName = parentName.first;
+    final enteredLastName = parentName.skip(1).join(' ');
+    final parentLastName = enteredLastName.isEmpty
+        ? parentFirstName
+        : enteredLastName;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => ChildProfileScreen(
+          parentAuthId: response.user?.id,
+          parentFirstName: parentFirstName,
+          parentLastName: parentLastName,
+          parentEmail: _emailController.text.trim(),
+          parentPhone: _phoneController.text.trim(),
+        ),
+      ),
+    );
   }
 
   @override
@@ -160,7 +196,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         ),
                       ),
                       SchoolPrimaryButton(
-                        label: 'Create Account',
+                        label: 'Next',
                         icon: Icons.arrow_forward,
                         backgroundColor: const Color(0xFFF58220),
                         isLoading: _viewModel.isLoading,
