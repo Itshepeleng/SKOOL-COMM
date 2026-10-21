@@ -1,0 +1,15 @@
+C:\Users\avhas\source\repos\SkoolComm.Application\bin\Debug\net10.0\SkoolComm.Application.deps.json
+C:\Users\avhas\source\repos\SkoolComm.Application\bin\Debug\net10.0\SkoolComm.Application.dll
+C:\Users\avhas\source\repos\SkoolComm.Application\bin\Debug\net10.0\SkoolComm.Application.pdb
+C:\Users\avhas\source\repos\SkoolComm.Application\bin\Debug\net10.0\SkoolComm.Domain.dll
+C:\Users\avhas\source\repos\SkoolComm.Application\bin\Debug\net10.0\SkoolComm.Domain.pdb
+C:\Users\avhas\source\repos\SkoolComm.Application\obj\Debug\net10.0\SkoolComm.Application.csproj.AssemblyReference.cache
+C:\Users\avhas\source\repos\SkoolComm.Application\obj\Debug\net10.0\SkoolComm.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\avhas\source\repos\SkoolComm.Application\obj\Debug\net10.0\SkoolComm.Application.AssemblyInfoInputs.cache
+C:\Users\avhas\source\repos\SkoolComm.Application\obj\Debug\net10.0\SkoolComm.Application.AssemblyInfo.cs
+C:\Users\avhas\source\repos\SkoolComm.Application\obj\Debug\net10.0\SkoolComm.Application.csproj.CoreCompileInputs.cache
+C:\Users\avhas\source\repos\SkoolComm.Application\obj\Debug\net10.0\SkoolCom.780DD51C.Up2Date
+C:\Users\avhas\source\repos\SkoolComm.Application\obj\Debug\net10.0\SkoolComm.Application.dll
+C:\Users\avhas\source\repos\SkoolComm.Application\obj\Debug\net10.0\refint\SkoolComm.Application.dll
+C:\Users\avhas\source\repos\SkoolComm.Application\obj\Debug\net10.0\SkoolComm.Application.pdb
+C:\Users\avhas\source\repos\SkoolComm.Application\obj\Debug\net10.0\ref\SkoolComm.Application.dll
