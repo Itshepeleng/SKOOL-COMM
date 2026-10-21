@@ -1,0 +1,93 @@
+@model List<SkoolComm.Domain.Models.Announcement>
+@using System.Globalization
+@{
+    ViewData["Title"] = "Announcements";
+    var inv = CultureInfo.InvariantCulture;
+
+    string successMsg = TempData["Success"]?.ToString() ?? "";
+    string errorMsg = (TempData["Error"]?.ToString() ?? "") + (ViewBag.Error as string ?? "");
+    string toastClass = errorMsg != "" ? "toast error"
+                      : successMsg != "" ? "toast success"
+                      : "toast success hidden";
+    string toastText = errorMsg != "" ? errorMsg : successMsg;
+
+    string Preview(string text) =>
+        text.Length > 140 ? text.Substring(0, 140).TrimEnd() + "…" : text;
+}
+
+<div class="page-wide stack" id="annPage">
+
+    <div id="annToast" class="@toastClass">
+        <span id="annToastText">@toastText</span>
+    </div>
+
+    <div class="grid-5">
+
+        <!-- ============ Create form ============ -->
+        <form class="card card-lg col-span-3 stack" id="annForm" method="post"
+              asp-controller="Announcements" asp-action="Create">
+
+            <h3 style="margin-bottom:0;">Create New Announcement</h3>
+
+            <div>
+                <label class="lbl" for="annTitle">Title</label>
+                <input type="text" id="annTitle" name="title" class="input"
+                       placeholder="Announcement title..." maxlength="255" />
+            </div>
+
+            <div>
+                <label class="lbl">Audience</label>
+                <div class="row gap-2 wrap" id="audienceChips">
+                    <button type="button" class="chip active" data-audience="All Parents">All Parents</button>
+                    <button type="button" class="chip" data-audience="Grade 5">Grade 5</button>
+                    <button type="button" class="chip" data-audience="Grade 6">Grade 6</button>
+                    <button type="button" class="chip" data-audience="Teachers Only">Teachers Only</button>
+                </div>
+                <input type="hidden" name="targetAudience" id="annAudience" value="All Parents" />
+            </div>
+
+            <div>
+                <label class="lbl" for="annMessage">Message</label>
+                <textarea id="annMessage" name="content" class="textarea" rows="6"
+                          placeholder="Dear Parents,&#10;&#10;Write your announcement message here..."></textarea>
+                <div class="small faint" style="text-align:right;margin-top:4px;">
+                    <span id="charCount">0</span> characters
+                </div>
+            </div>
+
+            <div class="row gap-3" style="justify-content:flex-end;">
+                <button type="button" id="annClear" class="btn btn-outline">Clear</button>
+                <button type="button" id="annSend" class="btn btn-primary" disabled>Send</button>
+            </div>
+        </form>
+
+        <!-- ============ Recent announcements (from Supabase) ============ -->
+        <div class="card col-span-2">
+            <h3 style="margin-bottom:16px;">Recent Announcements</h3>
+
+            <div class="stack-md">
+                @if (Model.Count == 0)
+                {
+                    <p class="small faint">No announcements yet. Send the first one.</p>
+                }
+
+                @foreach (var a in Model)
+                {
+                    <div class="record-box">
+                        <div class="row-between" style="align-items:flex-start;gap:8px;margin-bottom:4px;">
+                            <p style="font-size:14px;font-weight:600;line-height:1.35;">@a.Title</p>
+                            <span class="badge badge-green" style="flex-shrink:0;">@a.TargetAudience</span>
+                        </div>
+                        <p class="small muted" style="white-space:pre-line;line-height:1.5;">@Preview(a.Content)</p>
+                        <div class="tiny faint" style="margin-top:6px;">@a.DatePosted.ToString("d MMM yyyy, HH:mm", inv)</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/announcements.js" asp-append-version="true"></script>
+}

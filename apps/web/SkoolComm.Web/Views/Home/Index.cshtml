@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="grid grid-4">
+  <div class="card stat" style="background:#e8f4ec">
+    <div class="icon" style="background:#1a5c2e;color:#fff">👥</div>
+    <div class="value">284</div>
+    <div class="label">Total Learners</div>
+    <div class="small-muted">Across 18 classes</div>
+  </div>
+  <div class="card stat" style="background:#fdebd0">
+    <div class="icon" style="background:#e87722;color:#fff">👪</div>
+    <div class="value">250</div>
+    <div class="label">Total Parents</div>
+    <div class="small-muted">3 new this week</div>
+  </div>
+  <div class="card stat" style="background:#e8f4ec">
+    <div class="icon" style="background:#2a7a3e;color:#fff">📅</div>
+    <div class="value">6</div>
+    <div class="label">Today's Classes</div>
+    <div class="small-muted">All on schedule</div>
+  </div>
+  <div class="card stat" style="background:#fef3cd">
+    <div class="icon" style="background:#ca8a04;color:#fff">⏳</div>
+    <div class="value">3</div>
+    <div class="label">Pending Tasks</div>
+    <div class="small-muted">Require attention</div>
+  </div>
+</div>
+
+<div style="margin-top:16px" class="grid grid-3">
+  <div class="card">
+    <h3>Quick Links</h3>
+    <div style="margin-top:8px">
+      <a class="btn" asp-controller="Users" asp-action="Index" style="display:block;margin-bottom:8px">Manage Users</a>
+      <a class="btn" asp-controller="Events" asp-action="Index" style="display:block;margin-bottom:8px">Manage Events</a>
+      <a class="btn" asp-controller="Announcements" asp-action="Index" style="display:block">Announcements</a>
+    </div>
+  </div>
+
+  <div class="card" style="grid-column:span 2">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h3>Recent Activity</h3>
+      <span class="small-muted">Last 24 hours</span>
+    </div>
+
+    <div class="activity">
+      <div class="item">
+        <div class="avatar">M</div>
+        <div>
+          <div style="font-weight:600">Mrs van der Berg</div>
+        
+        </div>
+      </div>
+      <div class="item">
+        <div class="avatar">F</div>
+        <div>
+          <div style="font-weight:600">Mr Fourie</div>
+          <div class="small-muted">Recorded attendance for Grade 6B · 08:55</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

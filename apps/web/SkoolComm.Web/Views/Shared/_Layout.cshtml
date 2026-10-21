@@ -1,0 +1,153 @@
+﻿@using Microsoft.AspNetCore.Http
+@using System.Globalization
+@{
+    // Who is logged in? (saved in the session when they log in)
+    var userName = Context.Session.GetString("UserName") ?? "Guest User";
+    var userRole = Context.Session.GetString("UserRole") ?? "teacher";
+    bool isAdmin = userRole == "admin";
+    string roleLabel = isAdmin ? "Administrator" : "Teacher";
+    string initial = userName.Length > 0 ? userName.Substring(0, 1).ToUpper() : "?";
+
+    // Which page are we on? (used to highlight the menu item)
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    string Active(string controllerName) => currentController == controllerName ? "active" : "";
+
+    string dashboardAction = isAdmin ? "Admin" : "Teacher";
+    string pageTitle = ViewData["Title"]?.ToString() ?? "Dashboard";
+    string today = DateTime.Now.ToString("ddd, d MMM yyyy", CultureInfo.InvariantCulture);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@pageTitle - Skool-Comm</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+<div class="app-shell">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+            <svg width="36" height="36" viewBox="0 0 72 72" fill="none">
+                <path d="M36 4L8 16V40C8 55 20 66 36 70C52 66 64 55 64 40V16L36 4Z" fill="#133f20" />
+                <path d="M36 10L14 20V40C14 52 24 61 36 65C48 61 58 52 58 40V20L36 10Z" fill="none" stroke="#e87722" stroke-width="1.5" />
+                <path d="M22 28H32V22L36 18L40 22V28H50V44H22V28Z" fill="#e87722" opacity="0.85" />
+                <rect x="30" y="34" width="12" height="10" fill="#133f20" />
+                <circle cx="36" cy="25" r="2.5" fill="white" />
+            </svg>
+            <div>
+                <div class="name">Skool-Comm</div>
+                <div class="sub">Wilgehof Primary</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a asp-controller="Dashboard" asp-action="@dashboardAction" class="nav-link @Active("Dashboard")">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="10" y="2" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="2" y="10" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="10" y="10" width="6" height="6" rx="1.5" fill="currentColor"/></svg>
+                Dashboard
+            </a>
+
+            <a asp-controller="Announcements" asp-action="Index" class="nav-link @Active("Announcements")">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 5a2 2 0 012-2h8a2 2 0 012 2v6a2 2 0 01-2 2H7l-4 3V5z" fill="currentColor"/></svg>
+                Announcements
+            </a>
+
+            @if (isAdmin)
+            {
+                <a asp-controller="Users" asp-action="Index" class="nav-link @Active("Users")">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7" cy="6" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M2 15c0-2.8 2.2-5 5-5s5 2.2 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M13 8v5M15.5 10.5h-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    Users
+                </a>
+            }
+
+            @if (!isAdmin)
+            {
+                <a asp-controller="Attendance" asp-action="Index" class="nav-link @Active("Attendance")">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="3" width="12" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 7h6M6 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7 1v4M11 1v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    Attendance
+                </a>
+
+                <a asp-controller="Behavioural" asp-action="Index" class="nav-link @Active("Behavioural")">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l1.8 3.6 4 .6-2.9 2.8.7 4L9 11l-3.6 1.9.7-4L3.2 6.2l4-.6L9 2z" fill="currentColor"/></svg>
+                    Behavioural Points
+                </a>
+
+           
+            }
+
+            <a asp-controller="Events" asp-action="Index" class="nav-link @Active("Events")">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="4" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 2v4M12 2v4M3 8h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Events &amp; Year Plan
+            </a>
+
+            @if (isAdmin)
+            {
+                <a asp-controller="Attendance" asp-action="Index" class="nav-link @Active("Attendance")">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="3" width="12" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 7h6M6 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7 1v4M11 1v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    Attendance
+                </a>
+            }
+
+            <a asp-controller="Profile" asp-action="Index" class="nav-link @Active("Profile")">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M3 15c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+                My Profile
+            </a>
+
+        </nav>
+
+        <!-- Logged-in user + logout -->
+        <div class="sidebar-user">
+            <div class="inner">
+                <div class="avatar">@initial</div>
+                <div style="min-width:0;flex:1">
+                    <div class="uname">@userName</div>
+                    <div class="urole">@roleLabel</div>
+                </div>
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="margin:0;">
+                        <button type="submit" class="logout" title="Sign out">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 2h3a1 1 0 011 1v10a1 1 0 01-1 1h-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /><path d="M7 11l3-3-3-3M10 8H2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        </button>
+                    </form>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- ================= MAIN COLUMN ================= -->
+    <div class="main-col">
+
+        <header class="topbar">
+            <h1>@pageTitle</h1>
+
+            <div class="topbar-right">
+                <a asp-controller="Announcements" asp-action="Index" class="bell" title="Recent Announcements">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2a6 6 0 00-6 6c0 3.5-2 4.5-2 5h16s-2-1.5-2-5a6 6 0 00-6-6z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8.5 17a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    <span class="dot"></span>
+                </a>
+                <div class="divider"></div>
+                <span class="date">@today</span>
+                <div class="who">
+                    <div class="avatar">@initial</div>
+                    <span>@userName</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            @RenderBody()
+        </main>
+
+    </div>
+</div>
+
+
+
+@await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

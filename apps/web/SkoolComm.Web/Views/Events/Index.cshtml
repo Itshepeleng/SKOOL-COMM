@@ -1,0 +1,129 @@
+@model List<SkoolComm.Domain.Models.CalendarItem>
+@{
+    ViewData["Title"] = "Events & Year Plan";
+
+    // Lowercase names so JavaScript can read them
+    var items = Model.Select(i => new
+    {
+        kind = i.Kind,
+        id = i.Id,
+        title = i.Title,
+        description = i.Description,
+        date = i.StartDate.ToString("yyyy-MM-dd"),
+        time = i.Kind == "event" ? i.StartDate.ToString("HH:mm") : "",
+        endDate = i.EndDate.ToString("yyyy-MM-dd"),
+        location = i.Location
+    });
+    var itemsJson = System.Text.Json.JsonSerializer.Serialize(items);
+
+    string successMsg = TempData["Success"]?.ToString() ?? "";
+    string errorMsg = (TempData["Error"]?.ToString() ?? "") + (ViewBag.Error as string ?? "");
+    string toastClass = errorMsg != "" ? "toast error"
+                      : successMsg != "" ? "toast success"
+                      : "toast success hidden";
+    string toastText = errorMsg != "" ? errorMsg : successMsg;
+}
+
+<div class="page-wide stack" id="eventsPage" data-events="@itemsJson" data-month="@(ViewBag.Month as string)">
+
+    <div id="evToast" class="@toastClass">
+        <span id="evToastText">@toastText</span>
+    </div>
+
+    <!-- Top row: view tabs + Add -->
+    <div class="row-between">
+        <div class="tabs">
+            <button type="button" class="tab active" id="tabList">List</button>
+            <button type="button" class="tab" id="tabCalendar">Calendar</button>
+        </div>
+        <button type="button" id="addEventBtn" class="btn btn-orange btn-sm">+ Add</button>
+    </div>
+
+    <!-- Add / Edit form (posts to EventsController.Save) -->
+    <form method="post" asp-controller="Events" asp-action="Save" class="card card-lg hidden" id="eventForm">
+        <h3 id="formTitle">New Event</h3>
+
+        <input type="hidden" name="id" id="evId" />
+        <input type="hidden" name="kind" id="evKindHidden" value="event" />
+
+        <div class="grid-2">
+            <div>
+                <label class="lbl" for="evKind">Kind</label>
+                <select id="evKind" class="select">
+                    <option value="event">Event (one date)</option>
+                    <option value="yearplan">Year Plan (start to end date)</option>
+                </select>
+            </div>
+            <div></div>
+
+            <div style="grid-column:span 2;">
+                <label class="lbl" for="evTitle">Title</label>
+                <input type="text" name="title" id="evTitle" class="input" placeholder="Title..." />
+            </div>
+            <div style="grid-column:span 2;">
+                <label class="lbl" for="evDescription">Description</label>
+                <input type="text" name="description" id="evDescription" class="input" placeholder="Short description..." />
+            </div>
+
+            <div>
+                <label class="lbl" for="evDate" id="evDateLabel">Date</label>
+                <input type="date" name="date" id="evDate" class="input" />
+            </div>
+            <div id="evTimeGroup">
+                <label class="lbl" for="evTime">Time</label>
+                <input type="time" name="time" id="evTime" class="input" value="08:00" />
+            </div>
+            <div id="evEndGroup" class="hidden">
+                <label class="lbl" for="evEnd">End date</label>
+                <input type="date" name="endDate" id="evEnd" class="input" />
+            </div>
+            <div id="evLocationGroup" style="grid-column:span 2;">
+                <label class="lbl" for="evLocation">Location</label>
+                <input type="text" name="location" id="evLocation" class="input" placeholder="e.g. School hall" />
+            </div>
+        </div>
+
+        <div class="row gap-3" style="justify-content:flex-end;margin-top:16px;">
+            <button type="button" id="evCancel" class="btn btn-outline">Cancel</button>
+            <button type="submit" id="evSave" class="btn btn-primary" disabled>Add</button>
+        </div>
+    </form>
+
+    <!-- LIST VIEW -->
+    <div class="table-wrap" id="listView">
+        <table class="tbl">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Event</th>
+                    <th>Kind</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="eventRows"></tbody>
+        </table>
+    </div>
+
+    <!-- CALENDAR VIEW -->
+    <div class="card card-lg hidden" id="calendarView">
+        <div class="row-between" style="margin-bottom:20px;">
+            <h3 id="calTitle" style="font-size:16px;margin-bottom:0;"></h3>
+            <div class="row gap-2">
+                <button type="button" id="calPrev" class="btn btn-outline btn-sm">&larr; Prev</button>
+                <button type="button" id="calNext" class="btn btn-outline btn-sm">Next &rarr;</button>
+            </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <!-- Delete form (filled in by JavaScript) -->
+    <form method="post" asp-controller="Events" asp-action="Delete" id="delForm">
+        <input type="hidden" name="kind" id="delKind" />
+        <input type="hidden" name="id" id="delId" />
+    </form>
+
+</div>
+
+@section Scripts {
+    <script src="~/js/events.js" asp-append-version="true"></script>
+}

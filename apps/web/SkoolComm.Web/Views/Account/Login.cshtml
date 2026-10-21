@@ -1,0 +1,105 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Login";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Skool-Comm</title>
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+</head>
+
+<body class="login-wrap">
+
+    <!-- LEFT PANEL: green, with the form -->
+    <section class="login-left">
+
+        <div class="login-top">
+
+            <!-- School crest -->
+            <svg width="80" height="80" viewBox="0 0 72 72" fill="none">
+                <path d="M36 4L8 16V40C8 55 20 66 36 70C52 66 64 55 64 40V16L36 4Z" fill="#1a5c2e" />
+                <path d="M36 10L14 20V40C14 52 24 61 36 65C48 61 58 52 58 40V20L36 10Z" fill="#133f20" />
+                <path d="M36 10L14 20V40C14 52 24 61 36 65C48 61 58 52 58 40V20L36 10Z" fill="none" stroke="#e87722" stroke-width="1.5" />
+                <path d="M22 28H32V22L36 18L40 22V28H50V44H22V28Z" fill="#e87722" opacity="0.9" />
+                <rect x="30" y="34" width="12" height="10" fill="#1a5c2e" />
+                <circle cx="36" cy="25" r="3" fill="white" />
+                <path d="M22 44H50" stroke="#e87722" stroke-width="1" />
+                <text x="36" y="56" text-anchor="middle" fill="white" font-size="6" font-weight="bold" font-family="DM Sans, sans-serif">WILGEHOF</text>
+            </svg>
+
+            <div class="login-titles">
+                <div class="login-eyebrow">Wilgehof Primary School</div>
+                <h1>Skool-Comm</h1>
+                <p>Teacher &amp; Admin Portal</p>
+            </div>
+
+            <form id="loginForm" method="post" action="/Account/Login" class="login-form">
+
+                <!-- Role buttons -->
+                <div class="role-row">
+                    <button type="button" class="role-btn role-button active" data-role="teacher">Teacher</button>
+                    <button type="button" class="role-btn role-button" data-role="admin">Administrator</button>
+                </div>
+
+                <input type="hidden" id="roleInput" name="role" value="teacher" />
+
+                <div class="login-field">
+                    <label for="email">Email address</label>
+                    <input type="email" id="email" name="email"
+                           placeholder="Enter your email address"
+                           autocomplete="username" required />
+                </div>
+
+
+
+                <div class="login-field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password"
+                           placeholder="Enter your password"
+                           autocomplete="current-password" />
+                </div>
+
+                <div class="login-options">
+                    <label class="remember">
+                        <input type="checkbox" id="rememberMe" />
+                        Remember me
+                    </label>
+                    <a href="#" class="forgot">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="login-submit">Login</button>
+
+                <div id="loginMessage"
+                     class="login-message @(ViewBag.Error != null ? "show error" : "")">
+                    @ViewBag.Error
+                </div>
+
+            </form>
+        </div>
+
+        <div class="login-foot">
+            <div class="motto">Learn &nbsp;·&nbsp; Grow &nbsp;·&nbsp; Achieve</div>
+            <div class="copy">© 2026 Wilgehof Primary School</div>
+        </div>
+
+    </section>
+
+    <!-- RIGHT PANEL: school photo -->
+    <section class="login-right">
+        <img src="~/images/Wilgehof.jpeg" asp-append-version="true" alt="Wilgehof Primary School" />
+        <div class="login-overlay">
+            <div>
+                <h2>Together for a<br />brighter future</h2>
+                <p>Connect · Inform · Support</p>
+            </div>
+        </div>
+    </section>
+
+    <script src="~/js/login.js" asp-append-version="true"></script>
+
+</body>
+</html>

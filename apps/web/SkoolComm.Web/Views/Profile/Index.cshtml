@@ -1,0 +1,65 @@
+@model SkoolComm.Domain.Models.StaffProfile
+@{
+    ViewData["Title"] = "My Profile";
+
+    string Capital(string text) =>
+        string.IsNullOrEmpty(text) ? "" : char.ToUpper(text[0]) + text.Substring(1).ToLower();
+}
+
+<div class="page-narrow stack">
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="toast error"><span>@ViewBag.Error</span></div>
+    }
+
+    @if (Model == null)
+    {
+        <div class="card" style="padding:32px;">
+            <p class="muted">Your staff profile could not be found. Please log out and log in again.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card" style="padding:32px;">
+
+            <div class="row gap-4" style="margin-bottom:32px;">
+                <div class="avatar" style="width:64px;height:64px;font-size:24px;">
+                    @(Model.FullName.Length > 0 ? Model.FullName.Substring(0, 1).ToUpper() : "?")
+                </div>
+                <div>
+                    <h2 style="font-size:20px;font-weight:700;">@Model.FullName</h2>
+                    <p class="muted">@Capital(Model.Role)</p>
+                    <p class="small faint">Wilgehof Primary School</p>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-bottom:24px;">
+                <div>
+                    <label class="lbl-caps">First Name</label>
+                    <div class="field-box">@Model.FirstName</div>
+                </div>
+                <div>
+                    <label class="lbl-caps">Last Name</label>
+                    <div class="field-box">@Model.LastName</div>
+                </div>
+                <div>
+                    <label class="lbl-caps">Role</label>
+                    <div class="field-box">@Capital(Model.Role)</div>
+                </div>
+                <div>
+                    <label class="lbl-caps">Account Status</label>
+                    <div class="field-box">@Capital(Model.Status)</div>
+                </div>
+                <div style="grid-column:span 2;">
+                    <label class="lbl-caps">Email Address</label>
+                    <div class="field-box">@Model.Email</div>
+                </div>
+            </div>
+
+            <p class="small faint" style="border-top:1px solid var(--border-soft);padding-top:16px;">
+                To change your name, email address or password, please contact the school administrator.
+            </p>
+        </div>
+    }
+</div>

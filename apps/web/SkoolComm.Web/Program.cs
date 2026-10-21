@@ -1,28 +1,55 @@
+using SkoolComm.Application.Interfaces;
+using SkoolComm.Application.Services;
+using SkoolComm.Domain.Interfaces;
+using SkoolComm.Infrastructure.Repositores;
+using SkoolComm.Infrastructure.Services;
 using Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.AddControllersWithViews();
+builder.Services.AddSession();
 
-// Configure Supabase from configuration (appsettings or user secrets / env)
+
+// ===== Supabase + Auth Registration =====
 var supabaseUrl = builder.Configuration["Supabase:Url"];
 var supabaseKey = builder.Configuration["Supabase:Key"];
-if (!string.IsNullOrEmpty(supabaseUrl) && !string.IsNullOrEmpty(supabaseKey))
-{
-    // Initialize Supabase client and register as singleton
-    var supabaseClient = new Supabase.Client(supabaseUrl, supabaseKey);
-    await supabaseClient.InitializeAsync();
-    builder.Services.AddSingleton(supabaseClient);
-}
+Console.WriteLine($"SUPABASE URL LOADED: {supabaseUrl}");
 
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IStudentService, StudentService>();
+
+var supabaseOptions = new SupabaseOptions
+{
+    AutoConnectRealtime = false
+};
+
+var supabaseClient = new Client(supabaseUrl, supabaseKey, supabaseOptions);
+await supabaseClient.InitializeAsync();
+
+builder.Services.AddSingleton(supabaseClient);
+builder.Services.AddScoped<IAuthService, SupabaseAuthService>();
+builder.Services.AddScoped<IAnnouncementService, SupabaseAnnouncementService>();
+builder.Services.AddScoped<IAttendanceService, SupabaseAttendanceService>();
+builder.Services.AddScoped<IEventService, SupabaseEventService>();
+builder.Services.AddScoped<IBehaviourService, SupabaseBehaviourService>();
+builder.Services.AddScoped<IStaffService, SupabaseStaffService>();
+
+
+
+
+// ========================================
+
+
+// Build the app
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
@@ -30,10 +57,15 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseSession();
+
 app.UseAuthorization();
 
 app.MapStaticAssets();
-app.MapRazorPages()
-   .WithStaticAssets();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Account}/{action=Login}/{id?}")
+    .WithStaticAssets();
 
 app.Run();

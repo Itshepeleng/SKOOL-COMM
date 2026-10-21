@@ -1,0 +1,111 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+
+    // Demo data from the Figma design (replaced by Supabase later)
+    var recentActivity = new[]
+    {
+        new { User = "Mrs van der Berg", Action = "Published an announcement for Grade 5A", Time = "09:42" },
+        new { User = "Mr Fourie",        Action = "Recorded attendance for Grade 6B", Time = "08:55" },
+        new { User = "Admin Pretorius",  Action = "Added new user: Ms Sithole (Teacher)", Time = "08:20" },
+        new { User = "Mrs Nkosi",        Action = "Published announcement: Sports Day arrangements", Time = "07:55" },
+        new { User = "Mr Adams",         Action = "Recorded 4 behavioural points for Grade 4C", Time = "Yesterday" }
+    };
+}
+
+<div class="stack">
+
+    <!-- Header row -->
+    <div class="row-between">
+        <div>
+            <h2 class="page-title">Administrator Overview</h2>
+            <p class="page-sub">Wilgehof Primary School · Term 4, 2026</p>
+        </div>
+        <a asp-controller="Users" asp-action="Index" class="btn btn-primary btn-sm">+ New User</a>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="grid-2">
+        <div class="stat-card green">
+            <div class="stat-icon green">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="6" r="3" stroke="white" stroke-width="1.5" fill="none"/><path d="M2 17c0-3.3 2.2-5 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/><circle cx="13" cy="6" r="3" stroke="white" stroke-width="1.5" fill="none"/><path d="M18 17c0-3.3-2.2-5-5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+            </div>
+            <div class="stat-value">@(ViewBag.TeacherCount ?? "–")</div>
+            <div class="stat-label">Total Teachers</div>
+            <div class="stat-sub">Active staff members</div>
+        </div>
+
+        <div class="stat-card orange">
+            <div class="stat-icon orange">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="white" stroke-width="1.5" fill="none"/><path d="M4 18c0-3.9 2.7-7 6-7s6 3.1 6 7" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+            </div>
+            <div class="stat-value">250</div>
+            <div class="stat-label">Total Parents</div>
+            <div class="stat-sub">3 new this week</div>
+        </div>
+    </div>
+
+    <!-- Quick links + recent activity -->
+    <div class="grid-3">
+
+        <div class="card">
+            <h3>Quick Links</h3>
+            <div class="stack-sm">
+
+                <a asp-controller="Users" asp-action="Index" class="row gap-3 link-card">
+                    <div class="stat-icon green" style="margin-bottom:0;flex-shrink:0;">
+                        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="9" cy="7" r="3" stroke="white" stroke-width="1.5" fill="none"/><path d="M3 19c0-3.3 2.7-6 6-6" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M17 12v7M20.5 15.5h-7" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-size:14px;font-weight:600;">Manage Users</div>
+                        <div class="small faint">Add, edit or deactivate staff</div>
+                    </div>
+                </a>
+
+                <a asp-controller="Events" asp-action="Index" class="row gap-3 link-card">
+                    <div class="stat-icon orange" style="margin-bottom:0;flex-shrink:0;">
+                        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="15" rx="2" stroke="white" stroke-width="1.5" fill="none"/><path d="M8 2v4M14 2v4M3 10h16" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-size:14px;font-weight:600;">Manage Events</div>
+                        <div class="small faint">Edit school year plan</div>
+                    </div>
+                </a>
+
+                <a asp-controller="Announcements" asp-action="Index" class="row gap-3 link-card">
+                    <div class="stat-icon" style="margin-bottom:0;flex-shrink:0;background:#2a7a3e;">
+                        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 7a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H9l-5 4V7z" fill="white"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-size:14px;font-weight:600;">Announcements</div>
+                        <div class="small faint">Post school-wide messages</div>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+        <div class="card col-span-2">
+            <div class="row-between" style="margin-bottom:12px;">
+                <h3 style="margin-bottom:0;">Recent Activity</h3>
+                <span class="small faint">Last 24 hours</span>
+            </div>
+
+            <div>
+                @foreach (var a in recentActivity)
+                {
+                    <div class="list-row" style="align-items:center;">
+                        <div class="avatar" style="width:28px;height:28px;font-size:12px;background:#e8f4ec;color:#1a5c2e;">
+                            @a.User.Substring(0, 1)
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <span style="font-size:14px;font-weight:600;">@a.User</span>
+                            <span class="muted"> — @a.Action</span>
+                        </div>
+                        <span class="small faint" style="flex-shrink:0;">@a.Time</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>

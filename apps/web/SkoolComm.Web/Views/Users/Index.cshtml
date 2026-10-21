@@ -1,0 +1,361 @@
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<div class="page-header">
+
+    <div>
+        <h2>Manage Users</h2>
+        <p>Manage teachers, parents and administrators.</p>
+    </div>
+
+    <button type="button"
+            class="btn-primary"
+            id="addUserButton">
+        + Add User
+    </button>
+
+</div>
+
+
+<!-- USER SUMMARY -->
+
+<div class="stats-grid users-stats">
+
+    <div class="stat-card">
+
+        <div class="stat-icon stat-icon-green">
+            👥
+        </div>
+
+        <div class="stat-content">
+
+            <span>Total Users</span>
+
+            <strong id="totalUsers">
+                320
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon stat-icon-blue">
+            👨‍🏫
+        </div>
+
+        <div class="stat-content">
+
+            <span>Teachers</span>
+
+            <strong id="teacherCount">
+                35
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon stat-icon-orange">
+            👨‍👩‍👧
+        </div>
+
+        <div class="stat-content">
+
+            <span>Parents</span>
+
+            <strong id="parentCount">
+                250
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon stat-icon-purple">
+            ✓
+        </div>
+
+        <div class="stat-content">
+
+            <span>Administrators</span>
+
+            <strong id="adminCount">
+                3
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ADD USER FORM -->
+
+<div class="card user-form-card">
+
+    <div class="card-header">
+
+        <div>
+            <h3>Add New User</h3>
+            <p>Create a new school user account.</p>
+        </div>
+
+    </div>
+
+
+    <div class="user-form">
+
+        <div class="form-group">
+
+            <label for="userName">
+                Full Name
+            </label>
+
+            <input type="text"
+                   id="userName"
+                   placeholder="Enter full name" />
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="userEmail">
+                Email / Username
+            </label>
+
+            <input type="text"
+                   id="userEmail"
+                   placeholder="Enter email or username" />
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="userRole">
+                Role
+            </label>
+
+            <select id="userRole">
+
+                <option value="">
+                    Select role
+                </option>
+
+                <option value="teacher">
+                    Teacher
+                </option>
+
+                <option value="parent">
+                    Parent
+                </option>
+
+                <option value="admin">
+                    Administrator
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <div class="user-actions">
+
+        <button type="button"
+                class="btn-primary"
+                id="saveUserButton">
+            Create User
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- USERS TABLE -->
+
+<div class="card">
+
+    <div class="card-header">
+
+        <div>
+            <h3>School Users</h3>
+            <p>Current users registered on Skool-Comm.</p>
+        </div>
+
+    </div>
+
+
+    <div class="users-table-wrapper">
+
+        <table class="users-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>Name</th>
+
+                    <th>Email / Username</th>
+
+                    <th>Role</th>
+
+                    <th>Status</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                <tr>
+
+                    <td>
+                        <strong>Mrs Nkosi</strong>
+                    </td>
+
+                    <td>
+                        nkosi@wilgehof.co.za
+                    </td>
+
+                    <td>
+                        <span class="user-role teacher-role">
+                            Teacher
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="user-status active-status">
+                            Active
+                        </span>
+                    </td>
+
+                    <td>
+                        <button type="button"
+                                class="user-action-button">
+                            Edit
+                        </button>
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        <strong>Thabo Mokoena</strong>
+                    </td>
+
+                    <td>
+                        thabo.parent@example.com
+                    </td>
+
+                    <td>
+                        <span class="user-role parent-role">
+                            Parent
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="user-status active-status">
+                            Active
+                        </span>
+                    </td>
+
+                    <td>
+                        <button type="button"
+                                class="user-action-button">
+                            Edit
+                        </button>
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        <strong>Admin User</strong>
+                    </td>
+
+                    <td>
+                        admin@wilgehof.co.za
+                    </td>
+
+                    <td>
+                        <span class="user-role admin-role">
+                            Administrator
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="user-status active-status">
+                            Active
+                        </span>
+                    </td>
+
+                    <td>
+                        <button type="button"
+                                class="user-action-button">
+                            Edit
+                        </button>
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        <strong>Lerato Molefe</strong>
+                    </td>
+
+                    <td>
+                        lerato.parent@example.com
+                    </td>
+
+                    <td>
+                        <span class="user-role parent-role">
+                            Parent
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="user-status inactive-status">
+                            Inactive
+                        </span>
+                    </td>
+
+                    <td>
+                        <button type="button"
+                                class="user-action-button">
+                            Edit
+                        </button>
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

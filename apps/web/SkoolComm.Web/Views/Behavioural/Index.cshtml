@@ -1,0 +1,188 @@
+@model SkoolComm.Web.Models.BehaviourViewModel
+@using System.Globalization
+@using Microsoft.AspNetCore.Http
+@using SkoolComm.Domain.Models
+@{
+    ViewData["Title"] = "Behavioural Points";
+    var inv = CultureInfo.InvariantCulture;
+    var today = DateTime.Now.ToString("yyyy-MM-dd");
+    var teacher = Context.Session.GetString("UserName") ?? "";
+
+    var names = Model.Learners.ToDictionary(l => l.LearnerId, l => l.LastName + ", " + l.FirstName);
+
+    var learnersJson = System.Text.Json.JsonSerializer.Serialize(
+        Model.Learners.Select(l => new { id = l.LearnerId, name = l.LastName + ", " + l.FirstName, cls = l.Class }));
+
+    var entriesJson = System.Text.Json.JsonSerializer.Serialize(
+        Model.Entries.Select(e => new
+        {
+            learnerId = e.LearnerId,
+            code = e.OffenceCode,
+            date = e.DateRecorded.ToString("dd/MM/yyyy", inv),
+            sort = e.DateRecorded.ToString("yyyyMMddHHmmss", inv),
+            initials = e.IssuedByInitials,
+            points = e.Points
+        }));
+
+    var offencesJson = System.Text.Json.JsonSerializer.Serialize(
+        OffenceCatalog.All.Select(o => new { code = o.Code, description = o.Description, level = o.Level, points = o.Points }));
+
+    var levelsJson = System.Text.Json.JsonSerializer.Serialize(
+        OffenceCatalog.Levels.OrderBy(l => l.Key)
+            .Select(l => new { level = l.Key, name = l.Value.Name, points = l.Value.Points }));
+
+    string successMsg = TempData["Success"]?.ToString() ?? "";
+    string errorMsg = (TempData["Error"]?.ToString() ?? "") + (ViewBag.Error as string ?? "");
+    string toastClass = errorMsg != "" ? "toast error"
+                      : successMsg != "" ? "toast success"
+                      : "toast success hidden";
+    string toastText = errorMsg != "" ? errorMsg : successMsg;
+
+    var recent = Model.Entries.Take(6).ToList();
+}
+
+<div class="page-wide stack">
+
+    <div id="behToast" class="@toastClass">
+        <span id="behToastText">@toastText</span>
+    </div>
+
+    <div class="beh-layout" id="behPage"
+         data-learners="@learnersJson"
+         data-entries="@entriesJson"
+         data-offences="@offencesJson"
+         data-levels="@levelsJson"
+         data-selected="@Model.SelectedLearnerId">
+
+        <!-- ============ LEFT COLUMN ============ -->
+        <div class="stack">
+
+            <!-- Class / Date (sent with the form below through the form="behForm" link) -->
+            <div class="card">
+                <h3>Class / Date</h3>
+                <div class="grid-2" style="gap:12px;">
+                    <div>
+                        <label class="lbl-caps" for="behClass">Class</label>
+                        <select id="behClass" name="cls" form="behForm" class="select">
+                            @foreach (var c in Model.Classes)
+                            {
+                                if (c == Model.SelectedClass)
+                                {
+                                    <option selected>@c</option>
+                                }
+                                else
+                                {
+                                    <option>@c</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="lbl-caps" for="behDate">Date</label>
+                        <input type="date" id="behDate" name="date" form="behForm" class="input" value="@today" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Record New Entry -->
+            <form class="card stack" id="behForm" method="post" asp-controller="Behavioural" asp-action="Save">
+                <h3 style="margin-bottom:0;">Record New Entry</h3>
+
+                <div>
+                    <label class="lbl-caps" for="behSearch">Search learner</label>
+                    <div class="search-wrap">
+                        <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.5" /><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+                        <input type="text" id="behSearch" class="input" style="padding-left:36px;"
+                               placeholder="Type learner name..." autocomplete="off" />
+                    </div>
+                    <div id="behSuggest" class="suggest-box hidden"></div>
+                    <input type="hidden" name="learnerId" id="behLearnerId" />
+                </div>
+
+                <div>
+                    <label class="lbl-caps">Offence level (points)</label>
+                    <div class="level-row" id="levelRow">
+                        @foreach (var lv in OffenceCatalog.Levels.OrderBy(l => l.Key))
+                        {
+                            <button type="button" class="level-btn @(lv.Key == 1 ? "active" : "")" data-level="@lv.Key">
+                                <strong>@("L" + lv.Key)</strong>
+                                <span>@lv.Value.Points pts</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <div>
+                    <label class="lbl-caps" for="behOffence">Offence</label>
+                    <select id="behOffence" name="offenceCode" class="select"></select>
+                </div>
+
+                <div>
+                    <label class="lbl-caps" for="behNotes">Notes</label>
+                    <textarea id="behNotes" name="notes" class="textarea" rows="3"
+                              placeholder="Describe the behaviour..."></textarea>
+                </div>
+
+                <div class="row gap-3" style="justify-content:flex-end;">
+                    <button type="button" id="behCancel" class="btn btn-outline">Cancel</button>
+                    <button type="button" id="behSend" class="btn btn-primary" disabled>Send Record</button>
+                </div>
+            </form>
+
+            <!-- Recent Records -->
+            <div class="card">
+                <h3 style="margin-bottom:16px;">Recent Records</h3>
+                <div class="stack-md">
+                    @if (recent.Count == 0)
+                    {
+                        <p class="small faint">No records yet.</p>
+                    }
+                    @foreach (var r in recent)
+                    {
+                        <div class="record-box">
+                            <div class="row-between" style="margin-bottom:2px;">
+                                <span style="font-size:14px;font-weight:600;">@(names.ContainsKey(r.LearnerId) ? names[r.LearnerId] : "Learner " + r.LearnerId)</span>
+                                <span class="pts-neg">−@r.Points pts</span>
+                            </div>
+                            <p class="small muted">@r.OffenceCode · @r.OffenceName</p>
+                            <p class="tiny faint" style="margin-top:2px;">@r.DateRecorded.ToString("dd MMM yyyy", inv)</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ RIGHT COLUMN: the behaviour sheet ============ -->
+        <div class="card" style="padding:0;overflow:hidden;">
+            <div style="padding:20px 20px 12px;">
+                <h3 style="margin-bottom:2px;">Learner Behaviour Sheet</h3>
+                <p class="small muted">Wilgehof Primary School · Digital version of the paper record</p>
+            </div>
+
+            <div class="sheet-meta">
+                <span>Class: <strong id="shClass"></strong></span>
+                <span>Teacher: <strong>@teacher</strong></span>
+                <span>Learner: <strong id="shLearner">Select a learner</strong></span>
+                <span id="shTotal"></span>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="sheet">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Offence</th>
+                            <th colspan="5">Initial and date in column</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sheetBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/behavioural.js" asp-append-version="true"></script>
+}

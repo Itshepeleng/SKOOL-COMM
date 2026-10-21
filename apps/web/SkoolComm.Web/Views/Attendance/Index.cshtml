@@ -1,0 +1,110 @@
+@model SkoolComm.Web.Models.AttendanceViewModel
+@{
+    ViewData["Title"] = "Record Attendance";
+
+    string successMsg = TempData["Success"]?.ToString() ?? "";
+    string errorMsg = (TempData["Error"]?.ToString() ?? "") + (ViewBag.Error as string ?? "");
+    string toastClass = errorMsg != "" ? "toast error"
+                      : successMsg != "" ? "toast success"
+                      : "toast success hidden";
+    string toastText = errorMsg != "" ? errorMsg : successMsg;
+}
+
+<div class="page-wide stack" id="attPage" data-url="@Url.Action("Index", "Attendance")">
+
+    <!-- Message bar -->
+    <div id="attToast" class="@toastClass">
+        <span id="attToastText">@toastText</span>
+    </div>
+
+    <!-- Filters -->
+    <div class="card">
+        <div class="row gap-4" style="align-items:flex-end;">
+            <div style="flex:1;">
+                <label class="lbl-caps" for="classSelect">Class</label>
+                <select id="classSelect" class="select">
+                    @foreach (var c in Model.Classes)
+                    {
+                        if (c == Model.SelectedClass)
+                        {
+                            <option selected>@c</option>
+                        }
+                        else
+                        {
+                            <option>@c</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="lbl-caps" for="attDate">Date</label>
+                <input type="date" id="attDate" class="input" value="@Model.Date.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="row gap-2">
+                <button type="button" id="markAllPresent" class="btn btn-soft">All Present</button>
+                <button type="button" id="clearAll" class="btn btn-grey">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary pills -->
+    <div class="row gap-3 wrap">
+        <div class="pill-stat green">Present: <strong id="countPresent">0</strong></div>
+        <div class="pill-stat red">Absent: <strong id="countAbsent">0</strong></div>
+        <div class="pill-stat yellow">Late: <strong id="countLate">0</strong></div>
+        <div class="pill-stat grey">Not Marked: <strong id="countNotMarked">0</strong></div>
+    </div>
+
+    <!-- Learner table -->
+    <div class="table-wrap">
+        <table class="tbl">
+            <thead>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th>Learner Name</th>
+                    <th class="center">Attendance Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Learners.Count == 0)
+                {
+                    <tr><td colspan="3" class="center faint">No learners found.</td></tr>
+                }
+
+                @foreach (var l in Model.Learners)
+                {
+                    var status = Model.Saved.ContainsKey(l.LearnerId) ? Model.Saved[l.LearnerId] : "";
+
+                    <tr class="att-row" data-class="@l.Class" data-learner-id="@l.LearnerId" data-status="@status">
+                        <td class="faint row-num"></td>
+                        <td style="font-weight:500;">@l.LastName, @l.FirstName</td>
+                        <td>
+                            <div class="row gap-2" style="justify-content:center;">
+                                <button type="button" class="status-btn present @(status == "present" ? "selected" : "")" data-status="present">Present</button>
+                                <button type="button" class="status-btn absent @(status == "absent" ? "selected" : "")" data-status="absent">Absent</button>
+                                <button type="button" class="status-btn late @(status == "late" ? "selected" : "")" data-status="late">Late</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Save form (filled in by JavaScript) -->
+    <form id="attForm" method="post" asp-controller="Attendance" asp-action="Save">
+        <input type="hidden" name="date" id="formDate" />
+        <input type="hidden" name="cls" id="formClass" />
+        <input type="hidden" name="entriesJson" id="formEntries" />
+
+        <div class="row gap-3" style="justify-content:flex-end;">
+            <button type="button" id="cancelAtt" class="btn btn-outline">Cancel</button>
+            <button type="button" id="saveAtt" class="btn btn-primary">Save Attendance</button>
+        </div>
+    </form>
+
+</div>
+
+@section Scripts {
+    <script src="~/js/attendance.js" asp-append-version="true"></script>
+}

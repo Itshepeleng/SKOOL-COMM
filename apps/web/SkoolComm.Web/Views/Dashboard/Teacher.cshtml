@@ -1,0 +1,122 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    var userName = Context.Session.GetString("UserName") ?? "Teacher";
+
+    // Demo data from the Figma design (replaced by Supabase later)
+    var activity = new[]
+    {
+        new { Type = "attendance",   Desc = "Attendance recorded for Grade 5A", Time = "08:45", Date = "Today" },
+        new { Type = "behavioural",  Desc = "Behavioural point added: Thabo Dlamini — Excellent participation", Time = "09:30", Date = "Today" },
+        new { Type = "result",       Desc = "Maths results uploaded for Grade 5A — Term 2", Time = "11:15", Date = "Today" },
+        new { Type = "announcement", Desc = "Announcement published: Parent meeting next Thursday", Time = "14:00", Date = "Yesterday" },
+        new { Type = "attendance",   Desc = "Attendance recorded for Grade 5A", Time = "08:50", Date = "Yesterday" }
+    };
+
+    string DotColor(string type) => type switch
+    {
+        "attendance" => "#1a5c2e",
+        "behavioural" => "#e87722",
+        "result" => "#2a7a3e",
+        _ => "#ca8a04"
+    };
+    string BadgeClass(string type) => type switch
+    {
+        "attendance" => "badge-green",
+        "behavioural" => "badge-orange",
+        "result" => "badge-green",
+        _ => "badge-yellow"
+    };
+    string BadgeText(string type) => type switch
+    {
+        "attendance" => "Attendance",
+        "behavioural" => "Behaviour",
+        "result" => "Results",
+        _ => "Announcement"
+    };
+}
+
+<div class="stack">
+
+    <!-- Welcome row -->
+    <div class="row-between">
+        <div>
+            <h2 class="page-title">Welcome back, @userName</h2>
+            <p class="page-sub">Here is what is happening at Wilgehof today.</p>
+        </div>
+        <div class="card" style="padding:10px 16px;text-align:right;">
+            <div style="font-size:14px;font-weight:600;">Term 2, Week 8</div>
+            <div class="small muted">Grade 5A · 32 Learners</div>
+        </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="grid-2">
+        <div class="stat-card green">
+            <div class="stat-icon green">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="6" r="3" stroke="white" stroke-width="1.5" fill="none"/><path d="M2 17c0-3.3 2.2-5 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/><circle cx="13" cy="6" r="3" stroke="white" stroke-width="1.5" fill="none"/><path d="M18 17c0-3.3-2.2-5-5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+            </div>
+            <div class="stat-value">@(ViewBag.LearnerCount ?? "–")</div>
+            <div class="stat-label">Total Learners</div>
+            <div class="stat-sub">Across all classes</div>
+        </div>
+
+        <div class="stat-card orange">
+            <div class="stat-icon orange">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="white" stroke-width="1.5" fill="none"/><path d="M4 18c0-3.9 2.7-7 6-7s6 3.1 6 7" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+            </div>
+            <div class="stat-value">250</div>
+            <div class="stat-label">Total Parents</div>
+            <div class="stat-sub">Registered on portal</div>
+        </div>
+    </div>
+
+    <!-- Quick actions + recent activity -->
+    <div class="grid-3">
+
+        <div class="card">
+            <h3>Quick Actions</h3>
+            <div class="stack-sm">
+
+                <a asp-controller="Attendance" asp-action="Index" class="quick-btn">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9l4 4 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Take Attendance
+                </a>
+
+                <a asp-controller="Behavioural" asp-action="Index" class="quick-btn">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l2 4 4.5.7-3.3 3.2.8 4.5L9 12.3l-4 2.1.8-4.5L2.5 6.7l4.5-.7L9 2z" fill="currentColor"/></svg>
+                    Record Behaviour
+                </a>
+
+               
+
+                <a asp-controller="Announcements" asp-action="Index" class="quick-btn">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 6a2 2 0 012-2h6a2 2 0 012 2v5a2 2 0 01-2 2H7l-3 3V6z" fill="currentColor"/></svg>
+                    New Announcement
+                </a>
+
+            </div>
+        </div>
+
+        <div class="card col-span-2">
+            <div class="row-between" style="margin-bottom:12px;">
+                <h3 style="margin-bottom:0;">Recent Announcements</h3>
+                <a asp-controller="Announcements" asp-action="Index" class="link-btn">View all</a>
+            </div>
+
+            <div>
+                @foreach (var a in activity)
+                {
+                    <div class="list-row">
+                        <span class="dot" style="background:@DotColor(a.Type);margin-top:7px;"></span>
+                        <div style="flex:1;min-width:0;">
+                            <p>@a.Desc</p>
+                            <span class="tiny faint">@a.Date · @a.Time</span>
+                        </div>
+                        <span class="badge @BadgeClass(a.Type)" style="align-self:flex-start;">@BadgeText(a.Type)</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>

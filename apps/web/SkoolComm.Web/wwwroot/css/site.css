@@ -1,31 +1,1296 @@
-html {
-  font-size: 14px;
+/* =========================================================
+   Skool-Comm | Wilgehof Primary School
+   Global stylesheet (complete)
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* ---------- 1. Colour and size variables ---------- */
+:root {
+    --green: #1a5c2e;
+    --green-dark: #133f20;
+    --green-mid: #2a7a3e;
+    --green-border: #2d7a42;
+    --green-pale: #e8f4ec;
+    --green-text-light: #a8d4b4;
+    --green-text-mid: #7ac48a;
+    --orange: #e87722;
+    --orange-dark: #c06010;
+    --orange-pale: #fdebd0;
+    --bg: #f2f4f2;
+    --text: #1a2a1e;
+    --muted: #5a7a62;
+    --faint: #8aaa92;
+    --border: #dde5de;
+    --border-soft: #f0f4f1;
+    --ring: #a3c4a8;
+    --red: #dc2626;
+    --red-dark: #b91c1c;
+    --red-pale: #fee2e2;
+    --yellow: #ca8a04;
+    --yellow-pale: #fef3cd;
+    --yellow-text: #a07000;
+    --purple: #7c3aed;
+    --purple-pale: #ede9fe;
+    --radius: 8px;
+    --radius-lg: 12px;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+/* ---------- 2. Base ---------- */
+* {
+    box-sizing: border-box;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+html, body {
+    height: 100%;
+    margin: 0;
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+h1, h2, h3, h4 {
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+p {
+    margin: 0;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+input, select, textarea {
+    font-family: inherit;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c0ccc2;
+    border-radius: 3px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #8fa894;
+    }
+
+/* ---------- 3. App shell (sidebar + top bar + content) ---------- */
+.app-shell {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg);
+}
+
+.sidebar {
+    width: 224px;
+    flex-shrink: 0;
+    background: var(--green);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-brand {
+    padding: 20px;
+    border-bottom: 1px solid var(--green-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+    .sidebar-brand .name {
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+    }
+
+    .sidebar-brand .sub {
+        color: var(--green-text-mid);
+        font-size: 10px;
+        line-height: 1.2;
+    }
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--green-text-light);
+    transition: all .15s;
+}
+
+    .nav-link svg {
+        color: #5a9a6a;
+        flex-shrink: 0;
+    }
+
+    .nav-link:hover {
+        background: var(--green-dark);
+        color: #fff;
+    }
+
+    .nav-link.active {
+        background: var(--orange);
+        color: #fff;
+    }
+
+        .nav-link.active svg {
+            color: #fff;
+        }
+
+.sidebar-user {
+    padding: 16px 12px;
+    border-top: 1px solid var(--green-border);
+}
+
+    .sidebar-user .inner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 8px;
+    }
+
+    .sidebar-user .avatar {
+        background: var(--orange);
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+
+    .sidebar-user .uname {
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .sidebar-user .urole {
+        font-size: 10px;
+        color: var(--green-text-mid);
+        text-transform: capitalize;
+    }
+
+    .sidebar-user .logout {
+        color: var(--green-text-mid);
+        background: none;
+        border: 0;
+        padding: 0;
+        display: flex;
+    }
+
+        .sidebar-user .logout:hover {
+            color: var(--orange);
+        }
+
+.main-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.topbar {
+    height: 56px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+}
+
+    .topbar h1 {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.topbar .date {
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.topbar .divider {
+    height: 20px;
+    width: 1px;
+    background: var(--border);
+}
+
+.topbar .bell {
+    position: relative;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    padding: 0;
+    display: flex;
+}
+
+    .topbar .bell:hover {
+        color: var(--green);
+    }
+
+    .topbar .bell .dot {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 8px;
+        height: 8px;
+        background: var(--orange);
+        border-radius: 50%;
+    }
+
+.topbar .who {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+    .topbar .who .avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+/* ---------- 4. Reusable pieces ---------- */
+.avatar {
+    border-radius: 50%;
+    background: var(--green);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+}
+
+.card-lg {
+    padding: 24px;
+}
+
+.card h3, .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+}
+
+.page-narrow {
+    max-width: 896px;
+}
+
+.page-wide {
+    max-width: 1024px;
+}
+
+.stack > * + * {
+    margin-top: 16px;
+}
+
+.stack-sm > * + * {
+    margin-top: 8px;
+}
+
+.stack-md > * + * {
+    margin-top: 12px;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.grid-5 {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+}
+
+.col-span-2 {
+    grid-column: span 2;
+}
+
+.col-span-3 {
+    grid-column: span 3;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+}
+
+.row-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+.gap-3 {
+    gap: 12px;
+}
+
+.gap-4 {
+    gap: 16px;
+}
+
+.wrap {
+    flex-wrap: wrap;
+}
+
+.page-title {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.page-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+.faint {
+    color: var(--faint);
+}
+
+.small {
+    font-size: 12px;
+}
+
+.tiny {
+    font-size: 11px;
+}
+
+/* ---------- 5. Buttons ---------- */
+.btn {
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 700;
+    border: 1px solid transparent;
+    transition: all .15s;
+}
+
+.btn-primary {
+    background: var(--green);
+    color: #fff;
+}
+
+    .btn-primary:hover {
+        background: var(--green-dark);
+    }
+
+.btn-orange {
+    background: var(--orange);
+    color: #fff;
+}
+
+    .btn-orange:hover {
+        background: var(--orange-dark);
+    }
+
+.btn-outline {
+    background: #fff;
+    color: var(--muted);
+    border-color: var(--border);
+    font-weight: 500;
+}
+
+    .btn-outline:hover {
+        border-color: var(--faint);
+    }
+
+.btn-soft {
+    background: var(--green-pale);
+    color: var(--green);
+    font-weight: 600;
+}
+
+    .btn-soft:hover {
+        background: #c5e0cc;
+    }
+
+.btn-grey {
+    background: var(--bg);
+    color: var(--muted);
+    font-weight: 500;
+}
+
+    .btn-grey:hover {
+        background: var(--border);
+    }
+
+.btn-sm {
+    padding: 8px 16px;
+}
+
+.btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+.link-btn {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+}
+
+    .link-btn:hover {
+        text-decoration: underline;
+    }
+
+    .link-btn.danger {
+        color: var(--red);
+    }
+
+    .link-btn.grey {
+        color: var(--muted);
+    }
+
+/* ---------- 6. Forms ---------- */
+label.lbl {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+label.lbl-caps {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.input, .select, .textarea {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+}
+
+    .input::placeholder, .textarea::placeholder {
+        color: var(--faint);
+    }
+
+    .input:focus, .select:focus, .textarea:focus {
+        border-color: var(--green);
+        box-shadow: 0 0 0 2px var(--ring);
+    }
+
+.textarea {
+    resize: none;
+}
+
+.input-auto {
+    width: auto;
+}
+
+.chip {
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--muted);
+    transition: all .15s;
+}
+
+    .chip:hover {
+        border-color: var(--ring);
+    }
+
+    .chip.active {
+        background: var(--green);
+        color: #fff;
+        border-color: var(--green);
+    }
+
+/* ---------- 7. Tables ---------- */
+.table-wrap {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+table.tbl {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tbl thead tr {
+    background: var(--green);
+}
+
+.tbl th {
+    text-align: left;
+    padding: 12px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green-text-light);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+    .tbl th.center, .tbl td.center {
+        text-align: center;
+    }
+
+.tbl td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 14px;
+}
+
+.tbl tbody tr:nth-child(even) {
+    background: #fafbfa;
+}
+
+.tbl tbody tr:hover {
+    background: #f0f7f2;
+}
+
+.tbl tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.tbl tr.inactive {
+    opacity: .6;
+}
+
+/* ---------- 8. Badges / tags ---------- */
+.badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+
+.badge-green {
+    background: var(--green-pale);
+    color: var(--green);
+}
+
+.badge-orange {
+    background: var(--orange-pale);
+    color: var(--orange-dark);
+}
+
+.badge-yellow {
+    background: var(--yellow-pale);
+    color: var(--yellow-text);
+}
+
+.badge-purple {
+    background: var(--purple-pale);
+    color: var(--purple);
+}
+
+.badge-grey {
+    background: var(--bg);
+    color: var(--muted);
+}
+
+.badge-red {
+    background: var(--red-pale);
+    color: var(--red);
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+/* ---------- 9. Stat cards ---------- */
+.stat-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+}
+
+    .stat-card.green {
+        background: var(--green-pale);
+    }
+
+    .stat-card.orange {
+        background: var(--orange-pale);
+    }
+
+.stat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+    .stat-icon.green {
+        background: var(--green);
+    }
+
+    .stat-icon.orange {
+        background: var(--orange);
+    }
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #3a5a42;
+    margin-top: 2px;
+}
+
+.stat-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+/* ---------- 10. List rows (activity, records) ---------- */
+.list-row {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+    .list-row:last-child {
+        border-bottom: 0;
+    }
+
+.record-box {
+    padding: 12px;
+    border-radius: var(--radius);
+    background: #f8faf8;
+    border: 1px solid #eef2ef;
+}
+
+.quick-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 0;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    text-align: left;
+    transition: all .15s;
+}
+
+    .quick-btn svg {
+        color: var(--muted);
+    }
+
+    .quick-btn:hover {
+        background: var(--green-pale);
+        color: var(--green);
+    }
+
+/* ---------- 11. Toast (green/red/yellow message bar) ---------- */
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 1px solid;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+
+    .toast.success {
+        background: var(--green-pale);
+        border-color: #7ac48a;
+        color: var(--green);
+    }
+
+    .toast.error {
+        background: #fef2f2;
+        border-color: #fca5a5;
+        color: #b91c1c;
+    }
+
+    .toast.warning {
+        background: var(--yellow-pale);
+        border-color: #fcd34d;
+        color: var(--yellow-text);
+    }
+
+.hidden {
+    display: none !important;
+}
+
+/* ---------- 12. Confirm dialog ---------- */
+.dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(26, 42, 30, .45);
+    backdrop-filter: blur(2px);
+}
+
+.dialog {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px rgba(0,0,0,.25);
+    width: 100%;
+    max-width: 384px;
+    padding: 28px;
+    text-align: center;
+}
+
+.dialog-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+    .dialog-icon.danger {
+        background: var(--red-pale);
+    }
+
+    .dialog-icon.warning {
+        background: var(--yellow-pale);
+    }
+
+    .dialog-icon.primary {
+        background: var(--green-pale);
+    }
+
+.dialog h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.dialog p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.dialog-actions {
+    display: flex;
+    gap: 12px;
+}
+
+    .dialog-actions .btn {
+        flex: 1;
+        padding: 10px;
+        font-size: 14px;
+    }
+
+.btn-danger {
+    background: var(--red);
+    color: #fff;
+}
+
+    .btn-danger:hover {
+        background: var(--red-dark);
+    }
+
+.btn-warning {
+    background: var(--orange);
+    color: #fff;
+}
+
+    .btn-warning:hover {
+        background: var(--orange-dark);
+    }
+
+/* ---------- 13. Summary pills (attendance counts) ---------- */
+.pill-stat {
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+    .pill-stat.green {
+        background: var(--green-pale);
+        color: var(--green);
+    }
+
+    .pill-stat.red {
+        background: var(--red-pale);
+        color: var(--red);
+    }
+
+    .pill-stat.yellow {
+        background: var(--yellow-pale);
+        color: var(--yellow-text);
+    }
+
+    .pill-stat.grey {
+        background: var(--bg);
+        color: var(--muted);
+    }
+
+/* ---------- 14. Segmented tabs ---------- */
+.tabs {
+    display: flex;
+    gap: 4px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+}
+
+.tab {
+    padding: 6px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    background: none;
+    border: 0;
+    color: var(--muted);
+    text-transform: capitalize;
+}
+
+    .tab:hover {
+        color: var(--text);
+    }
+
+    .tab.active {
+        background: var(--green);
+        color: #fff;
+    }
+
+/* ---------- 15. Calendar ---------- */
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.cal-head {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--faint);
+    padding: 8px 0;
+}
+
+.cal-day {
+    min-height: 60px;
+    border-radius: 8px;
+    padding: 6px;
+    border: 1px solid var(--border-soft);
+    background: #fafbfa;
+}
+
+    .cal-day.today {
+        border-color: var(--green);
+        background: var(--green-pale);
+    }
+
+    .cal-day .num {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--muted);
+    }
+
+    .cal-day.today .num {
+        color: var(--green);
+    }
+
+.cal-event {
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 4px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---------- 16. Link cards (admin dashboard quick links) ---------- */
+.link-card {
+    padding: 12px;
+    border-radius: var(--radius);
+    transition: background .15s;
+}
+
+    .link-card:hover {
+        background: var(--bg);
+    }
+
+/* ---------- 17. Attendance status buttons ---------- */
+.status-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #fff;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    transition: all .15s;
+}
+
+    .status-btn:hover {
+        border-color: var(--faint);
+    }
+
+    .status-btn.present.selected {
+        background: var(--green);
+        color: #fff;
+        border-color: var(--green);
+    }
+
+    .status-btn.absent.selected {
+        background: var(--red);
+        color: #fff;
+        border-color: var(--red);
+    }
+
+    .status-btn.late.selected {
+        background: var(--orange);
+        color: #fff;
+        border-color: var(--orange);
+    }
+
+/* ---------- 18. Search box and suggestions (Behavioural) ---------- */
+.search-wrap {
+    position: relative;
+}
+
+    .search-wrap .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--faint);
+        pointer-events: none;
+    }
+
+.suggest-box {
+    margin-top: 4px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+    overflow: hidden;
+}
+
+.suggest-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 14px;
+    background: #fff;
+    color: var(--text);
+    border: 0;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+    .suggest-item:last-child {
+        border-bottom: 0;
+    }
+
+    .suggest-item:hover {
+        background: var(--bg);
+    }
+
+.suggest-empty {
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--faint);
+}
+
+.pts-pos {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--green);
+}
+
+.pts-neg {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--red);
+}
+
+/* ---------- 19. Behavioural points (offence sheet) ---------- */
+.beh-layout {
+    display: grid;
+    grid-template-columns: minmax(300px, 380px) 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 1100px) {
+    .beh-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.level-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.level-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    transition: all .15s;
+}
+
+    .level-btn strong {
+        font-size: 14px;
+    }
+
+    .level-btn span {
+        font-size: 11px;
+    }
+
+    .level-btn:hover {
+        border-color: var(--ring);
+    }
+
+    .level-btn.active {
+        background: var(--green);
+        border-color: var(--green);
+        color: #fff;
+    }
+
+.sheet-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    padding: 10px 20px;
+    background: var(--bg);
+    font-size: 12px;
+    color: var(--text);
+}
+
+table.sheet {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.sheet th {
+    background: var(--green);
+    color: #fff;
+    text-align: left;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.sheet td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+    .sheet td.code {
+        font-weight: 700;
+        width: 48px;
+    }
+
+.sheet-cell {
+    border-left: 1px solid var(--border-soft);
+    width: 110px;
+    min-width: 110px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+    .sheet-cell.filled {
+        background: var(--orange-pale);
+    }
+
+.lvl td {
+    padding: 6px 8px;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.lvl-inner {
+    display: flex;
+    justify-content: space-between;
+}
+
+.lvl-1 td {
+    background: #e8f4ec;
+}
+
+.lvl-2 td {
+    background: #fdebd0;
+}
+
+.lvl-3 td {
+    background: #fbddbc;
+}
+
+.lvl-4 td {
+    background: #f8c99a;
+}
+
+.lvl-5 td {
+    background: #f4ac72;
+}
+
+/* ---------- 20. Events and year plan kinds ---------- */
+.type-event {
+    background: var(--orange-pale);
+    color: var(--orange-dark);
+}
+
+.type-yearplan {
+    background: var(--green-pale);
+    color: var(--green);
+}
+
+.dot-event {
+    background: var(--orange);
+}
+
+.dot-yearplan {
+    background: var(--green);
+}
+
+/* ---------- 21. Users and Profile ---------- */
+.role-administrator {
+    background: var(--green-pale);
+    color: var(--green);
+}
+
+.role-teacher {
+    background: var(--orange-pale);
+    color: var(--orange-dark);
+}
+
+.role-parent {
+    background: var(--purple-pale);
+    color: var(--purple);
+}
+
+.role-learner {
+    background: var(--yellow-pale);
+    color: var(--yellow-text);
+}
+
+.field-box {
+    background: var(--bg);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--text);
 }

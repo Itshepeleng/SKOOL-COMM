@@ -1,0 +1,99 @@
+@page
+@model SkoolComm.Web.Pages.AttendanceModel
+@{
+  ViewData["Title"] = "Record Attendance";
+  Layout = "/Pages/Shared/_Layout.cshtml";
+}
+
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <h2>Record Attendance — @Model.Grade</h2>
+      <div class="small-muted">@Model.Date.ToString("MMMM d, yyyy")</div>
+    </div>
+    <div>
+      <form method="post" asp-page-handler="MarkAll" style="display:inline">
+        <button type="submit" name="mark" value="present" class="btn">All Present</button>
+      </form>
+      <form method="post" asp-page-handler="MarkAll" style="display:inline">
+        <button type="submit" name="mark" value="" class="btn">Clear</button>
+      </form>
+    </div>
+  </div>
+
+  @if (!string.IsNullOrEmpty(Model.StatusMessage))
+  {
+    <div style="margin-top:12px" class="card">@Model.StatusMessage</div>
+  }
+
+  <form method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="summary-row" style="margin-top:12px">
+      <div class="pill" style="background:#e8f4ec;color:#1a5c2e">Present: <strong id="summaryPresent">0</strong></div>
+      <div class="pill" style="background:#fee2e2;color:#dc2626">Absent: <strong id="summaryAbsent">0</strong></div>
+      <div class="pill" style="background:#fef3cd;color:#a07000">Late: <strong id="summaryLate">0</strong></div>
+      <div class="pill" style="background:#f2f4f2;color:#5a7a62">Not Marked: <strong id="summaryNotMarked">0</strong></div>
+    </div>
+
+    <table class="table attendance-table" style="margin-top:12px">
+      <thead>
+        <tr><th style="width:40px">#</th><th>Learner</th><th class="center">Attendance</th></tr>
+      </thead>
+      <tbody>
+        @for (var i = 0; i < Model.Learners.Count; i++)
+        {
+          var l = Model.Learners[i];
+        <tr class="attendance-row" data-id="@l.Id" data-selected="@l.Status">
+          <td>@(i + 1)</td>
+          <td>@l.Name</td>
+          <td style="text-align:center" class="attendance-controls">
+            <button type="button" class="pill" data-status="present">Present</button>
+            <button type="button" class="pill" data-status="absent">Absent</button>
+            <button type="button" class="pill" data-status="late">Late</button>
+            <input type="hidden" name="status_@l.Id" value="@l.Status" />
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px">
+      <a class="btn" asp-page="/Dashboard">Cancel</a>
+      <button type="submit" class="btn btn-primary">Save Attendance</button>
+    </div>
+  </form>
+</div>
+
+@section Scripts {
+  <script>
+    // keep hidden inputs in sync when JS toggles statuses
+    (function () {
+      function syncHiddenInputs() {
+        document.querySelectorAll('.attendance-row').forEach(function (r) {
+          var id = r.getAttribute('data-id');
+          var status = r.getAttribute('data-selected') || '';
+          var hidden = r.querySelector('input[type=hidden]');
+          if (hidden) hidden.value = status;
+          r.querySelectorAll('[data-status]').forEach(function (b) { b.classList.toggle('selected', status && b.getAttribute('data-status') === status); });
+        });
+      }
+
+      // hook into global init if present
+      if (window.SkoolComm && typeof window.SkoolComm.initAttendance === 'function') {
+        window.SkoolComm.initAttendance();
+        // sync on init
+        setTimeout(syncHiddenInputs, 50);
+      }
+
+      // watch for clicks that change data-selected (the site script does this)
+      document.addEventListener('click', function (e) {
+        if (!e.target) return;
+        if (e.target.matches('.attendance-controls [data-status]')) {
+          // after a tick, sync inputs
+          setTimeout(syncHiddenInputs, 10);
+        }
+      });
+    })();
+  </script>
+}
