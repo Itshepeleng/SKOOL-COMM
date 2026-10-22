@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../app/school_theme.dart';
 
 class NewsScreen extends StatelessWidget {
-  const NewsScreen({super.key});
+  const NewsScreen({required this.onBack, super.key});
+
+  final VoidCallback onBack;
 
   static const _items = [
     (
@@ -25,7 +27,14 @@ class NewsScreen extends StatelessWidget {
     return SafeArea(
       child: Column(
         children: [
-          AppBar(title: const Text('Latest News')),
+          AppBar(
+            title: const Text('Latest News'),
+            leading: IconButton(
+              tooltip: 'Back',
+              onPressed: onBack,
+              icon: const Icon(Icons.arrow_back),
+            ),
+          ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(14),
@@ -56,7 +65,8 @@ class NewsScreen extends StatelessWidget {
                         child: Text(item.$2),
                       ),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => _showArticle(context, item.$1, item.$2, item.$3),
+                      onTap: () =>
+                          _showArticle(context, item.$1, item.$2, item.$3),
                     ),
                   ),
               ],

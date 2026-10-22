@@ -8,8 +8,38 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SkoolComm.Application\SkoolComm.Application.csproj" />
-    <ProjectReference Include="..\SkoolComm.Infrastructure\SkoolComm.Infrastructure.csproj" />
+    <Reference Include="SkoolComm.Domain">
+      <HintPath>..\lib\SkoolComm.Domain.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SkoolComm.Application">
+      <HintPath>..\lib\SkoolComm.Application.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SkoolComm.Infrastructure">
+      <HintPath>..\lib\SkoolComm.Infrastructure.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Supabase">
+      <HintPath>..\lib\Supabase.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Supabase.Gotrue">
+      <HintPath>..\lib\Supabase.Gotrue.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Supabase.Realtime">
+      <HintPath>..\lib\Supabase.Realtime.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Supabase.Storage">
+      <HintPath>..\lib\Supabase.Storage.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Supabase.Postgrest">
+      <HintPath>..\lib\Supabase.Postgrest.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

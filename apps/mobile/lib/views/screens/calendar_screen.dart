@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/school_theme.dart';
 import '../../models/school_models.dart';
 import '../../viewmodels/calendar_view_model.dart';
 
 class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({super.key});
+  const CalendarScreen({this.client, this.initialMonth, super.key});
+
+  final SupabaseClient? client;
+  final DateTime? initialMonth;
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
@@ -17,7 +21,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    _viewModel = CalendarViewModel();
+    _viewModel = CalendarViewModel(
+      client: widget.client,
+      initialMonth: widget.initialMonth,
+    );
+    _viewModel.loadEvents();
   }
 
   @override
@@ -41,13 +49,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           (index) =>
               DateTime(firstDay.year, firstDay.month, index - offset + 1),
         );
-        final eventsForMonth = SchoolEvent.samples
-            .where(
-              (event) =>
-                  event.date.year == firstDay.year &&
-                  event.date.month == firstDay.month,
-            )
-            .toList();
+        final eventsForSelectedDate = _viewModel.eventsForSelectedDate;
 
         return Scaffold(
           appBar: AppBar(
@@ -123,9 +125,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         date,
                         _viewModel.selectedDate,
                       );
-                      final hasEvent = SchoolEvent.samples.any(
-                        (event) => DateUtils.isSameDay(event.date, date),
-                      );
+                      final hasEvent = _viewModel.hasEventOn(date);
                       return InkWell(
                         customBorder: const CircleBorder(),
                         onTap: inMonth
@@ -174,13 +174,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    DateUtils.isSameDay(
-                          _viewModel.selectedDate,
-                          DateTime(2026, 9, 20),
-                        )
-                        ? 'Upcoming Events'
-                        : 'Events · ${_viewModel.selectedDate.day} '
-                              '${_monthName(_viewModel.selectedDate.month)}',
+                    'Events · ${_viewModel.selectedDate.day} '
+                    '${_monthName(_viewModel.selectedDate.month)}',
                     style: const TextStyle(
                       color: SchoolTheme.darkGreen,
                       fontSize: 18,
@@ -188,19 +183,64 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  if (eventsForMonth.isEmpty)
+                  if (_viewModel.isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (_viewModel.errorMessage != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _viewModel.errorMessage!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: _viewModel.loadEvents,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    )
+                  else if (eventsForSelectedDate.isEmpty)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 18),
                       child: Text(
-                        'No events scheduled for this month.',
+                        'No events scheduled for this date.',
                         style: TextStyle(color: SchoolTheme.muted),
                       ),
                     ),
-                  for (final event in eventsForMonth)
+                  for (final event in eventsForSelectedDate)
                     _EventRow(
                       event: event,
                       onTap: () => _viewModel.selectDate(event.date),
                     ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Upcoming Events',
+                    style: TextStyle(
+                      color: SchoolTheme.darkGreen,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (!_viewModel.isLoading &&
+                      _viewModel.errorMessage == null &&
+                      _viewModel.upcomingEvents.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 18),
+                      child: Text(
+                        'No upcoming events.',
+                        style: TextStyle(color: SchoolTheme.muted),
+                      ),
+                    ),
+                  if (!_viewModel.isLoading && _viewModel.errorMessage == null)
+                    for (final event in _viewModel.upcomingEvents)
+                      _EventRow(
+                        event: event,
+                        onTap: () => _viewModel.selectEventDate(event.date),
+                      ),
                 ],
               ),
             ),
@@ -295,12 +335,33 @@ class _EventRow extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Text(
-                    event.title,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        event.title,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (event.description.isNotEmpty)
+                        Text(
+                          event.description,
+                          style: const TextStyle(
+                            color: SchoolTheme.muted,
+                            fontSize: 11,
+                          ),
+                        )
+                      else if (event.location.isNotEmpty)
+                        Text(
+                          event.location,
+                          style: const TextStyle(
+                            color: SchoolTheme.muted,
+                            fontSize: 11,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 Text(

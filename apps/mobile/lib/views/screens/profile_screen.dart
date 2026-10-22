@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../app/school_theme.dart';
 import '../../viewmodels/auth_view_model.dart';
@@ -7,6 +8,7 @@ import 'welcome_screen.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({
     required this.viewModel,
+    required this.onBack,
     required this.onOpenSettings,
     required this.onOpenChildren,
     required this.onAddChild,
@@ -14,6 +16,7 @@ class ProfileScreen extends StatelessWidget {
   });
 
   final AuthViewModel viewModel;
+  final VoidCallback onBack;
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenChildren;
   final VoidCallback onAddChild;
@@ -41,6 +44,11 @@ class ProfileScreen extends StatelessWidget {
             children: [
               AppBar(
                 title: const Text('Profile'),
+                leading: IconButton(
+                  tooltip: 'Back',
+                  onPressed: onBack,
+                  icon: const Icon(Icons.arrow_back),
+                ),
                 actions: [
                   IconButton(
                     tooltip: 'Settings',
@@ -53,15 +61,78 @@ class ProfileScreen extends StatelessWidget {
                 child: ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
-                    const CircleAvatar(
-                      radius: 42,
-                      backgroundColor: SchoolTheme.paleGreen,
-                      child: Icon(
-                        Icons.person,
-                        size: 48,
-                        color: SchoolTheme.green,
+                    Center(
+                      child: InkWell(
+                        onTap: viewModel.isLoadingAvatar
+                            ? null
+                            : () => _pickProfilePhoto(context),
+                        customBorder: const CircleBorder(),
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 42,
+                              backgroundColor: SchoolTheme.paleGreen,
+                              backgroundImage: viewModel.avatarUrl == null
+                                  ? null
+                                  : NetworkImage(viewModel.avatarUrl!),
+                              child: viewModel.avatarUrl == null
+                                  ? Text(
+                                      name.isEmpty
+                                          ? 'P'
+                                          : name[0].toUpperCase(),
+                                      style: const TextStyle(
+                                        color: SchoolTheme.green,
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: CircleAvatar(
+                                radius: 15,
+                                backgroundColor: SchoolTheme.green,
+                                child: viewModel.isLoadingAvatar
+                                    ? const SizedBox(
+                                        width: 15,
+                                        height: 15,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.camera_alt,
+                                        size: 15,
+                                        color: Colors.white,
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
+                    TextButton.icon(
+                      onPressed: viewModel.isLoadingAvatar
+                          ? null
+                          : () => _pickProfilePhoto(context),
+                      icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                      label: Text(
+                        viewModel.avatarUrl == null
+                            ? 'Add profile picture'
+                            : 'Change profile picture',
+                      ),
+                    ),
+                    if (viewModel.avatarErrorMessage != null)
+                      Text(
+                        viewModel.avatarErrorMessage!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
                     const SizedBox(height: 12),
                     Text(
                       name,
@@ -124,16 +195,6 @@ class ProfileScreen extends StatelessWidget {
                       icon: const Icon(Icons.edit_outlined),
                       label: const Text('Edit Contact Information'),
                     ),
-                    const SizedBox(height: 14),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: onAddChild,
-                        icon: const Icon(Icons.person_add_alt_1),
-                        label: const Text('Add Child'),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
                     Card(
                       color: SchoolTheme.paleGreen,
                       elevation: 0,
@@ -155,7 +216,15 @@ class ProfileScreen extends StatelessWidget {
                         onTap: onOpenChildren,
                       ),
                     ),
-                    const SizedBox(height: 22),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: onAddChild,
+                        icon: const Icon(Icons.person_add_alt_1, size: 18),
+                        label: const Text('Add Child'),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                     OutlinedButton.icon(
                       onPressed: () => _signOut(context),
                       icon: const Icon(Icons.logout),
@@ -173,6 +242,40 @@ class ProfileScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _pickProfilePhoto(BuildContext context) async {
+    try {
+      final image = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 512,
+        maxHeight: 512,
+      );
+      if (image == null) return;
+
+      final contentType =
+          image.mimeType ??
+          switch (image.name.toLowerCase().split('.').last) {
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            _ => 'image/jpeg',
+          };
+      final uploaded = await viewModel.uploadAvatar(
+        bytes: await image.readAsBytes(),
+        contentType: contentType,
+      );
+      if (uploaded && context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Profile photo updated.')));
+      }
+    } on Exception catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to select a profile photo: $error')),
+      );
+    }
   }
 
   Future<void> _editContact(

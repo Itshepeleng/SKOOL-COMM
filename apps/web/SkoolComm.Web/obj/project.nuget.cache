@@ -1,31 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "2ccDEqbdN6Y=",
-  "success": false,
-  "projectFilePath": "C:\\Users\\LusandaM\\source\\repos\\SKOOL-COMM\\apps\\web\\SkoolComm.Web\\SkoolComm.Web.csproj",
+  "dgSpecHash": "2mL2w8jsq0Q=",
+  "success": true,
+  "projectFilePath": "D:\\SKOOL-COMM\\apps\\web\\SkoolComm.Web\\SkoolComm.Web.csproj",
   "expectedPackageFiles": [],
-  "logs": [
-    {
-      "code": "NU1104",
-      "level": "Error",
-      "message": "Unable to find project 'C:\\Users\\LusandaM\\source\\repos\\SKOOL-COMM\\apps\\web\\SkoolComm.Application\\SkoolComm.Application.csproj'. Check that the project reference is valid and that the project file exists.",
-      "projectPath": "C:\\Users\\LusandaM\\source\\repos\\SKOOL-COMM\\apps\\web\\SkoolComm.Web\\SkoolComm.Web.csproj",
-      "filePath": "C:\\Users\\LusandaM\\source\\repos\\SKOOL-COMM\\apps\\web\\SkoolComm.Web\\SkoolComm.Web.csproj",
-      "libraryId": "C:\\Users\\LusandaM\\source\\repos\\SKOOL-COMM\\apps\\web\\SkoolComm.Application\\SkoolComm.Application.csproj",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    },
-    {
-      "code": "NU1104",
-      "level": "Error",
-      "message": "Unable to find project 'C:\\Users\\LusandaM\\source\\repos\\SKOOL-COMM\\apps\\web\\SkoolComm.Infrastructure\\SkoolComm.Infrastructure.csproj'. Check that the project reference is valid and that the project file exists.",
-      "projectPath": "C:\\Users\\LusandaM\\source\\repos\\SKOOL-COMM\\apps\\web\\SkoolComm.Web\\SkoolComm.Web.csproj",
-      "filePath": "C:\\Users\\LusandaM\\source\\repos\\SKOOL-COMM\\apps\\web\\SkoolComm.Web\\SkoolComm.Web.csproj",
-      "libraryId": "C:\\Users\\LusandaM\\source\\repos\\SKOOL-COMM\\apps\\web\\SkoolComm.Infrastructure\\SkoolComm.Infrastructure.csproj",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    }
-  ]
+  "logs": []
 }

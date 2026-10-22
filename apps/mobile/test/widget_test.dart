@@ -2,16 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/viewmodels/attendance_view_model.dart';
 import 'package:mobile/viewmodels/auth_view_model.dart';
+import 'package:mobile/viewmodels/calendar_view_model.dart';
 import 'package:mobile/viewmodels/dashboard_view_model.dart';
 import 'package:mobile/viewmodels/learner_view_model.dart';
 import 'package:mobile/models/learner_profile.dart';
+import 'package:mobile/models/learner_records.dart';
+import 'package:mobile/models/school_announcement.dart';
+import 'package:mobile/models/school_models.dart';
 import 'package:mobile/views/screens/behavioral_points_screen.dart';
 import 'package:mobile/views/screens/calendar_screen.dart';
 import 'package:mobile/views/screens/attendance_screen.dart';
 import 'package:mobile/views/screens/child_profile_screen.dart';
 import 'package:mobile/views/screens/my_children_screen.dart';
+import 'package:mobile/views/screens/news_screen.dart';
 import 'package:mobile/views/screens/profile_screen.dart';
 import 'package:mobile/views/screens/reminders_screen.dart';
+import 'package:mobile/views/screens/terms_and_conditions_screen.dart';
 import 'package:mobile/views/screens/welcome_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -33,6 +39,151 @@ void main() {
     expect(learner.relationship, 'Mother');
   });
 
+  test('learner attendance and behaviour records parse Supabase RPC rows', () {
+    final attendance = LearnerAttendanceRecord.fromJson({
+      'attendance_date': '2026-10-21',
+      'status': 'absent',
+    });
+    final point = PointRecord.fromJson({
+      'pointid': 5,
+      'offencecode': 'B2',
+      'level': 2,
+      'offencename': 'Late for class',
+      'points': -10,
+      'reason': 'Arrived after the lesson started.',
+      'daterecorded': '2026-10-21T08:30:00',
+      'teacher_name': 'Ms Nevusa',
+      'teacher_initials': 'NN',
+    });
+
+    expect(attendance.date, DateTime(2026, 10, 21));
+    expect(attendance.status, 'Absent');
+    expect(point.pointId, 5);
+    expect(point.title, 'Late for class');
+    expect(point.detail, 'Level 2 · B2');
+    expect(point.teacherName, 'Ms Nevusa');
+  });
+
+  test('school calendar event parses admin event and multi-day plan rows', () {
+    final event = SchoolEvent.fromJson({
+      'id': 12,
+      'kind': 'event',
+      'title': 'November Assembly',
+      'description': 'End-of-year assembly',
+      'start_date': '2026-11-12T08:30:00',
+      'end_date': '2026-11-12T08:30:00',
+      'location': 'School Hall',
+    });
+    final yearPlan = SchoolEvent.fromJson({
+      'id': 13,
+      'kind': 'yearplan',
+      'title': 'Examinations',
+      'description': 'Final examinations',
+      'start_date': '2026-11-16T00:00:00',
+      'end_date': '2026-11-20T00:00:00',
+      'location': '',
+    });
+
+    expect(event.date, DateTime(2026, 11, 12, 8, 30));
+    expect(event.time, '08:30');
+    expect(event.location, 'School Hall');
+    expect(yearPlan.endDate, DateTime(2026, 11, 20));
+    expect(yearPlan.time, isEmpty);
+  });
+
+  test('school announcement parses web-published parent messages', () {
+    final announcement = SchoolAnnouncement.fromJson({
+      'announcement_id': 31,
+      'title': 'November Assembly',
+      'content': 'The assembly begins at 08:30.',
+      'date_posted': '2026-10-22T08:30:00Z',
+      'target_audience': 'All Parents',
+    });
+
+    expect(announcement.id, 31);
+    expect(announcement.title, 'November Assembly');
+    expect(announcement.content, 'The assembly begins at 08:30.');
+    expect(announcement.targetAudience, 'All Parents');
+  });
+
+  test('calendar includes admin events across their scheduled date range', () {
+    final viewModel = CalendarViewModel(initialMonth: DateTime(2026, 11))
+      ..events = [
+        SchoolEvent.fromJson({
+          'id': 13,
+          'kind': 'yearplan',
+          'title': 'Examinations',
+          'description': 'Final examinations',
+          'start_date': '2026-11-16T00:00:00',
+          'end_date': '2026-11-20T00:00:00',
+          'location': '',
+        }),
+      ];
+    addTearDown(viewModel.dispose);
+
+    expect(viewModel.eventsForVisibleMonth, hasLength(1));
+    expect(viewModel.hasEventOn(DateTime(2026, 11, 18)), isTrue);
+    expect(viewModel.hasEventOn(DateTime(2026, 11, 21)), isFalse);
+  });
+
+  test('upcoming events excludes past events and sorts by start date', () {
+    final today = DateUtils.dateOnly(DateTime.now());
+    final viewModel = CalendarViewModel()
+      ..events = [
+        SchoolEvent(
+          id: 1,
+          kind: 'event',
+          date: today.subtract(const Duration(days: 4)),
+          endDate: today.subtract(const Duration(days: 4)),
+          title: 'Past event',
+          description: '',
+          time: '',
+          location: '',
+          colorValue: 0,
+        ),
+        SchoolEvent(
+          id: 2,
+          kind: 'yearplan',
+          date: today.add(const Duration(days: 5)),
+          endDate: today.add(const Duration(days: 5)),
+          title: 'Later event',
+          description: '',
+          time: '',
+          location: '',
+          colorValue: 0,
+        ),
+        SchoolEvent(
+          id: 3,
+          kind: 'event',
+          date: today.subtract(const Duration(days: 1)),
+          endDate: today.add(const Duration(days: 1)),
+          title: 'Current multi-day event',
+          description: '',
+          time: '',
+          location: '',
+          colorValue: 0,
+        ),
+        SchoolEvent(
+          id: 4,
+          kind: 'event',
+          date: today.add(const Duration(days: 2)),
+          endDate: today.add(const Duration(days: 2)),
+          title: 'Soon event',
+          description: '',
+          time: '',
+          location: '',
+          colorValue: 0,
+        ),
+      ];
+    addTearDown(viewModel.dispose);
+
+    expect(viewModel.upcomingEvents.map((event) => event.title), [
+      'Current multi-day event',
+      'Soon event',
+      'Later event',
+    ]);
+  });
+
   testWidgets('welcome screen offers sign in and account creation', (
     tester,
   ) async {
@@ -41,6 +192,17 @@ void main() {
     expect(find.text('Skool-Comm'), findsOneWidget);
     expect(find.text('Login'), findsOneWidget);
     expect(find.text('Create Account'), findsOneWidget);
+    expect(find.text('Terms & Conditions'), findsOneWidget);
+
+    await tester.tap(find.text('Terms & Conditions'));
+    await tester.pumpAndSettle();
+    expect(find.byType(TermsAndConditionsScreen), findsOneWidget);
+    expect(find.text('1. About these terms'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('10. Applicable law and contact'),
+      300,
+    );
+    expect(find.text('10. Applicable law and contact'), findsOneWidget);
   });
 
   testWidgets('profile editor offers all guardian relationships', (
@@ -61,6 +223,7 @@ void main() {
         home: Scaffold(
           body: ProfileScreen(
             viewModel: authViewModel,
+            onBack: () {},
             onOpenSettings: () {},
             onOpenChildren: () {},
             onAddChild: () => addChildTapped = true,
@@ -69,6 +232,7 @@ void main() {
       ),
     );
 
+    expect(find.byTooltip('Back'), findsOneWidget);
     await tester.tap(find.text('Edit Contact Information'));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(DropdownButtonFormField<String>).first);
@@ -86,6 +250,7 @@ void main() {
     expect(find.text('Edit Information'), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Add Child'), 300);
     expect(find.text('Add Child'), findsOneWidget);
     await tester.tap(find.text('Add Child'));
     expect(addChildTapped, isTrue);
@@ -108,7 +273,7 @@ void main() {
         home: MyChildrenScreen(
           viewModel: learnerViewModel,
           onOpenAttendance: (_) {},
-          onOpenPoints: () {},
+          onOpenPoints: (_) {},
           onSelectTab: (_) {},
           onAddChild: () {},
         ),
@@ -155,7 +320,7 @@ void main() {
         home: MyChildrenScreen(
           viewModel: learnerViewModel,
           onOpenAttendance: (_) {},
-          onOpenPoints: () {},
+          onOpenPoints: (_) {},
           onSelectTab: (_) {},
           onAddChild: () {},
         ),
@@ -166,6 +331,36 @@ void main() {
     expect(find.text('Ava Mokoena'), findsOneWidget);
     expect(find.text('Grade 3 · B · Term 3, 2026'), findsOneWidget);
   });
+
+  test(
+    'registered learner remains selected before the parent signs in',
+    () async {
+      const child = LearnerProfile(
+        learnerId: 17,
+        firstName: 'Ava',
+        lastName: 'Mokoena',
+        grade: 'Grade 3',
+        className: 'B',
+        relationship: 'Mother',
+      );
+      final learnerViewModel = LearnerViewModel(
+        SupabaseClient(
+          'https://example.supabase.co',
+          'test-key',
+          authOptions: const AuthClientOptions(autoRefreshToken: false),
+        ),
+      )..seedRegisteredChildren([child]);
+      addTearDown(learnerViewModel.dispose);
+
+      final loaded = await learnerViewModel.loadChildren();
+      final registrationViewModel = learnerViewModel.copyForRegistration();
+      addTearDown(registrationViewModel.dispose);
+
+      expect(loaded, isTrue);
+      expect(registrationViewModel.children, [child]);
+      expect(registrationViewModel.selectedChild, child);
+    },
+  );
 
   testWidgets('my children navigation and add child actions are wired', (
     tester,
@@ -186,7 +381,7 @@ void main() {
         home: MyChildrenScreen(
           viewModel: learnerViewModel,
           onOpenAttendance: (_) {},
-          onOpenPoints: () {},
+          onOpenPoints: (_) {},
           onSelectTab: (index) => selectedTab = index,
           onAddChild: () => addChildTapped = true,
         ),
@@ -237,6 +432,14 @@ void main() {
   testWidgets('attendance screen fits a narrow mobile viewport', (
     tester,
   ) async {
+    final learnerViewModel = LearnerViewModel(
+      SupabaseClient(
+        'https://example.supabase.co',
+        'test-key',
+        authOptions: const AuthClientOptions(autoRefreshToken: false),
+      ),
+    );
+    addTearDown(learnerViewModel.dispose);
     tester.view.physicalSize = const Size(280, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -250,7 +453,17 @@ void main() {
               child: TextButton(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => const AttendanceScreen(),
+                    builder: (_) => AttendanceScreen(
+                      child: const LearnerProfile(
+                        learnerId: 17,
+                        firstName: 'Ava',
+                        lastName: 'Mokoena',
+                        grade: 'Grade 3',
+                        className: 'B',
+                        relationship: 'Mother',
+                      ),
+                      loadAttendance: (_) async => [],
+                    ),
                   ),
                 ),
                 child: const Text('Open attendance'),
@@ -263,8 +476,39 @@ void main() {
     await tester.tap(find.text('Open attendance'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Term 3 Summary'), findsOneWidget);
+    expect(find.text('Attendance Summary'), findsOneWidget);
+    expect(find.text('No attendance records yet.'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('attendance loading stops and offers retry after a failure', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AttendanceScreen(
+          child: const LearnerProfile(
+            learnerId: 17,
+            firstName: 'Ava',
+            lastName: 'Mokoena',
+            grade: 'Grade 3',
+            className: 'B',
+            relationship: 'Mother',
+          ),
+          loadAttendance: (_) async => throw StateError('backend unavailable'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(
+      find.text(
+        'Unable to load attendance records: Bad state: backend unavailable',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Retry'), findsOneWidget);
   });
 
   test('weekly attendance report is generated as a PDF', () async {
@@ -273,6 +517,13 @@ void main() {
       grade: 'Grade 5B',
       now: DateTime(2026, 10, 21),
     );
+    viewModel.setAttendanceRecords([
+      LearnerAttendanceRecord(date: DateTime(2026, 10, 19), status: 'Present'),
+      LearnerAttendanceRecord(date: DateTime(2026, 10, 20), status: 'Present'),
+      LearnerAttendanceRecord(date: DateTime(2026, 10, 21), status: 'Absent'),
+      LearnerAttendanceRecord(date: DateTime(2026, 10, 22), status: 'Present'),
+      LearnerAttendanceRecord(date: DateTime(2026, 10, 23), status: 'Present'),
+    ]);
     addTearDown(viewModel.dispose);
 
     final pdfBytes = await viewModel.generateWeeklySummaryPdf();
@@ -304,12 +555,49 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: BehavioralPointsScreen(viewModel: viewModel)),
+        home: Scaffold(
+          body: BehavioralPointsScreen(
+            viewModel: viewModel,
+            onBack: () {},
+            children: const [
+              LearnerProfile(
+                learnerId: 17,
+                firstName: 'Ava',
+                lastName: 'Mokoena',
+                grade: 'Grade 3',
+                className: 'B',
+                relationship: 'Mother',
+              ),
+            ],
+            selectedChild: const LearnerProfile(
+              learnerId: 17,
+              firstName: 'Ava',
+              lastName: 'Mokoena',
+              grade: 'Grade 3',
+              className: 'B',
+              relationship: 'Mother',
+            ),
+            onSelectChild: (_) {},
+            records: [
+              PointRecord(
+                date: DateTime.now(),
+                title: 'Disrupting class / not following instructions',
+                detail: 'Level 2 · Infringement',
+                points: -10,
+                teacherInitials: 'NP',
+                teacherName: 'Ms N. P. Nevusa',
+                teacherNote: 'Repeatedly talking while teacher was explaining.',
+              ),
+            ],
+            isLoading: false,
+            errorMessage: null,
+          ),
+        ),
       ),
     );
 
     expect(find.text('Weekly Summary'), findsOneWidget);
-    expect(find.text('No points recorded this week.'), findsOneWidget);
+    expect(find.text('1 point record this week.'), findsOneWidget);
 
     await tester.tap(
       find.text('Disrupting class / not following instructions'),
@@ -326,15 +614,29 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
     expect(find.text('Behavioural points'), findsOneWidget);
+    expect(find.byTooltip('Back to Home'), findsOneWidget);
   });
 
   testWidgets('year plan calendar changes visible month', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: CalendarScreen()));
+    await tester.pumpWidget(
+      MaterialApp(home: CalendarScreen(initialMonth: DateTime(2026, 9))),
+    );
 
     expect(find.text('September 2026'), findsOneWidget);
     await tester.tap(find.byTooltip('Next month'));
     await tester.pumpAndSettle();
     expect(find.text('October 2026'), findsOneWidget);
+  });
+
+  testWidgets('news page has a back action', (tester) async {
+    var wentBack = false;
+    await tester.pumpWidget(
+      MaterialApp(home: NewsScreen(onBack: () => wentBack = true)),
+    );
+
+    expect(find.byTooltip('Back'), findsOneWidget);
+    await tester.tap(find.byTooltip('Back'));
+    expect(wentBack, isTrue);
   });
 
   testWidgets('reminders calendar action opens the school year plan', (
@@ -345,10 +647,12 @@ void main() {
         home: Builder(
           builder: (context) => Scaffold(
             body: RemindersScreen(
+              onBack: () {},
               onViewCalendar: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => const CalendarScreen(),
+                    builder: (_) =>
+                        CalendarScreen(initialMonth: DateTime(2026, 9)),
                   ),
                 );
               },
@@ -359,6 +663,8 @@ void main() {
     );
 
     await tester.ensureVisible(find.text('View school calendar'));
+
+    expect(find.byTooltip('Back'), findsOneWidget);
     await tester.tap(find.text('View school calendar'));
     await tester.pumpAndSettle();
 

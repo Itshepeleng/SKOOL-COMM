@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../viewmodels/auth_view_model.dart';
-import '../../viewmodels/learner_view_model.dart';
 import '../widgets/school_widgets.dart';
-import 'child_profile_screen.dart';
 import 'create_account_screen.dart';
 import 'main_navigation_screen.dart';
 
@@ -44,22 +42,6 @@ class _LoginScreenState extends State<LoginScreen> {
       password: _passwordController.text,
     );
     if (!mounted || response?.session == null) return;
-    final learnerViewModel = LearnerViewModel(Supabase.instance.client);
-    final loaded = await learnerViewModel.loadChildren();
-    if (!mounted) {
-      learnerViewModel.dispose();
-      return;
-    }
-    if (loaded && learnerViewModel.children.isEmpty) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute<void>(
-          builder: (_) => ChildProfileScreen(viewModel: learnerViewModel),
-        ),
-        (_) => false,
-      );
-      return;
-    }
-    learnerViewModel.dispose();
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute<void>(builder: (_) => const MainNavigationScreen()),
       (_) => false,

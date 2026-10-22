@@ -4,6 +4,7 @@ import '../../app/school_theme.dart';
 import '../widgets/school_widgets.dart';
 import 'create_account_screen.dart';
 import 'login_screen.dart';
+import 'terms_and_conditions_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -79,6 +80,11 @@ class WelcomeScreen extends StatelessWidget {
                         ),
                         child: const Text('Create Account'),
                       ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () => TermsAndConditionsScreen.open(context),
+                      child: const Text('Terms & Conditions'),
                     ),
                   ],
                 ),

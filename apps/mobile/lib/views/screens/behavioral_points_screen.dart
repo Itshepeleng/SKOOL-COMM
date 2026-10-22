@@ -1,14 +1,32 @@
 import 'package:flutter/material.dart';
 
 import '../../app/school_theme.dart';
+import '../../models/learner_profile.dart';
 import '../../models/school_models.dart';
 import '../../viewmodels/attendance_view_model.dart';
 import '../../viewmodels/dashboard_view_model.dart';
 
 class BehavioralPointsScreen extends StatelessWidget {
-  const BehavioralPointsScreen({required this.viewModel, super.key});
+  const BehavioralPointsScreen({
+    required this.viewModel,
+    required this.onBack,
+    required this.children,
+    required this.selectedChild,
+    required this.onSelectChild,
+    required this.records,
+    required this.isLoading,
+    required this.errorMessage,
+    super.key,
+  });
 
   final DashboardViewModel viewModel;
+  final VoidCallback onBack;
+  final List<LearnerProfile> children;
+  final LearnerProfile? selectedChild;
+  final ValueChanged<LearnerProfile> onSelectChild;
+  final List<PointRecord> records;
+  final bool isLoading;
+  final String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -22,22 +40,47 @@ class BehavioralPointsScreen extends StatelessWidget {
             onBack: viewModel.clearSelectedPoint,
           );
         }
-        return _PointList(viewModel: viewModel);
+        return _PointList(
+          viewModel: viewModel,
+          onBack: onBack,
+          children: children,
+          selectedChild: selectedChild,
+          onSelectChild: onSelectChild,
+          records: records,
+          isLoading: isLoading,
+          errorMessage: errorMessage,
+        );
       },
     );
   }
 }
 
 class _PointList extends StatelessWidget {
-  const _PointList({required this.viewModel});
+  const _PointList({
+    required this.viewModel,
+    required this.onBack,
+    required this.children,
+    required this.selectedChild,
+    required this.onSelectChild,
+    required this.records,
+    required this.isLoading,
+    required this.errorMessage,
+  });
 
   final DashboardViewModel viewModel;
+  final VoidCallback onBack;
+  final List<LearnerProfile> children;
+  final LearnerProfile? selectedChild;
+  final ValueChanged<LearnerProfile> onSelectChild;
+  final List<PointRecord> records;
+  final bool isLoading;
+  final String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
     final weekStart = AttendanceViewModel.weekStartFor(DateTime.now());
     final weekEnd = weekStart.add(const Duration(days: 7));
-    final weeklyRecords = PointRecord.samples.where((record) {
+    final weeklyRecords = records.where((record) {
       return !record.date.isBefore(weekStart) && record.date.isBefore(weekEnd);
     }).toList();
     final positive = weeklyRecords
@@ -47,7 +90,7 @@ class _PointList extends StatelessWidget {
         .where((record) => record.points < 0)
         .fold<int>(0, (sum, record) => sum + record.points);
 
-    final records = PointRecord.samples.where((record) {
+    final filteredRecords = records.where((record) {
       return switch (viewModel.pointFilter) {
         PointFilter.all => true,
         PointFilter.positive => record.points > 0,
@@ -58,7 +101,14 @@ class _PointList extends StatelessWidget {
     return SafeArea(
       child: Column(
         children: [
-          AppBar(title: const Text('Behavioural points')),
+          AppBar(
+            title: const Text('Behavioural points'),
+            leading: IconButton(
+              tooltip: 'Back to Home',
+              onPressed: onBack,
+              icon: const Icon(Icons.arrow_back),
+            ),
+          ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -69,153 +119,192 @@ class _PointList extends StatelessWidget {
                     color: SchoolTheme.paleOrange,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
                       CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(Icons.person, color: SchoolTheme.green),
                       ),
                       SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Thabo Mokoena',
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                          Text(
-                            'Grade 5B  ·  Term 3, 2026',
-                            style: TextStyle(
-                              color: SchoolTheme.muted,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
+                      Expanded(
+                        child: children.isEmpty
+                            ? const Text('No linked learner profiles.')
+                            : DropdownButton<int>(
+                                isExpanded: true,
+                                value: selectedChild?.learnerId,
+                                hint: const Text('Select a learner'),
+                                items: [
+                                  for (final child in children)
+                                    if (child.learnerId != null)
+                                      DropdownMenuItem(
+                                        value: child.learnerId,
+                                        child: Text(
+                                          '${child.fullName} · ${child.grade} ${child.className}',
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                ],
+                                onChanged: (learnerId) {
+                                  for (final child in children) {
+                                    if (child.learnerId == learnerId) {
+                                      onSelectChild(child);
+                                      break;
+                                    }
+                                  }
+                                },
+                              ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: SchoolTheme.paleGreen,
-                    borderRadius: BorderRadius.circular(12),
+                if (isLoading)
+                  const Padding(
+                    padding: EdgeInsets.all(18),
+                    child: Center(child: CircularProgressIndicator()),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Weekly Summary',
-                        style: TextStyle(
-                          color: SchoolTheme.darkGreen,
-                          fontWeight: FontWeight.w800,
-                        ),
+                if (errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      errorMessage!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
                       ),
-                      const SizedBox(height: 5),
-                      Text(
-                        '${AttendanceViewModel.formatDate(weekStart)} - '
-                        '${AttendanceViewModel.formatDate(weekEnd.subtract(const Duration(days: 1)))}',
-                        style: const TextStyle(
-                          color: SchoolTheme.muted,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _WeeklyPointMetric(
-                              label: 'Positive',
-                              value: '+$positive',
-                            ),
-                          ),
-                          Expanded(
-                            child: _WeeklyPointMetric(
-                              label: 'Negative',
-                              value: '$negative',
-                            ),
-                          ),
-                          Expanded(
-                            child: _WeeklyPointMetric(
-                              label: 'Net points',
-                              value: '${positive + negative}',
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        weeklyRecords.isEmpty
-                            ? 'No points recorded this week.'
-                            : '${weeklyRecords.length} point record${weeklyRecords.length == 1 ? '' : 's'} this week.',
-                        style: const TextStyle(
-                          color: SchoolTheme.muted,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SegmentedButton<PointFilter>(
-                  segments: const [
-                    ButtonSegment(value: PointFilter.all, label: Text('All')),
-                    ButtonSegment(
-                      value: PointFilter.positive,
-                      label: Text('Positive'),
                     ),
-                    ButtonSegment(
-                      value: PointFilter.negative,
-                      label: Text('Negative'),
-                    ),
-                  ],
-                  selected: {viewModel.pointFilter},
-                  onSelectionChanged: (selection) =>
-                      viewModel.selectPointFilter(selection.first),
-                ),
-                const SizedBox(height: 14),
-                for (final record in records) ...[
-                  _PointCard(
-                    record: record,
-                    onTap: () => viewModel.selectPoint(record),
                   ),
-                  const SizedBox(height: 10),
-                ],
-                if (records.isEmpty)
+                if (selectedChild == null)
                   const Padding(
                     padding: EdgeInsets.all(24),
                     child: Text(
-                      'No points in this category yet.',
+                      'Link a learner profile to view behavioural points.',
                       textAlign: TextAlign.center,
                     ),
+                  )
+                else ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: SchoolTheme.paleGreen,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Weekly Summary',
+                          style: TextStyle(
+                            color: SchoolTheme.darkGreen,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          '${AttendanceViewModel.formatDate(weekStart)} - '
+                          '${AttendanceViewModel.formatDate(weekEnd.subtract(const Duration(days: 1)))}',
+                          style: const TextStyle(
+                            color: SchoolTheme.muted,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _WeeklyPointMetric(
+                                label: 'Positive',
+                                value: '+$positive',
+                              ),
+                            ),
+                            Expanded(
+                              child: _WeeklyPointMetric(
+                                label: 'Negative',
+                                value: '$negative',
+                              ),
+                            ),
+                            Expanded(
+                              child: _WeeklyPointMetric(
+                                label: 'Net points',
+                                value: '${positive + negative}',
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          isLoading
+                              ? 'Loading records...'
+                              : weeklyRecords.isEmpty
+                              ? 'No points recorded this week.'
+                              : '${weeklyRecords.length} point record${weeklyRecords.length == 1 ? '' : 's'} this week.',
+                          style: const TextStyle(
+                            color: SchoolTheme.muted,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    IconButton(
-                      tooltip: 'Download PDF summary',
-                      onPressed: () => _showExportNotice(context),
-                      icon: const Icon(
-                        Icons.picture_as_pdf_outlined,
-                        color: Colors.redAccent,
+                  const SizedBox(height: 16),
+                  SegmentedButton<PointFilter>(
+                    segments: const [
+                      ButtonSegment(value: PointFilter.all, label: Text('All')),
+                      ButtonSegment(
+                        value: PointFilter.positive,
+                        label: Text('Positive'),
                       ),
-                    ),
-                    IconButton(
-                      tooltip: 'Download spreadsheet summary',
-                      onPressed: () => _showExportNotice(context),
-                      icon: const Icon(
-                        Icons.table_view_outlined,
-                        color: SchoolTheme.green,
+                      ButtonSegment(
+                        value: PointFilter.negative,
+                        label: Text('Negative'),
                       ),
+                    ],
+                    selected: {viewModel.pointFilter},
+                    onSelectionChanged: (selection) =>
+                        viewModel.selectPointFilter(selection.first),
+                  ),
+                  const SizedBox(height: 14),
+                  for (final record in filteredRecords) ...[
+                    _PointCard(
+                      record: record,
+                      onTap: () => viewModel.selectPoint(record),
                     ),
-                    const Spacer(),
-                    FilledButton(
-                      onPressed: () => _showSummary(context),
-                      child: const Text('Summary'),
-                    ),
+                    const SizedBox(height: 10),
                   ],
-                ),
+                  if (!isLoading && filteredRecords.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text(
+                        'No points recorded for this learner.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      IconButton(
+                        tooltip: 'Download PDF summary',
+                        onPressed: () => _showExportNotice(context),
+                        icon: const Icon(
+                          Icons.picture_as_pdf_outlined,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Download spreadsheet summary',
+                        onPressed: () => _showExportNotice(context),
+                        icon: const Icon(
+                          Icons.table_view_outlined,
+                          color: SchoolTheme.green,
+                        ),
+                      ),
+                      const Spacer(),
+                      FilledButton(
+                        onPressed: () => _showSummary(context, records),
+                        child: const Text('Summary'),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -224,10 +313,10 @@ class _PointList extends StatelessWidget {
     );
   }
 
-  void _showSummary(BuildContext context) {
+  void _showSummary(BuildContext context, List<PointRecord> records) {
     final weekStart = AttendanceViewModel.weekStartFor(DateTime.now());
     final weekEnd = weekStart.add(const Duration(days: 7));
-    final weeklyRecords = PointRecord.samples.where((record) {
+    final weeklyRecords = records.where((record) {
       return !record.date.isBefore(weekStart) && record.date.isBefore(weekEnd);
     });
     final positive = weeklyRecords
@@ -247,7 +336,7 @@ class _PointList extends StatelessWidget {
           'Positive points: +$positive\n'
           'Negative points: $negative\n'
           'Net points: ${positive + negative}\n\n'
-          'These are sample prototype records for the selected week.',
+          '${weeklyRecords.length} record${weeklyRecords.length == 1 ? '' : 's'} for the selected week.',
         ),
         actions: [
           TextButton(

@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../viewmodels/auth_view_model.dart';
 import '../widgets/school_widgets.dart';
 import 'child_profile_screen.dart';
+import 'terms_and_conditions_screen.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -184,16 +185,34 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           return null;
                         },
                       ),
-                      CheckboxListTile(
-                        contentPadding: EdgeInsets.zero,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        value: _acceptedTerms,
-                        onChanged: (value) =>
-                            setState(() => _acceptedTerms = value ?? false),
-                        title: const Text(
-                          'I agree to the Terms & Conditions and Privacy Policy',
-                          style: TextStyle(fontSize: 12),
-                        ),
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _acceptedTerms,
+                            onChanged: (value) =>
+                                setState(() => _acceptedTerms = value ?? false),
+                          ),
+                          Expanded(
+                            child: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                const Text('I agree to the '),
+                                TextButton(
+                                  onPressed: () =>
+                                      TermsAndConditionsScreen.open(context),
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: Size.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: const Text('Terms & Conditions'),
+                                ),
+                                const Text('.'),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                       SchoolPrimaryButton(
                         label: 'Next',

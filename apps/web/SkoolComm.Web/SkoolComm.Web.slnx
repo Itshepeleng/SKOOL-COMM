@@ -1,6 +1,3 @@
 <Solution>
-  <Project Path="../SkoolComm.Application/SkoolComm.Application.csproj" />
-  <Project Path="../SkoolComm.Domain/SkoolComm.Domain.csproj" />
-  <Project Path="../SkoolComm.Infrastructure/SkoolComm.Infrastructure.csproj" />
   <Project Path="SkoolComm.Web.csproj" />
 </Solution>

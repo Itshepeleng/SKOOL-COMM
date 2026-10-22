@@ -109,6 +109,12 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
       );
       return;
     }
+    final statusMessage = _viewModel.statusMessage;
+    if (statusMessage != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(statusMessage)));
+    }
     if (widget.returnToChildren) {
       Navigator.of(context).pop();
       return;
@@ -124,14 +130,29 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
           onOpenAttendance: (child) => navigator.push(
             MaterialPageRoute<void>(
               builder: (_) => AttendanceScreen(
-                studentName: child.fullName,
-                grade: '${child.grade} · ${child.className}',
+                child: child,
+                loadAttendance: (learnerId) async {
+                  final loaded = await learnerViewModel.loadAttendanceRecords(
+                    learnerId,
+                  );
+                  if (!loaded ||
+                      learnerViewModel.attendanceLearnerId != learnerId) {
+                    throw StateError(
+                      learnerViewModel.attendanceErrorMessage ??
+                          'Unable to load attendance records.',
+                    );
+                  }
+                  return learnerViewModel.attendanceRecords;
+                },
               ),
             ),
           ),
-          onOpenPoints: () => navigator.pushAndRemoveUntil(
+          onOpenPoints: (_) => navigator.pushAndRemoveUntil(
             MaterialPageRoute<void>(
-              builder: (_) => const MainNavigationScreen(initialTab: 1),
+              builder: (_) => MainNavigationScreen(
+                initialTab: 1,
+                initialChildren: learnerViewModel.children,
+              ),
             ),
             (_) => false,
           ),
@@ -145,7 +166,10 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
           ),
           onSelectTab: (index) => navigator.pushAndRemoveUntil(
             MaterialPageRoute<void>(
-              builder: (_) => MainNavigationScreen(initialTab: index),
+              builder: (_) => MainNavigationScreen(
+                initialTab: index,
+                initialChildren: learnerViewModel.children,
+              ),
             ),
             (_) => false,
           ),

@@ -10,6 +10,7 @@ class DashboardScreen extends StatelessWidget {
     required this.onOpenReminders,
     required this.onOpenSettings,
     required this.onOpenCalendar,
+    this.parentAvatarUrl,
     super.key,
   });
 
@@ -20,6 +21,7 @@ class DashboardScreen extends StatelessWidget {
   final VoidCallback onOpenReminders;
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenCalendar;
+  final String? parentAvatarUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +47,20 @@ class DashboardScreen extends StatelessWidget {
                 CircleAvatar(
                   radius: 15,
                   backgroundColor: Colors.white,
-                  child: Text(
-                    parentName.isEmpty ? 'P' : parentName[0].toUpperCase(),
-                    style: const TextStyle(
-                      color: SchoolTheme.green,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  backgroundImage: parentAvatarUrl == null
+                      ? null
+                      : NetworkImage(parentAvatarUrl!),
+                  child: parentAvatarUrl == null
+                      ? Text(
+                          parentName.isEmpty
+                              ? 'P'
+                              : parentName[0].toUpperCase(),
+                          style: const TextStyle(
+                            color: SchoolTheme.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
                 ),
               ],
             ),
@@ -148,7 +157,6 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class _ActionTile extends StatelessWidget {
@@ -183,7 +191,10 @@ class _ActionTile extends StatelessWidget {
                 title,
                 maxLines: 2,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),

@@ -3,16 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../models/learner_records.dart';
+
 class WeeklyAttendanceDay {
-  const WeeklyAttendanceDay({
-    required this.date,
-    required this.status,
-    this.note = '',
-  });
+  const WeeklyAttendanceDay({required this.date, required this.status});
 
   final DateTime date;
   final String status;
-  final String note;
 
   String get dateLabel => AttendanceViewModel.formatDate(date);
 
@@ -29,43 +26,61 @@ class AttendanceViewModel extends ChangeNotifier {
   final String studentName;
   final String grade;
   final DateTime _weekStart;
+  List<WeeklyAttendanceDay> _attendanceRecords = [];
 
   bool isDownloading = false;
   String? errorMessage;
   bool wasCancelled = false;
 
-  List<WeeklyAttendanceDay> get weeklyAttendance => [
-    WeeklyAttendanceDay(date: _weekStart, status: 'Present'),
-    WeeklyAttendanceDay(
-      date: _weekStart.add(const Duration(days: 1)),
-      status: 'Present',
-    ),
-    WeeklyAttendanceDay(
-      date: _weekStart.add(const Duration(days: 2)),
-      status: 'Absent',
-      note: 'Sick',
-    ),
-    WeeklyAttendanceDay(
-      date: _weekStart.add(const Duration(days: 3)),
-      status: 'Present',
-    ),
-    WeeklyAttendanceDay(
-      date: _weekStart.add(const Duration(days: 4)),
-      status: 'Present',
-    ),
-  ];
+  List<WeeklyAttendanceDay> get allAttendance => List.unmodifiable(
+    [..._attendanceRecords]..sort((a, b) => b.date.compareTo(a.date)),
+  );
+
+  List<WeeklyAttendanceDay> get weeklyAttendance {
+    final weekEnd = _weekStart.add(const Duration(days: 7));
+    return allAttendance
+        .where(
+          (record) =>
+              !record.date.isBefore(_weekStart) &&
+              record.date.isBefore(weekEnd),
+        )
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
+  }
+
+  int get totalDays => _attendanceRecords.length;
 
   int get presentDays =>
+      allAttendance.where((day) => day.status == 'Present').length;
+
+  int get weeklyPresentDays =>
       weeklyAttendance.where((day) => day.status == 'Present').length;
 
   int get absentDays =>
-      weeklyAttendance.where((day) => day.status == 'Absent').length;
+      allAttendance.where((day) => day.status == 'Absent').length;
 
-  int get attendancePercent =>
-      (presentDays / weeklyAttendance.length * 100).round();
+  int get attendancePercent => _attendancePercentFor(allAttendance);
+
+  int get weeklyAttendancePercent => _attendancePercentFor(weeklyAttendance);
+
+  int _attendancePercentFor(List<WeeklyAttendanceDay> records) {
+    if (records.isEmpty) return 0;
+    final attended = records.where((day) => day.status != 'Absent').length;
+    return (attended / records.length * 100).round();
+  }
 
   String get weekRange =>
-      '${formatDate(_weekStart)} - ${formatDate(_weekStart.add(const Duration(days: 4)))}';
+      '${formatDate(_weekStart)} - ${formatDate(_weekStart.add(const Duration(days: 6)))}';
+
+  void setAttendanceRecords(List<LearnerAttendanceRecord> records) {
+    _attendanceRecords = records
+        .map(
+          (record) =>
+              WeeklyAttendanceDay(date: record.date, status: record.status),
+        )
+        .toList();
+    notifyListeners();
+  }
 
   static DateTime weekStartFor(DateTime date) {
     final day = DateTime(date.year, date.month, date.day);
@@ -75,7 +90,7 @@ class AttendanceViewModel extends ChangeNotifier {
   Future<Uint8List> generateWeeklySummaryPdf() async {
     final document = pw.Document();
     final days = weeklyAttendance;
-    final weeklyPercent = attendancePercent;
+    final weeklyPercent = weeklyAttendancePercent;
 
     document.addPage(
       pw.MultiPage(
@@ -105,8 +120,12 @@ class AttendanceViewModel extends ChangeNotifier {
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('Present: $presentDays / ${days.length} days'),
-                pw.Text('Absent: $absentDays days'),
+                pw.Text(
+                  'Present: $weeklyPresentDays / ${days.length} recorded days',
+                ),
+                pw.Text(
+                  'Absent: ${days.where((day) => day.status == 'Absent').length} days',
+                ),
                 pw.Text('Attendance: $weeklyPercent%'),
               ],
             ),
@@ -127,14 +146,9 @@ class AttendanceViewModel extends ChangeNotifier {
                   weekday(day.date.weekday),
                   formatDate(day.date),
                   day.status,
-                  day.note.isEmpty ? '-' : day.note,
+                  '-',
                 ]),
             ],
-          ),
-          pw.SizedBox(height: 24),
-          pw.Text(
-            'Sample report: attendance entries shown here are demonstration data.',
-            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
           ),
         ],
       ),

@@ -4,6 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../viewmodels/auth_view_model.dart';
 import '../../viewmodels/dashboard_view_model.dart';
 import '../../viewmodels/learner_view_model.dart';
+import '../../viewmodels/messages_view_model.dart';
+import '../../models/learner_profile.dart';
+import '../../models/learner_records.dart';
 import '../widgets/school_widgets.dart';
 import 'attendance_screen.dart';
 import 'behavioral_points_screen.dart';
@@ -18,9 +21,14 @@ import 'reminders_screen.dart';
 import 'settings_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key, this.initialTab = 0});
+  const MainNavigationScreen({
+    super.key,
+    this.initialTab = 0,
+    this.initialChildren = const [],
+  });
 
   final int initialTab;
+  final List<LearnerProfile> initialChildren;
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
@@ -35,8 +43,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void initState() {
     super.initState();
     _viewModel = DashboardViewModel()..selectedTab = widget.initialTab;
-    _authViewModel = AuthViewModel(Supabase.instance.client.auth);
-    _learnerViewModel = LearnerViewModel(Supabase.instance.client);
+    final client = Supabase.instance.client;
+    _authViewModel = AuthViewModel(client.auth, client: client);
+    _learnerViewModel = LearnerViewModel(Supabase.instance.client)
+      ..seedRegisteredChildren(widget.initialChildren);
+    _authViewModel.loadAvatar();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadChildren());
   }
 
   @override
@@ -50,23 +62,46 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: Listenable.merge([_viewModel, _authViewModel]),
+      animation: Listenable.merge([
+        _viewModel,
+        _authViewModel,
+        _learnerViewModel,
+      ]),
       builder: (context, _) {
         final screen = switch (_viewModel.selectedTab) {
           0 => DashboardScreen(
             parentName: _authViewModel.dashboardName,
-            onOpenPoints: () => _viewModel.selectTab(1),
+            parentAvatarUrl: _authViewModel.avatarUrl,
+            onOpenPoints: _openPoints,
             onOpenMessages: _openMessages,
             onOpenAttendance: _openAttendance,
             onOpenReminders: () => _viewModel.selectTab(3),
             onOpenSettings: _openSettings,
             onOpenCalendar: _openCalendar,
           ),
-          1 => BehavioralPointsScreen(viewModel: _viewModel),
-          2 => const NewsScreen(),
-          3 => RemindersScreen(onViewCalendar: _openCalendar),
+          1 => BehavioralPointsScreen(
+            viewModel: _viewModel,
+            onBack: () => _selectTab(0),
+            children: _learnerViewModel.children,
+            selectedChild: _learnerViewModel.selectedChild,
+            onSelectChild: _selectChild,
+            records:
+                _learnerViewModel.behaviouralLearnerId ==
+                    _learnerViewModel.selectedLearnerId
+                ? _learnerViewModel.behaviouralRecords
+                : const [],
+            isLoading: _learnerViewModel.isLoadingBehaviour,
+            errorMessage: _learnerViewModel.behaviourErrorMessage,
+          ),
+          2 => NewsScreen(onBack: () => _selectTab(0)),
+          3 => RemindersScreen(
+            onBack: () => _selectTab(0),
+            onViewCalendar: _openCalendar,
+            client: Supabase.instance.client,
+          ),
           _ => ProfileScreen(
             viewModel: _authViewModel,
+            onBack: () => _selectTab(0),
             onOpenSettings: _openSettings,
             onOpenChildren: _openChildren,
             onAddChild: _addChild,
@@ -77,7 +112,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           body: screen,
           bottomNavigationBar: SchoolBottomNavigation(
             selectedIndex: _viewModel.selectedTab,
-            onSelected: _viewModel.selectTab,
+            onSelected: _selectTab,
           ),
         );
       },
@@ -87,28 +122,29 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void _openMessages() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => MessagesScreen(viewModel: _viewModel),
-      ),
-    );
-  }
-
-  void _openAttendance() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => AttendanceScreen(
-          studentName: _authViewModel.childFullName.isEmpty
-              ? 'Thabo Mokoena'
-              : _authViewModel.childFullName,
-          grade: _authViewModel.childGrade,
+        builder: (_) => MessagesScreen(
+          viewModel: MessagesViewModel(Supabase.instance.client),
+          onBack: () => Navigator.of(context).maybePop(),
         ),
       ),
     );
   }
 
+  void _openAttendance() {
+    final child = _learnerViewModel.selectedChild;
+    if (child == null) {
+      _openChildren();
+      return;
+    }
+    _openAttendanceForChild(child);
+  }
+
   void _openCalendar() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute<void>(builder: (_) => const CalendarScreen()));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => CalendarScreen(client: Supabase.instance.client),
+      ),
+    );
   }
 
   void _openSettings() {
@@ -124,15 +160,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       MaterialPageRoute<void>(
         builder: (_) => MyChildrenScreen(
           viewModel: _learnerViewModel,
-          onOpenAttendance: (child) => _openAttendanceForChild(
-            child.fullName,
-            '${child.grade} · ${child.className}',
-          ),
-          onOpenPoints: _openPoints,
+          onOpenAttendance: _openAttendanceForChild,
+          onOpenPoints: _openPointsForChild,
           onAddChild: _addChildFromChildren,
           onSelectTab: (index) {
             Navigator.of(context).pop();
-            _viewModel.selectTab(index);
+            _selectTab(index);
           },
         ),
       ),
@@ -162,17 +195,75 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  void _openPoints() {
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    _viewModel.selectTab(1);
+  Future<void> _loadChildren() async {
+    if (!_learnerViewModel.hasAuthenticatedUser) return;
+    await _learnerViewModel.loadChildren();
+    if (!mounted) return;
+    if (_viewModel.selectedTab == 1) {
+      final learnerId = _learnerViewModel.selectedLearnerId;
+      if (learnerId != null) {
+        await _learnerViewModel.loadBehaviouralRecords(learnerId);
+      }
+    }
   }
 
-  void _openAttendanceForChild(String studentName, String grade) {
+  void _selectTab(int index) {
+    _viewModel.selectTab(index);
+    final learnerId = _learnerViewModel.selectedLearnerId;
+    if (index == 1 && learnerId != null) {
+      _learnerViewModel.loadBehaviouralRecords(learnerId);
+    }
+  }
+
+  void _selectChild(LearnerProfile child) {
+    _learnerViewModel.selectChild(child);
+    _viewModel.clearSelectedPoint();
+    final learnerId = child.learnerId;
+    if (_viewModel.selectedTab == 1 && learnerId != null) {
+      _learnerViewModel.loadBehaviouralRecords(learnerId);
+    }
+  }
+
+  void _openPoints() {
+    final learnerId = _learnerViewModel.selectedLearnerId;
+    if (learnerId == null) {
+      _openChildren();
+      return;
+    }
+    _viewModel.selectTab(1);
+    _learnerViewModel.loadBehaviouralRecords(learnerId);
+  }
+
+  void _openPointsForChild(LearnerProfile child) {
+    _selectChild(child);
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    _viewModel.selectTab(1);
+    if (child.learnerId != null) {
+      _learnerViewModel.loadBehaviouralRecords(child.learnerId!);
+    }
+  }
+
+  void _openAttendanceForChild(LearnerProfile child) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            AttendanceScreen(studentName: studentName, grade: grade),
+        builder: (_) => AttendanceScreen(
+          child: child,
+          loadAttendance: _loadAttendanceForChild,
+        ),
       ),
     );
+  }
+
+  Future<List<LearnerAttendanceRecord>> _loadAttendanceForChild(
+    int learnerId,
+  ) async {
+    final loaded = await _learnerViewModel.loadAttendanceRecords(learnerId);
+    if (!loaded || _learnerViewModel.attendanceLearnerId != learnerId) {
+      throw StateError(
+        _learnerViewModel.attendanceErrorMessage ??
+            'Unable to load attendance records.',
+      );
+    }
+    return _learnerViewModel.attendanceRecords;
   }
 }

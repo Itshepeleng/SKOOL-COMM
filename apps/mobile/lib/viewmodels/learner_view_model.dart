@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/learner_profile.dart';
+import '../models/learner_records.dart';
+import '../models/school_models.dart';
 
 class LearnerViewModel extends ChangeNotifier {
   LearnerViewModel(this._client);
@@ -9,13 +11,26 @@ class LearnerViewModel extends ChangeNotifier {
   final SupabaseClient _client;
 
   List<LearnerProfile> children = [];
+  List<LearnerAttendanceRecord> attendanceRecords = [];
+  List<PointRecord> behaviouralRecords = [];
+  int? selectedLearnerId;
+  int? attendanceLearnerId;
+  int? behaviouralLearnerId;
   bool isLoading = false;
+  bool isLoadingAttendance = false;
+  bool isLoadingBehaviour = false;
   String? errorMessage;
+  String? statusMessage;
+  String? attendanceErrorMessage;
+  String? behaviourErrorMessage;
   String? _parentAuthId;
   String? _parentFirstName;
   String? _parentLastName;
   String? _parentEmail;
   String? _parentPhone;
+  final Set<int> _recentlyRegisteredLearnerIds = {};
+  int _attendanceRequestId = 0;
+  int _behaviourRequestId = 0;
   bool _disposed = false;
 
   bool get hasAuthenticatedUser => _client.auth.currentUser != null;
@@ -23,6 +38,8 @@ class LearnerViewModel extends ChangeNotifier {
   LearnerViewModel copyForRegistration() {
     return LearnerViewModel(_client)
       ..children = List.of(children)
+      ..selectedLearnerId = selectedLearnerId
+      .._recentlyRegisteredLearnerIds.addAll(_recentlyRegisteredLearnerIds)
       .._parentAuthId = _parentAuthId
       .._parentFirstName = _parentFirstName
       .._parentLastName = _parentLastName
@@ -40,7 +57,20 @@ class LearnerViewModel extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
 
+  void seedRegisteredChildren(List<LearnerProfile> registeredChildren) {
+    children = List.of(registeredChildren);
+    _recentlyRegisteredLearnerIds.addAll(
+      registeredChildren.map((child) => child.learnerId).whereType<int>(),
+    );
+    selectedLearnerId ??= registeredChildren
+        .map((child) => child.learnerId)
+        .whereType<int>()
+        .firstOrNull;
+  }
+
   Future<bool> loadChildren() async {
+    if (!hasAuthenticatedUser) return children.isNotEmpty;
+
     isLoading = true;
     errorMessage = null;
     _notifyListeners();
@@ -49,12 +79,30 @@ class LearnerViewModel extends ChangeNotifier {
       if (response is! List) {
         throw const FormatException('The linked learner list is invalid.');
       }
-      children = response.map((row) {
+      final linkedChildren = response.map((row) {
         if (row is! Map<String, dynamic>) {
           throw const FormatException('A learner record is invalid.');
         }
         return LearnerProfile.fromJson(row);
       }).toList();
+      final linkedIds = linkedChildren
+          .map((child) => child.learnerId)
+          .whereType<int>()
+          .toSet();
+      final recentlyRegisteredChildren = children.where(
+        (child) =>
+            child.learnerId != null &&
+            _recentlyRegisteredLearnerIds.contains(child.learnerId) &&
+            !linkedIds.contains(child.learnerId),
+      );
+      children = [...linkedChildren, ...recentlyRegisteredChildren];
+      _recentlyRegisteredLearnerIds.removeAll(linkedIds);
+      if (!children.any((child) => child.learnerId == selectedLearnerId)) {
+        selectedLearnerId = children
+            .map((child) => child.learnerId)
+            .whereType<int>()
+            .firstOrNull;
+      }
       return true;
     } on PostgrestException catch (error) {
       errorMessage = 'Unable to load linked learners: ${error.message}';
@@ -65,6 +113,115 @@ class LearnerViewModel extends ChangeNotifier {
     } finally {
       isLoading = false;
       _notifyListeners();
+    }
+    return false;
+  }
+
+  LearnerProfile? get selectedChild {
+    for (final child in children) {
+      if (child.learnerId == selectedLearnerId) return child;
+    }
+    return null;
+  }
+
+  void selectChild(LearnerProfile child) {
+    final learnerId = child.learnerId;
+    if (learnerId == null ||
+        !children.any((item) => item.learnerId == learnerId)) {
+      throw ArgumentError.value(child, 'child', 'Must be a linked learner.');
+    }
+    selectedLearnerId = learnerId;
+    _notifyListeners();
+  }
+
+  Future<bool> loadAttendanceRecords(int learnerId) async {
+    final requestId = ++_attendanceRequestId;
+    isLoadingAttendance = true;
+    attendanceErrorMessage = null;
+    _notifyListeners();
+    try {
+      final response = await _client.rpc(
+        'get_my_learner_attendance',
+        params: {'p_learner_id': learnerId},
+      );
+      if (response is! List) {
+        throw const FormatException('The attendance response is invalid.');
+      }
+      final records = response.map((row) {
+        if (row is! Map<String, dynamic>) {
+          throw const FormatException('An attendance record is invalid.');
+        }
+        return LearnerAttendanceRecord.fromJson(row);
+      }).toList();
+      if (requestId != _attendanceRequestId) return false;
+      attendanceRecords = records;
+      attendanceLearnerId = learnerId;
+      return true;
+    } on PostgrestException catch (error) {
+      if (requestId == _attendanceRequestId) {
+        attendanceErrorMessage =
+            'Unable to load attendance records: ${error.message}';
+      }
+    } on FormatException catch (error) {
+      if (requestId == _attendanceRequestId) {
+        attendanceErrorMessage =
+            'Unable to read attendance records: ${error.message}';
+      }
+    } on Exception catch (error) {
+      if (requestId == _attendanceRequestId) {
+        attendanceErrorMessage = 'Unable to load attendance records: $error';
+      }
+    } finally {
+      if (requestId == _attendanceRequestId) {
+        isLoadingAttendance = false;
+        _notifyListeners();
+      }
+    }
+    return false;
+  }
+
+  Future<bool> loadBehaviouralRecords(int learnerId) async {
+    final requestId = ++_behaviourRequestId;
+    isLoadingBehaviour = true;
+    behaviourErrorMessage = null;
+    _notifyListeners();
+    try {
+      final response = await _client.rpc(
+        'get_my_learner_behavioural_points',
+        params: {'p_learner_id': learnerId},
+      );
+      if (response is! List) {
+        throw const FormatException('The behaviour response is invalid.');
+      }
+      final records = response.map((row) {
+        if (row is! Map<String, dynamic>) {
+          throw const FormatException('A behaviour record is invalid.');
+        }
+        return PointRecord.fromJson(row);
+      }).toList();
+      if (requestId != _behaviourRequestId) return false;
+      behaviouralRecords = records;
+      behaviouralLearnerId = learnerId;
+      return true;
+    } on PostgrestException catch (error) {
+      if (requestId == _behaviourRequestId) {
+        behaviourErrorMessage =
+            'Unable to load behaviour records: ${error.message}';
+      }
+    } on FormatException catch (error) {
+      if (requestId == _behaviourRequestId) {
+        behaviourErrorMessage =
+            'Unable to read behaviour records: ${error.message}';
+      }
+    } on Exception catch (error) {
+      if (requestId == _behaviourRequestId) {
+        behaviourErrorMessage = 'Unable to load behaviour records: $error';
+      }
+    } finally {
+      if (requestId == _behaviourRequestId) {
+        isLoadingBehaviour = false;
+        _notifyListeners();
+      }
     }
     return false;
   }
@@ -85,6 +242,7 @@ class LearnerViewModel extends ChangeNotifier {
   }) async {
     isLoading = true;
     errorMessage = null;
+    statusMessage = null;
     _notifyListeners();
 
     try {
@@ -142,18 +300,35 @@ class LearnerViewModel extends ChangeNotifier {
       }
       final status = response['status']?.toString().toLowerCase();
       if (status == 'success') {
+        if (user?.id == authId) {
+          try {
+            await _client.auth.updateUser(
+              UserAttributes(data: {'guardian_relationship': relationship}),
+            );
+          } on AuthException catch (error) {
+            statusMessage =
+                'Learner linked, but the parent relationship could not be '
+                'updated: ${error.message}';
+          } on Exception catch (error) {
+            statusMessage =
+                'Learner linked, but the parent relationship could not be '
+                'updated: $error';
+          }
+        } else {
+          statusMessage =
+              'Learner linked. The parent relationship will be synced after '
+              'you sign in.';
+        }
         final returnedLearnerId =
             response['learnerid'] ?? response['learner_id'];
-        final registeredLearner = LearnerProfile(
-          learnerId: returnedLearnerId is num
-              ? returnedLearnerId.toInt()
-              : null,
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
-          grade: grade.trim(),
-          className: className.trim(),
-          relationship: relationship,
-        );
+        final registeredLearner = LearnerProfile.fromJson({
+          'learnerid': returnedLearnerId,
+          'firstname': response['firstname']?.toString() ?? firstName.trim(),
+          'lastname': response['lastname']?.toString() ?? lastName.trim(),
+          'grade': response['grade']?.toString() ?? grade.trim(),
+          'class_name': response['class_name']?.toString() ?? className.trim(),
+          'relationship': response['relationship']?.toString() ?? relationship,
+        });
         children = [
           ...children.where(
             (child) => registeredLearner.learnerId != null
@@ -162,6 +337,10 @@ class LearnerViewModel extends ChangeNotifier {
           ),
           registeredLearner,
         ];
+        selectedLearnerId = registeredLearner.learnerId;
+        if (registeredLearner.learnerId case final learnerId?) {
+          _recentlyRegisteredLearnerIds.add(learnerId);
+        }
         return true;
       }
       if (status == 'error') {

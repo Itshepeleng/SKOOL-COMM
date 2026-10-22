@@ -18,7 +18,7 @@ class MyChildrenScreen extends StatefulWidget {
 
   final LearnerViewModel viewModel;
   final ValueChanged<LearnerProfile> onOpenAttendance;
-  final VoidCallback onOpenPoints;
+  final ValueChanged<LearnerProfile> onOpenPoints;
   final ValueChanged<int> onSelectTab;
   final VoidCallback onAddChild;
   final bool ownsViewModel;
@@ -185,7 +185,7 @@ class _MyChildrenScreenState extends State<MyChildrenScreen> {
           FilledButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              widget.onOpenPoints();
+              widget.onOpenPoints(child);
             },
             child: const Text('Behavioural points'),
           ),

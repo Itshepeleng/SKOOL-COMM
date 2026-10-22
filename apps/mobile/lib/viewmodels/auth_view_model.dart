@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Owns authentication requests and exposes transient UI state to auth screens.
 class AuthViewModel extends ChangeNotifier {
-  AuthViewModel(this._auth);
+  AuthViewModel(this._auth, {SupabaseClient? client}) : _client = client;
 
   static const guardianRelationships = [
     'Father',
@@ -16,10 +16,14 @@ class AuthViewModel extends ChangeNotifier {
   ];
 
   final GoTrueClient _auth;
+  final SupabaseClient? _client;
 
   bool isLoading = false;
+  bool isLoadingAvatar = false;
   String? errorMessage;
   String? statusMessage;
+  String? avatarUrl;
+  String? avatarErrorMessage;
 
   User? get currentUser => _auth.currentUser;
 
@@ -37,6 +41,23 @@ class AuthViewModel extends ChangeNotifier {
         : 'Father';
   }
 
+  Future<bool> updateGuardianRelationship(String relationship) async {
+    _clearMessages();
+    try {
+      await _auth.updateUser(
+        UserAttributes(data: {'guardian_relationship': relationship}),
+      );
+      notifyListeners();
+      return true;
+    } on AuthException catch (error) {
+      errorMessage = 'Unable to update guardian relationship: ${error.message}';
+    } on Exception catch (error) {
+      errorMessage = 'Unable to update guardian relationship: $error';
+    }
+    notifyListeners();
+    return false;
+  }
+
   String get dashboardName {
     final nameParts = fullName.trim().split(RegExp(r'\s+'));
     final surname = nameParts.isEmpty ? '' : nameParts.last;
@@ -47,6 +68,72 @@ class AuthViewModel extends ChangeNotifier {
 
   String get phone =>
       currentUser?.userMetadata?['phone'] as String? ?? 'Not added';
+
+  Future<void> loadAvatar() async {
+    final client = _client;
+    final avatarPath = currentUser?.userMetadata?['avatar_path'] as String?;
+    if (client == null || avatarPath == null || avatarPath.isEmpty) return;
+
+    avatarErrorMessage = null;
+    try {
+      avatarUrl = await client.storage
+          .from('parent-avatars')
+          .createSignedUrl(avatarPath, 60 * 60 * 24);
+    } on Exception catch (error) {
+      avatarErrorMessage = 'Unable to load your profile photo: $error';
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<bool> uploadAvatar({
+    required Uint8List bytes,
+    required String contentType,
+  }) async {
+    _clearMessages();
+    avatarErrorMessage = null;
+    final user = currentUser;
+    final client = _client;
+    if (user == null || client == null) {
+      avatarErrorMessage = 'Sign in before adding a profile photo.';
+      notifyListeners();
+      return false;
+    }
+
+    final extension = switch (contentType) {
+      'image/jpeg' => 'jpg',
+      'image/png' => 'png',
+      'image/webp' => 'webp',
+      _ => null,
+    };
+    if (extension == null || bytes.isEmpty) {
+      avatarErrorMessage = 'Choose a JPEG, PNG, or WebP image.';
+      notifyListeners();
+      return false;
+    }
+
+    isLoadingAvatar = true;
+    notifyListeners();
+    try {
+      final path = '${user.id}/avatar.$extension';
+      final storage = client.storage.from('parent-avatars');
+      await storage.uploadBinary(
+        path,
+        bytes,
+        fileOptions: FileOptions(contentType: contentType, upsert: true),
+      );
+      await _auth.updateUser(UserAttributes(data: {'avatar_path': path}));
+      avatarUrl = await storage.createSignedUrl(path, 60 * 60 * 24);
+      statusMessage = 'Profile photo updated.';
+      return true;
+    } on Exception catch (error) {
+      avatarErrorMessage = 'Unable to save your profile photo: $error';
+    } finally {
+      isLoadingAvatar = false;
+      notifyListeners();
+    }
+    return false;
+  }
 
   String get childFullName {
     final metadata = currentUser?.userMetadata;
