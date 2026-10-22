@@ -1,0 +1,15 @@
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\bin\Debug\net10.0\SkoolComm.Infrastructure.deps.json
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\bin\Debug\net10.0\SkoolComm.Infrastructure.dll
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\bin\Debug\net10.0\SkoolComm.Infrastructure.pdb
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\bin\Debug\net10.0\SkoolComm.Domain.dll
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\bin\Debug\net10.0\SkoolComm.Domain.pdb
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\obj\Debug\net10.0\SkoolComm.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\obj\Debug\net10.0\SkoolComm.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\obj\Debug\net10.0\SkoolComm.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\obj\Debug\net10.0\SkoolComm.Infrastructure.AssemblyInfo.cs
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\obj\Debug\net10.0\SkoolComm.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\obj\Debug\net10.0\SkoolCom.8EFA56ED.Up2Date
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\obj\Debug\net10.0\SkoolComm.Infrastructure.dll
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\obj\Debug\net10.0\refint\SkoolComm.Infrastructure.dll
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\obj\Debug\net10.0\SkoolComm.Infrastructure.pdb
+C:\Users\avhas\source\repos\SkoolComm.Infrastructure\obj\Debug\net10.0\ref\SkoolComm.Infrastructure.dll
