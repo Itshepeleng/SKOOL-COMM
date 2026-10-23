@@ -22,7 +22,19 @@ class WelcomeScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SchoolLogo(),
+                    Container(
+                      width: 200,
+                      height: 200,
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: SchoolTheme.green, width: 1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Image.asset(
+                        'assets/images/wilgehof_crest.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                     const SizedBox(height: 24),
                     const Text(
                       'Connecting School, Parents & Learners',
