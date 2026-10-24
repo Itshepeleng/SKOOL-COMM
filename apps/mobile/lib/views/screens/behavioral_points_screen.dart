@@ -123,7 +123,9 @@ class _PointList extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         backgroundColor: Colors.white,
-                        child: Icon(Icons.person, color: SchoolTheme.green),
+                        backgroundImage: AssetImage(
+                          'assets/images/thabo_mokoena.jpg',
+                        ),
                       ),
                       SizedBox(width: 12),
                       Expanded(
@@ -497,7 +499,15 @@ class _PointDetails extends StatelessWidget {
                         child: ListTile(
                           leading: CircleAvatar(
                             backgroundColor: SchoolTheme.paleGreen,
-                            child: Text(record.teacherInitials),
+                            backgroundImage:
+                                record.teacherName == 'Ms L. Mokoena'
+                                ? const AssetImage(
+                                    'assets/images/mrs_mokoena_profile.jpg',
+                                  )
+                                : null,
+                            child: record.teacherName == 'Ms L. Mokoena'
+                                ? null
+                                : Text(record.teacherInitials),
                           ),
                           title: Text(
                             record.teacherName,

@@ -69,18 +69,13 @@ class DashboardScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(14, 14, 14, 18),
               children: [
-                Container(
-                  height: 160,
-                  decoration: BoxDecoration(
-                    color: SchoolTheme.paleGreen,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.account_balance_rounded,
-                      size: 74,
-                      color: SchoolTheme.green,
-                    ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    'assets/images/school_homepage.jpg',
+                    width: double.infinity,
+                    height: 160,
+                    fit: BoxFit.cover,
                   ),
                 ),
                 const SizedBox(height: 14),

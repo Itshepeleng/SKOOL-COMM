@@ -58,10 +58,18 @@ class WelcomeScreen extends StatelessWidget {
                         color: SchoolTheme.paleGreen,
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Icon(
-                        Icons.account_balance_rounded,
-                        size: 92,
-                        color: SchoolTheme.green,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.asset(
+                          'assets/images/school_building.jpg',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(
+                                Icons.account_balance_rounded,
+                                size: 92,
+                                color: SchoolTheme.green,
+                              ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -98,6 +106,7 @@ class WelcomeScreen extends StatelessWidget {
                       onPressed: () => TermsAndConditionsScreen.open(context),
                       child: const Text('Terms & Conditions'),
                     ),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),

@@ -13,6 +13,7 @@ import 'package:mobile/views/screens/behavioral_points_screen.dart';
 import 'package:mobile/views/screens/calendar_screen.dart';
 import 'package:mobile/views/screens/attendance_screen.dart';
 import 'package:mobile/views/screens/child_profile_screen.dart';
+import 'package:mobile/views/screens/dashboard_screen.dart';
 import 'package:mobile/views/screens/my_children_screen.dart';
 import 'package:mobile/views/screens/news_screen.dart';
 import 'package:mobile/views/screens/profile_screen.dart';
@@ -193,7 +194,17 @@ void main() {
     expect(find.text('Login'), findsOneWidget);
     expect(find.text('Create Account'), findsOneWidget);
     expect(find.text('Terms & Conditions'), findsOneWidget);
+    expect(
+      find.image(const AssetImage('assets/images/wilgehof_crest.png')),
+      findsOneWidget,
+    );
+    expect(
+      find.image(const AssetImage('assets/images/school_building.jpg')),
+      findsOneWidget,
+    );
 
+    await tester.ensureVisible(find.text('Terms & Conditions'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Terms & Conditions'));
     await tester.pumpAndSettle();
     expect(find.byType(TermsAndConditionsScreen), findsOneWidget);
@@ -203,6 +214,27 @@ void main() {
       300,
     );
     expect(find.text('10. Applicable law and contact'), findsOneWidget);
+  });
+
+  testWidgets('dashboard displays the homepage image', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DashboardScreen(
+          parentName: 'Test Parent',
+          onOpenPoints: () {},
+          onOpenMessages: () {},
+          onOpenAttendance: () {},
+          onOpenReminders: () {},
+          onOpenSettings: () {},
+          onOpenCalendar: () {},
+        ),
+      ),
+    );
+
+    expect(
+      find.image(const AssetImage('assets/images/school_homepage.jpg')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('profile editor offers all guardian relationships', (

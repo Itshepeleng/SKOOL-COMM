@@ -12,37 +12,11 @@ class SchoolLogo extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: compact ? 54 : 72,
-          height: compact ? 54 : 72,
-          decoration: BoxDecoration(
-            color: SchoolTheme.paleGreen,
-            border: Border.all(color: SchoolTheme.green, width: 2),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: const Icon(
-            Icons.school_rounded,
-            color: SchoolTheme.green,
-            size: 38,
-          ),
-        ),
-        const SizedBox(height: 7),
-        Text(
-          'WILGEHOF',
-          style: TextStyle(
-            color: SchoolTheme.darkGreen,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1.4,
-            fontSize: compact ? 12 : 14,
-          ),
-        ),
-        const Text(
-          'PRIMARY SCHOOL',
-          style: TextStyle(
-            color: SchoolTheme.muted,
-            fontSize: 8,
-            letterSpacing: 1.2,
-          ),
+        Image.asset(
+          'assets/logos/school_logo.jpg',
+          width: compact ? 108 : 160,
+          height: compact ? 81 : 120,
+          fit: BoxFit.contain,
         ),
       ],
     );
