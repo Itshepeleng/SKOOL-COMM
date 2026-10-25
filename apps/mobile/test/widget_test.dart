@@ -195,12 +195,24 @@ void main() {
     expect(find.text('Create Account'), findsOneWidget);
     expect(find.text('Terms & Conditions'), findsOneWidget);
     expect(
-      find.image(const AssetImage('assets/images/wilgehof_crest.png')),
+      find.image(const AssetImage('assets/logos/school_logo.jpg')),
       findsOneWidget,
+    );
+    expect(
+      find.image(const AssetImage('assets/images/wilgehof_crest.png')),
+      findsNothing,
     );
     expect(
       find.image(const AssetImage('assets/images/school_building.jpg')),
       findsOneWidget,
+    );
+    expect(
+      tester
+          .getSize(
+            find.image(const AssetImage('assets/images/school_building.jpg')),
+          )
+          .height,
+      300,
     );
 
     await tester.ensureVisible(find.text('Terms & Conditions'));

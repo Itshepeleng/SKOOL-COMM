@@ -14,8 +14,8 @@ class SchoolLogo extends StatelessWidget {
       children: [
         Image.asset(
           'assets/logos/school_logo.jpg',
-          width: compact ? 108 : 160,
-          height: compact ? 81 : 120,
+          width: compact ? 108 : 190,
+          height: compact ? 81 : 142,
           fit: BoxFit.contain,
         ),
       ],
@@ -89,9 +89,7 @@ class SchoolPrimaryButton extends StatelessWidget {
         style: FilledButton.styleFrom(
           backgroundColor: backgroundColor ?? SchoolTheme.green,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(9),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
         ),
         child: isLoading
             ? const SizedBox.square(
@@ -117,11 +115,7 @@ class SchoolPrimaryButton extends StatelessWidget {
 }
 
 class ScreenIntro extends StatelessWidget {
-  const ScreenIntro({
-    required this.title,
-    required this.subtitle,
-    super.key,
-  });
+  const ScreenIntro({required this.title, required this.subtitle, super.key});
 
   final String title;
   final String subtitle;
@@ -150,11 +144,7 @@ class ScreenIntro extends StatelessWidget {
 }
 
 class StatusBanner extends StatelessWidget {
-  const StatusBanner({
-    required this.message,
-    required this.isError,
-    super.key,
-  });
+  const StatusBanner({required this.message, required this.isError, super.key});
 
   final String message;
   final bool isError;
