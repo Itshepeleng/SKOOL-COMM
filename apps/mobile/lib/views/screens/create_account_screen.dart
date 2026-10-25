@@ -118,7 +118,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Center(child: SchoolLogo(compact: true)),
+                                            // Make the logo bigger just for this screen
+                      const Center(
+                        child: SizedBox(
+                          height: 110, // Adjust this number if you want it even bigger
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: SchoolLogo(compact: true),
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 28),
                       const ScreenIntro(
                         title: 'Create Account',
