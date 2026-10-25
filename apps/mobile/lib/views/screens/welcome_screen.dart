@@ -9,131 +9,139 @@ import 'terms_and_conditions_screen.dart';
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
-    @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Remove or comment out the backgroundColor line here
-      // backgroundColor: const Color(0xFFF3F8F4), 
-      
+      // ✨ FORCE the background to be transparent so our gradient shows
+      backgroundColor: Colors.transparent, 
       body: Container(
-        // ✨ MAGIC: A beautiful green gradient background
+        // 🎨 THE CATCHY GRADIENT
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
-              Color(0xFF1B5E20), // Dark Wilgehof Green
-              Color(0xFF4CAF50), // Lighter green
-              Color(0xFFF3F8F4), // Very pale green
+              Color(0xFF103E14), // Very dark green (top left)
+              Color(0xFF2E7D32), // Wilgehof green (middle)
+              Color(0xFF66BB6A), // Lighter green (bottom right)
             ],
-            stops: [0.0, 0.4, 0.8], 
           ),
         ),
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              // ... the rest of your code stays exactly the same!
               return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 28),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 30),
                       
-                      // White glowing badge for the logo
+                      // 🛡️ THE LOGO BADGE (Floating effect)
+                                            // 🛡️ THE LOGO BADGE (Floating Card)
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: const [
+                          borderRadius: BorderRadius.circular(24), // Rounded rectangle
+                          boxShadow: [
                             BoxShadow(
-                              color: Colors.black26, // Darker shadow on green
+                              color: Colors.black.withOpacity(0.25),
                               blurRadius: 20,
-                              offset: Offset(0, 8),
+                              offset: const Offset(0, 10),
                             ),
                           ],
                         ),
-                        child: const SchoolLogo(),
+                        // Let the logo dictate its own size
+                        child: const SchoolLogo(), 
                       ),
                       
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 24),
                       
-                      // ✨ Changed text to White so it pops on the green background
+                      // TITLE
                       const Text(
                         'Skool-Comm',
                         style: TextStyle(
-                          color: Colors.white, 
-                          fontSize: 34, // Slightly larger
+                          color: Colors.white,
+                          fontSize: 38,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
+                          letterSpacing: 1.5,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       const Text(
                         'Connecting School, Parents & Learners',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white70, // Soft white
                           fontSize: 15,
+                          letterSpacing: 0.5,
                         ),
                       ),
                       
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 40),
                       
-                      // The school image, floating beautifully
+                      // 🏫 SCHOOL IMAGE WITH A "GLASS" BORDER
                       Container(
                         width: double.infinity,
-                        height: 260, // Adjusted height to fit screen better
+                        height: 220,
+                        padding: const EdgeInsets.all(6), // The "border" thickness
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24), // Rounder corners
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black26, // Strong shadow for depth
-                              blurRadius: 25,
-                              offset: Offset(0, 12),
-                            ),
-                          ],
+                          color: Colors.white.withOpacity(0.2), // Glass effect border
+                          borderRadius: BorderRadius.circular(28),
+                          border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(22),
                           child: Image.asset(
                             'assets/images/school_building.jpg',
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                              Icons.account_balance_rounded,
-                              size: 92,
-                              color: SchoolTheme.green,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              color: Colors.white24,
+                              child: const Center(
+                                child: Icon(Icons.school, size: 80, color: Colors.white),
+                              ),
                             ),
                           ),
                         ),
                       ),
                       
-                      const SizedBox(height: 35),
+                      const SizedBox(height: 45),
                       
-                      // The Login Button
-                      SchoolPrimaryButton(
-                        label: 'Login',
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const LoginScreen(),
+                      // 🟢 LOGIN BUTTON (White with Green text for high contrast)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const LoginScreen(),
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: SchoolTheme.darkGreen,
+                            elevation: 8,
+                            shadowColor: Colors.black45,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: const Text(
+                            'Login',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
                       
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       
-                      // The Create Account Button
+                      // ⚪ CREATE ACCOUNT BUTTON (Transparent with white border)
                       SizedBox(
                         width: double.infinity,
-                        height: 55, // Made it match the Login button height
+                        height: 56,
                         child: OutlinedButton(
                           onPressed: () => Navigator.of(context).push(
                             MaterialPageRoute<void>(
@@ -141,38 +149,33 @@ class WelcomeScreen extends StatelessWidget {
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.white, // White background so it stands out
-                            foregroundColor: SchoolTheme.darkGreen,
+                            foregroundColor: Colors.white,
                             side: const BorderSide(color: Colors.white, width: 2),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(26), // Rounded pill shape
+                              borderRadius: BorderRadius.circular(30),
                             ),
-                            elevation: 2,
                           ),
                           child: const Text(
                             'Create Account',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
                       
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 20),
                       
-                      // Terms & Conditions
+                      // TERMS & CONDITIONS
                       TextButton(
                         onPressed: () => TermsAndConditionsScreen.open(context),
                         child: const Text(
                           'Terms & Conditions',
                           style: TextStyle(
-                            color: SchoolTheme.darkGreen, // Dark text to read on the pale bottom
-                            fontWeight: FontWeight.w600,
+                            color: Colors.white70,
+                            decoration: TextDecoration.underline,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
