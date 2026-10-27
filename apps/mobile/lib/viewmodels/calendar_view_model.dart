@@ -39,6 +39,7 @@ class CalendarViewModel extends ChangeNotifier {
   List<SchoolEvent> get eventsForVisibleMonth {
     final monthStart = DateTime(visibleMonth.year, visibleMonth.month);
     final monthEnd = DateTime(visibleMonth.year, visibleMonth.month + 1);
+    // Include events that start earlier but overlap any part of this month.
     return events
         .where(
           (event) =>
@@ -149,6 +150,7 @@ class CalendarViewModel extends ChangeNotifier {
 
   void _keepSelectedDayInVisibleMonth() {
     final lastDay = DateTime(visibleMonth.year, visibleMonth.month + 1, 0).day;
+    // Clamp dates such as the 31st when navigating into a shorter month.
     selectedDate = DateTime(
       visibleMonth.year,
       visibleMonth.month,

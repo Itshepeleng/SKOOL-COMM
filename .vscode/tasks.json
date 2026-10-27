@@ -4,24 +4,49 @@
 		{
 			"label": "Run Flutter Web",
 			"type": "shell",
-			"command": "powershell",
+			"command": "flutter",
 			"args": [
-				"-NoProfile",
-				"-Command",
-				"Set-Location 'D:\\SKOOL-COMM\\apps\\mobile'; flutter run -d web-server --web-hostname 127.0.0.1 --web-port 52011"
+				"run",
+				"-d",
+				"web-server",
+				"--web-hostname",
+				"127.0.0.1",
+				"--web-port",
+				"52011"
 			],
+			"options": {
+				"cwd": "${workspaceFolder}/apps/mobile"
+			},
 			"isBackground": true,
 			"problemMatcher": []
 		},
 		{
 			"label": "Run Flutter in Chrome",
 			"type": "shell",
-			"command": "powershell",
+			"command": "flutter",
 			"args": [
-				"-NoProfile",
-				"-Command",
-				"Set-Location 'D:\\SKOOL-COMM\\apps\\mobile'; flutter run -d chrome"
+				"run",
+				"-d",
+				"chrome"
 			],
+			"options": {
+				"cwd": "${workspaceFolder}/apps/mobile"
+			},
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Flutter in Edge",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"edge"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/apps/mobile"
+			},
 			"isBackground": true,
 			"problemMatcher": []
 		}

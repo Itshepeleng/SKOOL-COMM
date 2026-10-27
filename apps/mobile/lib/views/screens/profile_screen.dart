@@ -256,6 +256,7 @@ class ProfileScreen extends StatelessWidget {
 
       final contentType =
           image.mimeType ??
+          // Some platforms omit the MIME type, so infer it from the selected filename.
           switch (image.name.toLowerCase().split('.').last) {
             'png' => 'image/png',
             'webp' => 'image/webp',

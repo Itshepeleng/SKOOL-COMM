@@ -12,18 +12,16 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ✨ FORCE the background to be transparent so our gradient shows
-      backgroundColor: Colors.transparent, 
+      backgroundColor: Colors.transparent,
       body: Container(
-        // 🎨 THE CATCHY GRADIENT
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF103E14), // Very dark green (top left)
-              Color(0xFF2E7D32), // Wilgehof green (middle)
-              Color(0xFF66BB6A), // Lighter green (bottom right)
+              Color(0xFF103E14),
+              Color(0xFF2E7D32),
+              Color(0xFF66BB6A),
             ],
           ),
         ),
@@ -39,13 +37,14 @@ class WelcomeScreen extends StatelessWidget {
                     children: [
                       const SizedBox(height: 30),
                       
-                      // 🛡️ THE LOGO BADGE (Floating effect)
-                                            // 🛡️ THE LOGO BADGE (Floating Card)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 30,
+                          vertical: 20,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(24), // Rounded rectangle
+                          borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.25),
@@ -54,13 +53,11 @@ class WelcomeScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        // Let the logo dictate its own size
-                        child: const SchoolLogo(), 
+                        child: const SchoolLogo(),
                       ),
                       
                       const SizedBox(height: 24),
                       
-                      // TITLE
                       const Text(
                         'Skool-Comm',
                         style: TextStyle(
@@ -75,7 +72,7 @@ class WelcomeScreen extends StatelessWidget {
                         'Connecting School, Parents & Learners',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white70, // Soft white
+                          color: Colors.white70,
                           fontSize: 15,
                           letterSpacing: 0.5,
                         ),
@@ -83,13 +80,12 @@ class WelcomeScreen extends StatelessWidget {
                       
                       const SizedBox(height: 40),
                       
-                      // 🏫 SCHOOL IMAGE WITH A "GLASS" BORDER
                       Container(
                         width: double.infinity,
                         height: 220,
-                        padding: const EdgeInsets.all(6), // The "border" thickness
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2), // Glass effect border
+                          color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(28),
                           border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
                         ),
@@ -110,7 +106,6 @@ class WelcomeScreen extends StatelessWidget {
                       
                       const SizedBox(height: 45),
                       
-                      // 🟢 LOGIN BUTTON (White with Green text for high contrast)
                       SizedBox(
                         width: double.infinity,
                         height: 56,
@@ -138,7 +133,6 @@ class WelcomeScreen extends StatelessWidget {
                       
                       const SizedBox(height: 16),
                       
-                      // ⚪ CREATE ACCOUNT BUTTON (Transparent with white border)
                       SizedBox(
                         width: double.infinity,
                         height: 56,
@@ -164,7 +158,6 @@ class WelcomeScreen extends StatelessWidget {
                       
                       const SizedBox(height: 20),
                       
-                      // TERMS & CONDITIONS
                       TextButton(
                         onPressed: () => TermsAndConditionsScreen.open(context),
                         child: const Text(

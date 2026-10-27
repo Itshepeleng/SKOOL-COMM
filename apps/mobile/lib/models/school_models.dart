@@ -83,6 +83,7 @@ class SchoolEvent {
       );
     }
 
+    // Keep the full date range so multi-day year-plan items appear on each day.
     final date = DateTime.parse(rawStartDate.toString());
     final endDate = DateTime.parse(rawEndDate.toString());
     return SchoolEvent(

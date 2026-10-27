@@ -251,6 +251,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       });
       return;
     }
+    // The callback verifies the learner-specific RPC result before returning records.
     setState(() {
       _isLoading = true;
       _errorMessage = null;

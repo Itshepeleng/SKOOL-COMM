@@ -48,6 +48,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _learnerViewModel = LearnerViewModel(Supabase.instance.client)
       ..seedRegisteredChildren(widget.initialChildren);
     _authViewModel.loadAvatar();
+    // Let the first frame render before the initial Supabase request updates listeners.
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadChildren());
   }
 
@@ -173,6 +174,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _addChild() {
+    // The registration route gets an owned copy so it can be disposed independently.
     final registrationViewModel = _learnerViewModel.copyForRegistration();
     Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -236,6 +238,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   void _openPointsForChild(LearnerProfile child) {
     _selectChild(child);
+    // Close the children screen before switching tabs to avoid stacking navigation routes.
     Navigator.of(context).popUntil((route) => route.isFirst);
     _viewModel.selectTab(1);
     if (child.learnerId != null) {

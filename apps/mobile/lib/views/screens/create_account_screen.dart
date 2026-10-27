@@ -120,7 +120,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Make the logo bigger just for this screen
                       const Center(
                         child: SizedBox(
                           height:

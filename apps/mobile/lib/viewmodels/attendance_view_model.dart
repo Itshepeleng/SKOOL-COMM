@@ -65,6 +65,7 @@ class AttendanceViewModel extends ChangeNotifier {
 
   int _attendancePercentFor(List<WeeklyAttendanceDay> records) {
     if (records.isEmpty) return 0;
+    // Any recorded status other than "Absent" counts as attendance.
     final attended = records.where((day) => day.status != 'Absent').length;
     return (attended / records.length * 100).round();
   }
@@ -84,6 +85,7 @@ class AttendanceViewModel extends ChangeNotifier {
 
   static DateTime weekStartFor(DateTime date) {
     final day = DateTime(date.year, date.month, date.day);
+    // weekday numbers start at Monday, matching the school week display.
     return day.subtract(Duration(days: day.weekday - DateTime.monday));
   }
 
@@ -165,6 +167,7 @@ class AttendanceViewModel extends ChangeNotifier {
     try {
       final bytes = await generateWeeklySummaryPdf();
       if (kIsWeb) {
+        // Browsers download directly; native platforms use a save-location picker.
         await FileSaver.instance.saveFile(
           name: 'weekly_attendance_summary',
           bytes: bytes,

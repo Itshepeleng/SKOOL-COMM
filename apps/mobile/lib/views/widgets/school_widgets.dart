@@ -12,17 +12,15 @@ class SchoolLogo extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Your actual logo image
         Image.asset(
-          'assets/logos/school_logo.jpg', // The correct name!
-          height: compact ? 50 : 90, // Made it a bit bigger since we removed the text
+          'assets/logos/school_logo.jpg',
+          height: compact ? 50 : 90,
           fit: BoxFit.contain,
         ),
       ],
     );
   }
 }
-
 
 class SchoolBottomNavigation extends StatelessWidget {
   const SchoolBottomNavigation({

@@ -36,6 +36,7 @@ class LearnerViewModel extends ChangeNotifier {
   bool get hasAuthenticatedUser => _client.auth.currentUser != null;
 
   LearnerViewModel copyForRegistration() {
+    // A pushed registration route owns its notifier without taking over this screen's state.
     return LearnerViewModel(_client)
       ..children = List.of(children)
       ..selectedLearnerId = selectedLearnerId
@@ -95,6 +96,7 @@ class LearnerViewModel extends ChangeNotifier {
             _recentlyRegisteredLearnerIds.contains(child.learnerId) &&
             !linkedIds.contains(child.learnerId),
       );
+      // Keep newly saved learners visible if the follow-up RPC has not returned them yet.
       children = [...linkedChildren, ...recentlyRegisteredChildren];
       _recentlyRegisteredLearnerIds.removeAll(linkedIds);
       if (!children.any((child) => child.learnerId == selectedLearnerId)) {
@@ -135,6 +137,7 @@ class LearnerViewModel extends ChangeNotifier {
   }
 
   Future<bool> loadAttendanceRecords(int learnerId) async {
+    // Ignore stale responses if the user switches learners before a request finishes.
     final requestId = ++_attendanceRequestId;
     isLoadingAttendance = true;
     attendanceErrorMessage = null;
@@ -181,6 +184,7 @@ class LearnerViewModel extends ChangeNotifier {
   }
 
   Future<bool> loadBehaviouralRecords(int learnerId) async {
+    // Ignore stale responses if the user switches learners before a request finishes.
     final requestId = ++_behaviourRequestId;
     isLoadingBehaviour = true;
     behaviourErrorMessage = null;
@@ -265,6 +269,7 @@ class LearnerViewModel extends ChangeNotifier {
       final resolvedEmail = parentEmail ?? _parentEmail ?? user?.email ?? '';
       final resolvedPhone =
           parentPhone ?? _parentPhone ?? metadata['phone'] as String? ?? '';
+      // Retain these details when email confirmation leaves no active session.
       _parentAuthId = authId;
       _parentFirstName = resolvedFirstName;
       _parentLastName = resolvedLastName;

@@ -119,6 +119,7 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
       Navigator.of(context).pop();
       return;
     }
+    // The next route takes ownership of this view model to preserve the saved learner.
     _ownsViewModel = false;
     final navigator = Navigator.of(context);
     final learnerViewModel = _viewModel;

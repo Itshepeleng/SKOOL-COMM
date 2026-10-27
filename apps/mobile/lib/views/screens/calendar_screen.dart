@@ -43,6 +43,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           _viewModel.visibleMonth.year,
           _viewModel.visibleMonth.month,
         );
+        // A fixed six-week grid keeps the calendar layout steady across months.
         final offset = firstDay.weekday % 7;
         final cells = List.generate(
           42,

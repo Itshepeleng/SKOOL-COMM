@@ -35,6 +35,7 @@ class LearnerProfile {
   }
 
   static Object? _value(Map<String, dynamic> json, List<String> names) {
+    // Supabase RPCs and the legacy ERD use different column names and casing.
     for (final name in names) {
       if (json.containsKey(name)) return json[name];
     }

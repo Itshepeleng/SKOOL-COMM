@@ -76,6 +76,7 @@ class AuthViewModel extends ChangeNotifier {
 
     avatarErrorMessage = null;
     try {
+      // The avatar bucket is private, so the app must use a short-lived URL.
       avatarUrl = await client.storage
           .from('parent-avatars')
           .createSignedUrl(avatarPath, 60 * 60 * 24);
@@ -190,6 +191,7 @@ class AuthViewModel extends ChangeNotifier {
         data: {'full_name': fullName.trim(), 'phone': phone.trim()},
       );
       if (response.session == null) {
+        // Without a session, the learner-registration step waits for email confirmation.
         statusMessage =
             'Confirm your email using the link. You will return to Skool-Comm '
             'to create the learner profile.';
@@ -256,6 +258,7 @@ class AuthViewModel extends ChangeNotifier {
         ),
       );
       if (emailChanged) {
+        // Auth may require a separate confirmation before applying the new email.
         try {
           await _auth.updateUser(UserAttributes(email: normalizedEmail));
           statusMessage =
