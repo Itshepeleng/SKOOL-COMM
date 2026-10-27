@@ -4,9 +4,9 @@
 
 Skool-Comm is a school-parent communication system designed for Wilgehof Primary School. It consists of a Flutter mobile application for parents and guardians, an ASP.NET Core web application for teachers and administrators, and a shared Supabase backend.
 
-The system centralises school communication by allowing parents and guardians to view announcements, attendance records, behavioural points, reminders, school events and the year plan. Parents can also update their contact information and register their profiles for approval.
+The system centralises school communication by allowing parents and guardians to view announcements, attendance records, behavioural points, reminders, school events and the year plan.Parents can also update their contact information and register their profiles. Registration is automatic and immediate upon signup.
 
-Teachers and administrators use the web application to manage announcements, attendance and school events. Teachers record behavioural points, while administrators manage user accounts and approve or reject parent profiles. The system also supports parent engagement tracking to monitor announcement views.
+Teachers and administrators use the web application to manage announcements, attendance and school events. Teachers record behavioural points, while administrators manage user accounts, events, and the year plan. The system also supports parent engagement tracking to monitor announcement views and event responses.
 
 ## Proposed Solution
 
@@ -28,7 +28,7 @@ The web application allows teachers and administrators to:
 - Record learner behavioural points through the teacher role.
 - Manage school events and the year plan.
 - Track parent engagement with announcements.
-- Generate reports according to the approved requirements.
+
 
 Administrators can also manage user accounts and approve or reject parent profiles.
 
@@ -85,7 +85,7 @@ Project-specific configuration, including Supabase settings, must be supplied se
 ### Must-Have Features
 
 - Secure registration, login and role-based access for parents, teachers and administrators.
-- Parent profile registration and administrator approval or rejection.
+- Automatic parent profile registration 
 - User management by administrators.
 - Announcement management.
 - In-app reminders for parents.
