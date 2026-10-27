@@ -22,6 +22,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final _confirmPasswordController = TextEditingController();
   late final AuthViewModel _viewModel;
   bool _acceptedTerms = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void initState() {
@@ -118,10 +120,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                                            // Make the logo bigger just for this screen
+                      // Make the logo bigger just for this screen
                       const Center(
                         child: SizedBox(
-                          height: 110, // Adjust this number if you want it even bigger
+                          height:
+                              110, // Adjust this number if you want it even bigger
                           child: FittedBox(
                             fit: BoxFit.contain,
                             child: SchoolLogo(compact: true),
@@ -172,9 +175,22 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                       _field(
                         controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        suffixIcon: IconButton(
+                          tooltip: _obscurePassword
+                              ? 'Show password'
+                              : 'Hide password',
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                        ),
                         hint: 'Create password',
                         icon: Icons.lock_outline,
-                        obscureText: true,
                         validator: (value) {
                           if (value == null || value.length < 8) {
                             return 'Use at least 8 characters';
@@ -186,7 +202,21 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         controller: _confirmPasswordController,
                         hint: 'Confirm password',
                         icon: Icons.lock_outline,
-                        obscureText: true,
+                        obscureText: _obscureConfirmPassword,
+                        suffixIcon: IconButton(
+                          tooltip: _obscureConfirmPassword
+                              ? 'Show password'
+                              : 'Hide password',
+                          onPressed: () => setState(
+                            () => _obscureConfirmPassword =
+                                !_obscureConfirmPassword,
+                          ),
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                        ),
                         validator: (value) {
                           if (value != _passwordController.text) {
                             return 'Passwords do not match';
@@ -248,6 +278,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     required String? Function(String?) validator,
     TextInputType? keyboardType,
     bool obscureText = false,
+    Widget? suffixIcon,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -255,7 +286,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         controller: controller,
         keyboardType: keyboardType,
         obscureText: obscureText,
-        decoration: InputDecoration(prefixIcon: Icon(icon), hintText: hint),
+        decoration: InputDecoration(
+          prefixIcon: Icon(icon),
+          hintText: hint,
+          suffixIcon: suffixIcon,
+        ),
         validator: validator,
       ),
     );

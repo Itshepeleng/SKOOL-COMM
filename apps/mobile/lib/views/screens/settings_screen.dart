@@ -34,58 +34,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return AnimatedBuilder(
       animation: _viewModel,
       builder: (context, _) => Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        leading: IconButton(
-          tooltip: 'Back',
-          onPressed: () => Navigator.of(context).maybePop(),
-          icon: const Icon(Icons.arrow_back),
+        appBar: AppBar(
+          title: const Text('Settings'),
+          leading: IconButton(
+            tooltip: 'Back',
+            onPressed: () => Navigator.of(context).maybePop(),
+            icon: const Icon(Icons.arrow_back),
+          ),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _SettingsAction(
-            title: 'Change Password',
-            onTap: _changePassword,
-          ),
-          _SettingsAction(
-            title: 'Language',
-            trailing: 'English',
-            onTap: () => _showNotice('Language options'),
-          ),
-          _SettingsAction(
-            title: 'Help & Support',
-            onTap: () => _showNotice('Contact the school office for support.'),
-          ),
-          _SettingsToggle(
-            title: 'Push Notifications',
-            value: _viewModel.pushNotificationsEnabled,
-            onChanged: _viewModel.setPushNotifications,
-          ),
-          _SettingsToggle(
-            title: 'Email Notifications',
-            value: _viewModel.emailNotificationsEnabled,
-            onChanged: _viewModel.setEmailNotifications,
-          ),
-          const SizedBox(height: 24),
-          OutlinedButton(
-            onPressed: _signOut,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: SchoolTheme.orange,
-              side: const BorderSide(color: SchoolTheme.orange),
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            _SettingsAction(title: 'Change Password', onTap: _changePassword),
+            _SettingsAction(
+              title: 'Language',
+              trailing: 'English',
+              onTap: () => _showNotice('Language options'),
             ),
-            child: const Text('Log Out'),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'Notification preferences are stored for this session only.',
-            style: TextStyle(color: SchoolTheme.muted, fontSize: 12),
-          ),
-        ],
-      ),
+            _SettingsAction(
+              title: 'Help & Support',
+              onTap: _showHelpAndSupport,
+            ),
+            _SettingsToggle(
+              title: 'Push Notifications',
+              value: _viewModel.pushNotificationsEnabled,
+              onChanged: _viewModel.setPushNotifications,
+            ),
+            _SettingsToggle(
+              title: 'Email Notifications',
+              value: _viewModel.emailNotificationsEnabled,
+              onChanged: _viewModel.setEmailNotifications,
+            ),
+            const SizedBox(height: 24),
+            OutlinedButton(
+              onPressed: _signOut,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: SchoolTheme.orange,
+                side: const BorderSide(color: SchoolTheme.orange),
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+              ),
+              child: const Text('Log Out'),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Notification preferences are stored for this session only.',
+              style: TextStyle(color: SchoolTheme.muted, fontSize: 12),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -137,6 +137,95 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _showHelpAndSupport() {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Help & Support'),
+        content: SizedBox(
+          width: 440,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'School Office Contact Information',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: SchoolTheme.darkGreen,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const _SupportContactRow(
+                  icon: Icons.phone_outlined,
+                  label: 'Main reception',
+                  value: '051 522 5211',
+                ),
+                const _SupportContactRow(
+                  icon: Icons.access_time,
+                  label: 'Office hours',
+                  value: 'Monday – Friday, 07:30 – 14:30',
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  'Direct Email Support',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: SchoolTheme.darkGreen,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const _SupportContactRow(
+                  icon: Icons.mail_outline,
+                  label: 'Email',
+                  value: 'support@skoolcomm.co.za',
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Frequently Asked Questions',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: SchoolTheme.darkGreen,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const _SupportFaq(
+                  question: 'How do I update my parent profile?',
+                  answer:
+                      'Open Profile, then tap Edit Contact Information. '
+                      'Update your details and save your changes.',
+                ),
+                const _SupportFaq(
+                  question: 'How do I link multiple children?',
+                  answer:
+                      'Open Profile and tap My Children to view linked '
+                      'learners. Tap Add Child to register another learner '
+                      'to your account.',
+                ),
+                const _SupportFaq(
+                  question: 'How do I troubleshoot notifications?',
+                  answer:
+                      'Check that Push Notifications or Email Notifications '
+                      'are enabled in Settings. Also check your device’s '
+                      'notification permissions and internet connection. '
+                      'Notification preferences currently last only for '
+                      'this session.',
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _signOut() async {
     final signedOut = await widget.authViewModel.signOut();
     if (!mounted) return;
@@ -146,15 +235,82 @@ class _SettingsScreenState extends State<SettingsScreen> {
         (_) => false,
       );
     } else {
-      _showNotice(
-        widget.authViewModel.errorMessage ?? 'Unable to sign out.',
-      );
+      _showNotice(widget.authViewModel.errorMessage ?? 'Unable to sign out.');
     }
   }
 
   void _showNotice(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+class _SupportContactRow extends StatelessWidget {
+  const _SupportContactRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: SchoolTheme.green),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: SchoolTheme.muted,
+                    fontSize: 12,
+                  ),
+                ),
+                SelectableText(value),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SupportFaq extends StatelessWidget {
+  const _SupportFaq({required this.question, required this.answer});
+
+  final String question;
+  final String answer;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      tilePadding: EdgeInsets.zero,
+      childrenPadding: const EdgeInsets.only(bottom: 12),
+      title: Text(
+        question,
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      ),
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            answer,
+            style: const TextStyle(color: SchoolTheme.muted, height: 1.4),
+          ),
+        ),
+      ],
     );
   }
 }
