@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app/school_theme.dart';
 
+import '../../utils/validators.dart';
 import '../../viewmodels/auth_view_model.dart';
 import '../widgets/school_widgets.dart';
 import 'child_profile_screen.dart';
@@ -97,8 +98,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           parentAuthId: response.user?.id,
           parentFirstName: parentFirstName,
           parentLastName: parentLastName,
-          parentEmail: _emailController.text.trim(),
-          parentPhone: _phoneController.text.trim(),
+          parentEmail: Validators.normalizeEmail(_emailController.text),
+          parentPhone: Validators.normalizePhone(_phoneController.text) ??
+              _phoneController.text.trim(),
         ),
       ),
     );
@@ -178,19 +180,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         hint: 'Email address',
                         icon: Icons.mail_outline,
                         keyboardType: TextInputType.emailAddress,
-                        validator: (value) {
-                          if (value == null || !value.contains('@')) {
-                            return 'Enter a valid email address';
-                          }
-                          return null;
-                        },
+                        validator: Validators.email,
                       ),
                       _field(
                         controller: _phoneController,
                         hint: 'Phone number',
                         icon: Icons.phone_outlined,
                         keyboardType: TextInputType.phone,
-                        validator: _required,
+                        validator: Validators.phone,
                       ),
                       _field(
                         controller: _passwordController,

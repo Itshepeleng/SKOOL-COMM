@@ -453,8 +453,10 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
       context: context,
       initialDate:
           _dateOfBirth ?? DateTime(today.year - 10, today.month, today.day),
-      firstDate: DateTime(1900),
-      lastDate: today,
+      // A primary school learner is roughly 4 to 16 years old.
+      firstDate: DateTime(today.year - 16, today.month, today.day),
+      lastDate: DateTime(today.year - 4, today.month, today.day),
+      helpText: 'Select date of birth',
     );
     if (selected != null) setState(() => _dateOfBirth = selected);
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app/school_theme.dart';
 
+import '../../utils/validators.dart';
 import '../../viewmodels/auth_view_model.dart';
 import '../widgets/school_widgets.dart';
 import 'create_account_screen.dart';
@@ -115,12 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           prefixIcon: Icon(Icons.mail_outline),
                           hintText: 'Email address',
                         ),
-                        validator: (value) {
-                          if (value == null || !value.contains('@')) {
-                            return 'Enter a valid email address';
-                          }
-                          return null;
-                        },
+                        validator: Validators.email,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -198,8 +194,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _showForgotPasswordDialog() async {
-    final email = _emailController.text.trim();
-    if (!email.contains('@')) {
+    final email = Validators.normalizeEmail(_emailController.text);
+    if (Validators.email(email) != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Enter your email address first.')),
       );
