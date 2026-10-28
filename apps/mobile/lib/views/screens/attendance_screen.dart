@@ -29,7 +29,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     super.initState();
     _viewModel = AttendanceViewModel(
       studentName: widget.child.fullName,
-      grade: '${widget.child.grade} · ${widget.child.className}',
+      grade: widget.child.gradeClassLabel,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadRecords());
   }
@@ -69,7 +69,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                       ),
                     ),
                     Text(
-                      '${widget.child.grade} · ${widget.child.className}',
+                      widget.child.gradeClassLabel,
                       style: TextStyle(color: SchoolTheme.muted),
                     ),
                     const SizedBox(height: 24),

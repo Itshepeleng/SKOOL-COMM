@@ -141,7 +141,7 @@ class _PointList extends StatelessWidget {
                                       DropdownMenuItem(
                                         value: child.learnerId,
                                         child: Text(
-                                          '${child.fullName} · ${child.grade} ${child.className}',
+                                          '${child.fullName} · ${child.gradeClassLabel}',
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
