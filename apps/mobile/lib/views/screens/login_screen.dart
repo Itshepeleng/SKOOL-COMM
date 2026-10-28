@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../app/school_theme.dart';
 
 import '../../viewmodels/auth_view_model.dart';
 import '../widgets/school_widgets.dart';
@@ -65,7 +66,35 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Center(child: SchoolLogo(compact: true)),
+                                            Center(
+                        child: Container(
+                          width: 170,
+                          height: 170,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            border: Border.all(
+                              color: SchoolTheme.green,
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.10),
+                                blurRadius: 16,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: SizedBox(
+                            width: 135,
+                            child: Image.asset(
+                              'assets/logos/school_logo.jpg',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 34),
                       const ScreenIntro(
                         title: 'Log In',
