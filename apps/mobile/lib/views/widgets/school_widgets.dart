@@ -14,7 +14,7 @@ class SchoolLogo extends StatelessWidget {
       children: [
         Image.asset(
           'assets/logos/school_logo.jpg',
-          height: compact ? 50 : 90,
+          height: compact ? 60 : 120,
           fit: BoxFit.contain,
         ),
       ],
