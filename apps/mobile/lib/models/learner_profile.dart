@@ -18,6 +18,16 @@ class LearnerProfile {
 
   String get fullName => '$firstName $lastName';
 
+  /// Display label such as "Grade 5B". Falls back to the raw values for any
+  /// old row that is not in the standard format yet.
+  String get gradeClassLabel {
+    final cls = className.trim().toUpperCase();
+    if (RegExp(r'^(R|[1-7])[A-F]$').hasMatch(cls)) return 'Grade $cls';
+    return [grade.trim(), className.trim()]
+        .where((part) => part.isNotEmpty)
+        .join(' · ');
+  }
+
   factory LearnerProfile.fromJson(Map<String, dynamic> json) {
     final learnerId = _value(json, const ['learnerid', 'learner_id']);
     if (learnerId is! num) {

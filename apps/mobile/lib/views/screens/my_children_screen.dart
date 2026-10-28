@@ -149,7 +149,7 @@ class _MyChildrenScreenState extends State<MyChildrenScreen> {
                   for (final child in viewModel.children)
                     _ChildCard(
                       name: child.fullName,
-                      grade: '${child.grade} · ${child.className}',
+                      grade: child.gradeClassLabel,
                       onTap: () => _showChildDetails(context, child),
                     ),
                 ],
@@ -171,7 +171,7 @@ class _MyChildrenScreenState extends State<MyChildrenScreen> {
       builder: (dialogContext) => AlertDialog(
         title: Text(child.fullName),
         content: Text(
-          '${child.grade} · ${child.className}\n'
+          '${child.gradeClassLabel}\n'
           'Relationship: ${child.relationship}\nActive',
         ),
         actions: [

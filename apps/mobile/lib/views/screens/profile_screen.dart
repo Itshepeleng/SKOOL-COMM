@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../app/school_theme.dart';
+import '../../utils/validators.dart';
 import '../../viewmodels/auth_view_model.dart';
 import 'welcome_screen.dart';
 
@@ -170,7 +171,7 @@ class ProfileScreen extends StatelessWidget {
                             _ContactRow(
                               icon: Icons.phone_outlined,
                               label: 'Phone Number',
-                              value: phone,
+                              value: Validators.formatPhone(phone),
                             ),
                             const SizedBox(height: 13),
                             _ContactRow(
@@ -369,7 +370,9 @@ class _EditContactDialogState extends State<_EditContactDialog> {
     super.initState();
     _nameController = TextEditingController(text: widget.name);
     _phoneController = TextEditingController(
-      text: widget.phone == 'Not added' ? '' : widget.phone,
+      text: widget.phone == 'Not added'
+          ? ''
+          : Validators.formatPhone(widget.phone),
     );
     _emailController = TextEditingController(
       text: widget.email == 'Not available' ? '' : widget.email,
@@ -408,20 +411,14 @@ class _EditContactDialogState extends State<_EditContactDialog> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  final address = value?.trim() ?? '';
-                  final atIndex = address.indexOf('@');
-                  return atIndex <= 0 ||
-                          !address.substring(atIndex).contains('.')
-                      ? 'Enter a valid email address'
-                      : null;
-                },
+                validator: Validators.email,
               ),
               const SizedBox(height: 10),
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(labelText: 'Phone number'),
+                validator: Validators.phone,
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
@@ -469,8 +466,9 @@ class _EditContactDialogState extends State<_EditContactDialog> {
             if (_formKey.currentState!.validate()) {
               Navigator.pop(context, (
                 _nameController.text.trim(),
-                _phoneController.text.trim(),
-                _emailController.text.trim(),
+                Validators.normalizePhone(_phoneController.text) ??
+                    _phoneController.text.trim(),
+                Validators.normalizeEmail(_emailController.text),
                 _selectedTitle,
                 _selectedRelationship,
               ));

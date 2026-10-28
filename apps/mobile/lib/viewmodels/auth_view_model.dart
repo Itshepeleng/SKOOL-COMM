@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../utils/validators.dart';
+
 // Owns authentication requests and exposes transient UI state to auth screens.
 class AuthViewModel extends ChangeNotifier {
   AuthViewModel(this._auth, {SupabaseClient? client}) : _client = client;
@@ -157,7 +159,7 @@ class AuthViewModel extends ChangeNotifier {
 
     try {
       return await _auth.signInWithPassword(
-        email: email.trim(),
+        email: Validators.normalizeEmail(email),
         password: password,
       );
     } on AuthException catch (error) {
@@ -183,12 +185,15 @@ class AuthViewModel extends ChangeNotifier {
 
     try {
       final response = await _auth.signUp(
-        email: email.trim(),
+        email: Validators.normalizeEmail(email),
         password: password,
         emailRedirectTo: kIsWeb
             ? Uri.base.origin
             : 'io.supabase.flutter://login-callback/',
-        data: {'full_name': fullName.trim(), 'phone': phone.trim()},
+        data: {
+          'full_name': fullName.trim(),
+          'phone': Validators.normalizePhone(phone) ?? phone.trim(),
+        },
       );
       if (response.session == null) {
         // Without a session, the learner-registration step waits for email confirmation.
@@ -245,13 +250,13 @@ class AuthViewModel extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
     try {
-      final normalizedEmail = email.trim();
+      final normalizedEmail = Validators.normalizeEmail(email);
       final emailChanged = normalizedEmail != currentUser?.email;
       await _auth.updateUser(
         UserAttributes(
           data: {
             'full_name': fullName.trim(),
-            'phone': phone.trim(),
+            'phone': Validators.normalizePhone(phone) ?? phone.trim(),
             'guardian_title': guardianTitle,
             'guardian_relationship': guardianRelationship,
           },
