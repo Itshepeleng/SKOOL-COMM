@@ -39,12 +39,18 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _surnameController = TextEditingController();
-  final _gradeController = TextEditingController();
-  final _classController = TextEditingController();
   final _idNumberController = TextEditingController();
   late final LearnerViewModel _viewModel;
   DateTime? _dateOfBirth;
   String _relationship = 'Father';
+  String? _grade;
+  String? _className;
+
+  static const _grades = [
+    'Grade R', 'Grade 1', 'Grade 2', 'Grade 3',
+    'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7',
+  ];
+  static const _classes = ['A', 'B', 'C', 'D', 'E', 'F'];
   bool _ownsViewModel = false;
 
   @override
@@ -64,8 +70,6 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
   void dispose() {
     _nameController.dispose();
     _surnameController.dispose();
-    _gradeController.dispose();
-    _classController.dispose();
     _idNumberController.dispose();
     if (_ownsViewModel) _viewModel.dispose();
     super.dispose();
@@ -84,8 +88,8 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
     final saved = await _viewModel.registerLearner(
       firstName: _nameController.text,
       lastName: _surnameController.text,
-      grade: _gradeController.text,
-      className: _classController.text,
+      grade: _grade ?? '',
+      className: '${(_grade ?? '').replaceFirst('Grade ', '')}${_className ?? ''}',
       dateOfBirth: _dateOfBirth!,
       idNumber: _idNumberController.text,
       relationship: _relationship,
@@ -259,17 +263,19 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
                     hint: "Enter child's surname",
                     validator: _required,
                   ),
-                  _profileField(
-                    controller: _gradeController,
+                  _dropdownField(
                     label: 'Grade',
-                    hint: 'Enter learner grade',
-                    validator: _required,
+                    hint: 'Select grade',
+                    options: _grades,
+                    value: _grade,
+                    onChanged: (v) => setState(() => _grade = v),
                   ),
-                  _profileField(
-                    controller: _classController,
+                  _dropdownField(
                     label: 'Class',
-                    hint: 'Enter learner class',
-                    validator: _required,
+                    hint: 'Select class',
+                    options: _classes,
+                    value: _className,
+                    onChanged: (v) => setState(() => _className = v),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 14),
@@ -401,6 +407,35 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
             keyboardType: keyboardType,
             decoration: InputDecoration(hintText: hint),
             validator: validator,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _dropdownField({
+    required String label,
+    required String hint,
+    required List<String> options,
+    required String? value,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 7),
+          DropdownButtonFormField<String>(
+            initialValue: value,
+            isExpanded: true,
+            hint: Text(hint),
+            items: options
+                .map((o) => DropdownMenuItem(value: o, child: Text(o)))
+                .toList(),
+            onChanged: onChanged,
+            validator: (v) => v == null ? 'Please select an option' : null,
           ),
         ],
       ),
