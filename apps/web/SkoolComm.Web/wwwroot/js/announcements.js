@@ -19,6 +19,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const clearBtn = document.getElementById("annClear");
     const toast = document.getElementById("annToast");
     const toastText = document.getElementById("annToastText");
+    const announcementDialog = document.getElementById("announcementDialog");
+    const announcementDialogTitle = document.getElementById("announcementDialogTitle");
+    const announcementDialogContent = document.getElementById("announcementDialogContent");
+    const announcementDialogAudience = document.getElementById("announcementDialogAudience");
+    const announcementDialogDate = document.getElementById("announcementDialogDate");
+    const announcementDialogClose = document.getElementById("announcementDialogClose");
 
 
     /* ---------- Helpers ---------- */
@@ -37,6 +43,30 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateSend() {
         sendBtn.disabled = !(titleInput.value.trim() && messageInput.value.trim());
     }
+
+    function closeAnnouncementDialog() {
+        announcementDialog.classList.add("hidden");
+    }
+
+    document.querySelectorAll(".announcement-card").forEach(function (card) {
+        card.addEventListener("click", function () {
+            announcementDialogTitle.textContent = card.dataset.title;
+            announcementDialogContent.textContent = card.dataset.content;
+            announcementDialogAudience.textContent = card.dataset.audience;
+            announcementDialogDate.textContent = card.dataset.date;
+            announcementDialog.classList.remove("hidden");
+        });
+    });
+
+    announcementDialogClose.addEventListener("click", closeAnnouncementDialog);
+    announcementDialog.addEventListener("click", function (e) {
+        if (e.target === announcementDialog) closeAnnouncementDialog();
+    });
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && !announcementDialog.classList.contains("hidden")) {
+            closeAnnouncementDialog();
+        }
+    });
 
 
     /* ---------- Inputs ---------- */

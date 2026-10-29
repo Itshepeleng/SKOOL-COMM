@@ -18,8 +18,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const roleInput =
         document.getElementById("roleInput");
 
-    const usernameInput =
-        document.getElementById("username");
+    const emailInput =
+        document.getElementById("email");
 
     const passwordInput =
         document.getElementById("password");
@@ -58,20 +58,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     loginForm.addEventListener("submit", function (event) {
 
-        const username =
-            usernameInput.value.trim();
+        const email =
+            emailInput.value.trim();
 
         const password =
             passwordInput.value.trim();
 
 
         // Only stop submission if fields are empty
-        if (!username || !password) {
+        if (!email || !password) {
 
             event.preventDefault();
 
             loginMessage.textContent =
-                "Please enter your username and password.";
+                "Please enter your email and password.";
 
             loginMessage.className =
                 "login-message show error";

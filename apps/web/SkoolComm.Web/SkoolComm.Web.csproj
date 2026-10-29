@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- These projects are consumed through the compiled DLL references below.
+         Do not compile their nested source and generated files into the web app. -->
+    <Compile Remove="SkoolComm.Domain\**\*.cs" />
+    <Compile Remove="SkoolComm.Application\**\*.cs" />
+    <Compile Remove="SkoolComm.Infrastructure\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="SkoolComm.Domain">
       <HintPath>..\lib\SkoolComm.Domain.dll</HintPath>
       <Private>true</Private>
@@ -22,6 +30,10 @@
     </Reference>
     <Reference Include="Supabase">
       <HintPath>..\lib\Supabase.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Supabase.Core">
+      <HintPath>..\lib\Supabase.Core.dll</HintPath>
       <Private>true</Private>
     </Reference>
     <Reference Include="Supabase.Gotrue">

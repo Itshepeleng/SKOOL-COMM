@@ -73,18 +73,36 @@
 
                 @foreach (var a in Model)
                 {
-                    <div class="record-box">
+                    <button type="button" class="record-box announcement-card"
+                            data-title="@a.Title"
+                            data-content="@a.Content"
+                            data-audience="@a.TargetAudience"
+                            data-date="@a.DatePosted.ToString("d MMM yyyy, HH:mm", inv)">
                         <div class="row-between" style="align-items:flex-start;gap:8px;margin-bottom:4px;">
                             <p style="font-size:14px;font-weight:600;line-height:1.35;">@a.Title</p>
                             <span class="badge badge-green" style="flex-shrink:0;">@a.TargetAudience</span>
                         </div>
                         <p class="small muted" style="white-space:pre-line;line-height:1.5;">@Preview(a.Content)</p>
                         <div class="tiny faint" style="margin-top:6px;">@a.DatePosted.ToString("d MMM yyyy, HH:mm", inv)</div>
-                    </div>
+                    </button>
                 }
             </div>
         </div>
 
+    </div>
+</div>
+
+<div id="announcementDialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="announcementDialogTitle">
+    <div class="dialog announcement-dialog">
+        <div class="row-between" style="align-items:flex-start;gap:12px;margin-bottom:16px;">
+            <h2 id="announcementDialogTitle" style="margin:0;text-align:left;"></h2>
+            <button type="button" id="announcementDialogClose" class="dialog-close" aria-label="Close announcement">&times;</button>
+        </div>
+        <div class="row gap-2" style="margin-bottom:16px;">
+            <span id="announcementDialogAudience" class="badge badge-green"></span>
+            <span id="announcementDialogDate" class="tiny faint"></span>
+        </div>
+        <p id="announcementDialogContent" class="announcement-content"></p>
     </div>
 </div>
 

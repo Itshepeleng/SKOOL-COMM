@@ -11,6 +11,7 @@
           "SkoolComm.Application": "1.0.0.0",
           "SkoolComm.Domain": "1.0.0.0",
           "SkoolComm.Infrastructure": "1.0.0.0",
+          "Supabase.Core": "1.0.0.0",
           "Supabase": "8.0.0.0",
           "Supabase.Gotrue": "8.0.0.0",
           "Supabase.Postgrest": "8.0.0.0",
@@ -40,6 +41,14 @@
       "SkoolComm.Infrastructure/1.0.0.0": {
         "runtime": {
           "SkoolComm.Infrastructure.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Supabase.Core/1.0.0.0": {
+        "runtime": {
+          "Supabase.Core.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
@@ -90,14 +99,6 @@
           "Supabase.Functions.dll": {
             "assemblyVersion": "8.0.0.0",
             "fileVersion": "8.0.0.0"
-          }
-        }
-      },
-      "Supabase.Core/1.0.0.0": {
-        "runtime": {
-          "Supabase.Core.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
           }
         }
       },
@@ -204,6 +205,11 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Supabase.Core/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
     "Supabase/8.0.0.0": {
       "type": "reference",
       "serviceable": false,
@@ -230,11 +236,6 @@
       "sha512": ""
     },
     "Supabase.Functions/8.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Supabase.Core/1.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""

@@ -4,7 +4,8 @@
     // Who is logged in? (saved in the session when they log in)
     var userName = Context.Session.GetString("UserName") ?? "Guest User";
     var userRole = Context.Session.GetString("UserRole") ?? "teacher";
-    bool isAdmin = userRole == "admin";
+    bool isAdmin = userRole.Equals("admin", StringComparison.OrdinalIgnoreCase)
+        || userRole.Equals("administrator", StringComparison.OrdinalIgnoreCase);
     string roleLabel = isAdmin ? "Administrator" : "Teacher";
     string initial = userName.Length > 0 ? userName.Substring(0, 1).ToUpper() : "?";
 

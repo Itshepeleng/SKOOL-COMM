@@ -758,6 +758,22 @@ table.tbl {
     border: 1px solid #eef2ef;
 }
 
+.announcement-card {
+    width: 100%;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+}
+
+    .announcement-card:hover,
+    .announcement-card:focus-visible {
+        background: var(--green-pale);
+        border-color: var(--ring);
+        outline: none;
+    }
+
 .quick-btn {
     width: 100%;
     display: flex;
@@ -839,6 +855,29 @@ table.tbl {
     max-width: 384px;
     padding: 28px;
     text-align: center;
+}
+
+.announcement-dialog {
+    max-width: 560px;
+    text-align: left;
+}
+
+.dialog-close {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 24px;
+    line-height: 1;
+    padding: 0 4px;
+}
+
+    .dialog-close:hover {
+        color: var(--text);
+    }
+
+.announcement-content {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
 }
 
 .dialog-icon {

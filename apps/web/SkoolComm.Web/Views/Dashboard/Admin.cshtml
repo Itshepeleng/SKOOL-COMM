@@ -1,15 +1,8 @@
-﻿@{
+﻿@using System.Globalization
+@using SkoolComm.Web.Models
+@{
     ViewData["Title"] = "Dashboard";
-
-    // Demo data from the Figma design (replaced by Supabase later)
-    var recentActivity = new[]
-    {
-        new { User = "Mrs van der Berg", Action = "Published an announcement for Grade 5A", Time = "09:42" },
-        new { User = "Mr Fourie",        Action = "Recorded attendance for Grade 6B", Time = "08:55" },
-        new { User = "Admin Pretorius",  Action = "Added new user: Ms Sithole (Teacher)", Time = "08:20" },
-        new { User = "Mrs Nkosi",        Action = "Published announcement: Sports Day arrangements", Time = "07:55" },
-        new { User = "Mr Adams",         Action = "Recorded 4 behavioural points for Grade 4C", Time = "Yesterday" }
-    };
+    var recentActivity = ViewBag.RecentActivity as List<DashboardActivityViewModel> ?? new();
 }
 
 <div class="stack">
@@ -31,14 +24,14 @@
             </div>
             <div class="stat-value">@(ViewBag.TeacherCount ?? "–")</div>
             <div class="stat-label">Total Teachers</div>
-            <div class="stat-sub">Active staff members</div>
+            <div class="stat-sub">Teacher accounts in database</div>
         </div>
 
         <div class="stat-card orange">
             <div class="stat-icon orange">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="white" stroke-width="1.5" fill="none"/><path d="M4 18c0-3.9 2.7-7 6-7s6 3.1 6 7" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
             </div>
-            <div class="stat-value">250</div>
+            <div class="stat-value">@(ViewBag.ParentCount ?? "–")</div>
             <div class="stat-label">Total Parents</div>
             <div class="stat-sub">3 new this week</div>
         </div>
@@ -87,21 +80,25 @@
         <div class="card col-span-2">
             <div class="row-between" style="margin-bottom:12px;">
                 <h3 style="margin-bottom:0;">Recent Activity</h3>
-                <span class="small faint">Last 24 hours</span>
+                <span class="small faint">Latest announcements</span>
             </div>
 
             <div>
+                @if (recentActivity.Count == 0)
+                {
+                    <p class="small faint">No recent activity.</p>
+                }
                 @foreach (var a in recentActivity)
                 {
                     <div class="list-row" style="align-items:center;">
                         <div class="avatar" style="width:28px;height:28px;font-size:12px;background:#e8f4ec;color:#1a5c2e;">
-                            @a.User.Substring(0, 1)
+                            @a.User.Substring(0, 1).ToUpperInvariant()
                         </div>
                         <div style="flex:1;min-width:0;">
                             <span style="font-size:14px;font-weight:600;">@a.User</span>
                             <span class="muted"> — @a.Action</span>
                         </div>
-                        <span class="small faint" style="flex-shrink:0;">@a.Time</span>
+                        <span class="small faint" style="flex-shrink:0;">@a.DatePosted.ToString("d MMM, HH:mm", CultureInfo.InvariantCulture)</span>
                     </div>
                 }
             </div>
