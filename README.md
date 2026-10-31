@@ -193,19 +193,17 @@ The structure above describes the intended organisation of the repository. Only 
 
 ## Project Status
 
-**Current Phase:** Phase 2 – System Architecture and Design
+**Current Phase:** Phase 3 – System Development and Implementation
 
-Phase 2 activities include:
-- System architecture design.
-- UML use case and sequence diagrams.
-- Database design and ERD.
-- Software Requirements Specification updates.
-- User interface design for Flutter and ASP.NET Core.
-- Microsoft Project schedule updates.
-- GitHub documentation organisation.
-- Project progress tracker updates.
-
-The next stage is system development, implementation, testing and the final demonstration.
+Phase 3 activities include:
+- Set up and Implement the Shared Supabase.
+- Develop the Flutter Mobile Application.
+- Develop the ASP.NET Web Application.
+- Integrate the Mobile and Web Applications.
+- Demonstrate the Integrated Prototype.
+- Update Project Documentation and Tools.
+- Final Demonstration.
+- Group Progress Checkpoint.
 
 ---
 
