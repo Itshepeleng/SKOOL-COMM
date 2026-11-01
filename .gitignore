@@ -4,3 +4,17 @@
 
 /.vs
 /apps/web/SkoolComm.Web/.vs
+
+# Local/generated legacy artifacts
+/application.il
+/application.res
+/domain.il
+/apps/web/lib/
+/apps/web/SkoolComm.Web/bin/
+/apps/web/SkoolComm.Web/obj/
+/apps/web/SkoolComm.Web/SkoolComm.Application/bin/
+/apps/web/SkoolComm.Web/SkoolComm.Application/obj/
+/apps/web/SkoolComm.Web/SkoolComm.Domain/bin/
+/apps/web/SkoolComm.Web/SkoolComm.Domain/obj/
+/apps/web/SkoolComm.Web/SkoolComm.Infrastructure/bin/
+/apps/web/SkoolComm.Web/SkoolComm.Infrastructure/obj/
