@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app/school_theme.dart';
+import '../../models/school_announcement.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({
@@ -10,6 +11,11 @@ class DashboardScreen extends StatelessWidget {
     required this.onOpenReminders,
     required this.onOpenSettings,
     required this.onOpenCalendar,
+    required this.onOpenNews,
+    required this.latestAnnouncements,
+    required this.isLoadingAnnouncements,
+    required this.onRetryAnnouncements,
+    this.announcementError,
     this.parentAvatarUrl,
     super.key,
   });
@@ -21,6 +27,11 @@ class DashboardScreen extends StatelessWidget {
   final VoidCallback onOpenReminders;
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenCalendar;
+  final VoidCallback onOpenNews;
+  final List<SchoolAnnouncement> latestAnnouncements;
+  final bool isLoadingAnnouncements;
+  final Future<bool> Function() onRetryAnnouncements;
+  final String? announcementError;
   final String? parentAvatarUrl;
 
   @override
@@ -136,15 +147,43 @@ class DashboardScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const _NewsCard(
-                  title: 'Annual Athletics Sports Day announcements',
-                  date: '24 Sep 2026',
-                ),
-                const SizedBox(height: 9),
-                const _NewsCard(
-                  title: 'School Early Closure updates for Term 3',
-                  date: '20 Sep 2026',
-                ),
+                if (isLoadingAnnouncements)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(14),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                else if (announcementError != null)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Unable to load the latest announcements.',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: onRetryAnnouncements,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  )
+                else if (latestAnnouncements.isEmpty)
+                  const Text(
+                    'No announcements yet.',
+                    style: TextStyle(color: SchoolTheme.muted),
+                  )
+                else
+                  for (final announcement
+                      in latestAnnouncements.take(2)) ...[
+                    _NewsCard(
+                      announcement: announcement,
+                      onTap: onOpenNews,
+                    ),
+                    const SizedBox(height: 9),
+                  ],
               ],
             ),
           ),
@@ -200,30 +239,69 @@ class _ActionTile extends StatelessWidget {
 }
 
 class _NewsCard extends StatelessWidget {
-  const _NewsCard({required this.title, required this.date});
+  const _NewsCard({required this.announcement, required this.onTap});
 
-  final String title;
-  final String date;
+  final SchoolAnnouncement announcement;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE1E7E2)),
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
-          Text(
-            date,
-            style: const TextStyle(fontSize: 11, color: SchoolTheme.muted),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color(0xFFE1E7E2)),
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                announcement.title,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _formatDate(announcement.datePosted),
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: SchoolTheme.muted,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                announcement.content,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 }

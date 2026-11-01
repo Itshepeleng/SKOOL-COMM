@@ -28,12 +28,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
   }
 
   @override
-  void dispose() {
-    _viewModel.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _viewModel,

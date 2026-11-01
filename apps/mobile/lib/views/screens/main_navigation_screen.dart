@@ -38,6 +38,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late final DashboardViewModel _viewModel;
   late final AuthViewModel _authViewModel;
   late final LearnerViewModel _learnerViewModel;
+  late final MessagesViewModel _messagesViewModel;
 
   @override
   void initState() {
@@ -45,11 +46,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _viewModel = DashboardViewModel()..selectedTab = widget.initialTab;
     final client = Supabase.instance.client;
     _authViewModel = AuthViewModel(client.auth, client: client);
+    _messagesViewModel = MessagesViewModel(client);
     _learnerViewModel = LearnerViewModel(Supabase.instance.client)
       ..seedRegisteredChildren(widget.initialChildren);
     _authViewModel.loadAvatar();
     // Let the first frame render before the initial Supabase request updates listeners.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadChildren());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadChildren();
+      _messagesViewModel.loadAnnouncements();
+    });
   }
 
   @override
@@ -57,6 +62,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _viewModel.dispose();
     _authViewModel.dispose();
     _learnerViewModel.dispose();
+    _messagesViewModel.dispose();
     super.dispose();
   }
 
@@ -67,6 +73,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         _viewModel,
         _authViewModel,
         _learnerViewModel,
+        _messagesViewModel,
       ]),
       builder: (context, _) {
         final screen = switch (_viewModel.selectedTab) {
@@ -79,6 +86,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             onOpenReminders: () => _viewModel.selectTab(3),
             onOpenSettings: _openSettings,
             onOpenCalendar: _openCalendar,
+            onOpenNews: () => _viewModel.selectTab(2),
+            latestAnnouncements: _messagesViewModel.announcements,
+            isLoadingAnnouncements: _messagesViewModel.isLoading,
+            announcementError: _messagesViewModel.errorMessage,
+            onRetryAnnouncements: _messagesViewModel.loadAnnouncements,
           ),
           1 => BehavioralPointsScreen(
             viewModel: _viewModel,
@@ -94,7 +106,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             isLoading: _learnerViewModel.isLoadingBehaviour,
             errorMessage: _learnerViewModel.behaviourErrorMessage,
           ),
-          2 => NewsScreen(onBack: () => _selectTab(0)),
+          2 => NewsScreen(
+            viewModel: _messagesViewModel,
+            onBack: () => _selectTab(0),
+          ),
           3 => RemindersScreen(
             onBack: () => _selectTab(0),
             onViewCalendar: _openCalendar,
@@ -124,7 +139,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => MessagesScreen(
-          viewModel: MessagesViewModel(Supabase.instance.client),
+          viewModel: _messagesViewModel,
           onBack: () => Navigator.of(context).maybePop(),
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:mobile/viewmodels/auth_view_model.dart';
 import 'package:mobile/viewmodels/calendar_view_model.dart';
 import 'package:mobile/viewmodels/dashboard_view_model.dart';
 import 'package:mobile/viewmodels/learner_view_model.dart';
+import 'package:mobile/viewmodels/messages_view_model.dart';
 import 'package:mobile/models/learner_profile.dart';
 import 'package:mobile/models/learner_records.dart';
 import 'package:mobile/models/school_announcement.dart';
@@ -239,6 +240,10 @@ void main() {
           onOpenReminders: () {},
           onOpenSettings: () {},
           onOpenCalendar: () {},
+          onOpenNews: () {},
+          latestAnnouncements: const [],
+          isLoadingAnnouncements: false,
+          onRetryAnnouncements: () async => true,
         ),
       ),
     );
@@ -674,8 +679,18 @@ void main() {
 
   testWidgets('news page has a back action', (tester) async {
     var wentBack = false;
+    final viewModel = MessagesViewModel(
+      SupabaseClient(
+        'https://example.supabase.co',
+        'test-key',
+        authOptions: const AuthClientOptions(autoRefreshToken: false),
+      ),
+    );
+    addTearDown(viewModel.dispose);
     await tester.pumpWidget(
-      MaterialApp(home: NewsScreen(onBack: () => wentBack = true)),
+      MaterialApp(
+        home: NewsScreen(viewModel: viewModel, onBack: () => wentBack = true),
+      ),
     );
 
     expect(find.byTooltip('Back'), findsOneWidget);
