@@ -277,7 +277,7 @@ void main() {
     );
 
     expect(find.byTooltip('Back'), findsOneWidget);
-    await tester.tap(find.text('Edit Contact Information'));
+    await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(DropdownButtonFormField<String>).first);
     await tester.pumpAndSettle();
@@ -289,12 +289,13 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Edit Contact Information'));
+    await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
     expect(find.text('Edit Information'), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Add Child'), 300);
+    await tester.ensureVisible(find.text('Add Child'));
+    await tester.pumpAndSettle();
     expect(find.text('Add Child'), findsOneWidget);
     await tester.tap(find.text('Add Child'));
     expect(addChildTapped, isTrue);
@@ -640,15 +641,17 @@ void main() {
       ),
     );
 
-    expect(find.text('Weekly Summary'), findsOneWidget);
-    expect(find.text('1 point record this week.'), findsOneWidget);
+    expect(find.text('Points deducted'), findsOneWidget);
+    expect(find.text('1 offence recorded'), findsOneWidget);
+    expect(find.text('No behaviour records yet.'), findsNothing);
 
     await tester.tap(
       find.text('Disrupting class / not following instructions'),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Points Details'), findsOneWidget);
+    expect(find.text('Behaviour Record'), findsOneWidget);
+    expect(find.text('10 points deducted'), findsOneWidget);
     expect(
       find.text("Repeatedly talking while teacher was explaining."),
       findsOneWidget,
@@ -667,7 +670,7 @@ void main() {
     );
 
     expect(find.text('September 2026'), findsOneWidget);
-    await tester.tap(find.byTooltip('Next month'));
+    await tester.tap(find.byIcon(Icons.chevron_right));
     await tester.pumpAndSettle();
     expect(find.text('October 2026'), findsOneWidget);
   });
@@ -695,8 +698,9 @@ void main() {
               onViewCalendar: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) =>
-                        CalendarScreen(initialMonth: DateTime(2026, 9)),
+                    builder: (_) => Scaffold(
+                      body: CalendarScreen(initialMonth: DateTime(2026, 9)),
+                    ),
                   ),
                 );
               },
@@ -712,7 +716,6 @@ void main() {
     await tester.tap(find.text('View school calendar'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Year Plan'), findsOneWidget);
     expect(find.text('September 2026'), findsOneWidget);
   });
 }

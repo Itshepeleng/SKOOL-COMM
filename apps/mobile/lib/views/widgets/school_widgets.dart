@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/school_theme.dart';
+import 'glass_widget.dart';
 
 class SchoolLogo extends StatelessWidget {
   const SchoolLogo({super.key, this.compact = false});
@@ -34,34 +35,12 @@ class SchoolBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NavigationBar(
+    return GlassBottomNavigation(
       selectedIndex: selectedIndex,
-      onDestinationSelected: onSelected,
-      height: 68,
-      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-      destinations: const [
-        NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
-        NavigationDestination(
-          icon: Icon(Icons.stars_outlined),
-          label: 'Points',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.campaign_outlined),
-          label: 'News',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.notifications_none),
-          label: 'Alerts',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.person_outline),
-          label: 'Profile',
-        ),
-      ],
+      onSelected: onSelected,
     );
   }
 }
-
 class SchoolPrimaryButton extends StatelessWidget {
   const SchoolPrimaryButton({
     required this.label,

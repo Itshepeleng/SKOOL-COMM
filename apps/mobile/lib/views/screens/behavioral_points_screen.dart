@@ -3,8 +3,99 @@ import 'package:flutter/material.dart';
 import '../../app/school_theme.dart';
 import '../../models/learner_profile.dart';
 import '../../models/school_models.dart';
-import '../../viewmodels/attendance_view_model.dart';
 import '../../viewmodels/dashboard_view_model.dart';
+import '../widgets/school_loading_screen.dart';
+
+const Color _demeritRed = Color(0xFFE5334B);
+const Color _cardBorder = Color(0xFFE0E7E2);
+
+const Map<int, String> _levelNames = {
+  1: 'Enforcing reprimand',
+  2: 'Infringement',
+  3: 'Serious offence',
+  4: 'Very serious offence',
+  5: 'Criminal / serious violation',
+};
+
+/// "Level 2 - Infringement". The level is the first digit of the offence
+/// code (101 to 509) that is inside the record's detail text.
+String _levelLabel(String detail) {
+  final match = RegExp(r'\b([1-5])\d{2}\b').firstMatch(detail);
+  if (match == null) return detail;
+  final level = int.parse(match.group(1)!);
+  return 'Level $level - ${_levelNames[level]}';
+}
+
+String _levelInfo(PointRecord record) {
+  return 'This offence resulted in ${record.points.abs()} points being '
+      'deducted from the learner\'s record.';
+}
+
+/// South African school terms (approximate, by month).
+String _termLabel(DateTime date) {
+  final term = date.month <= 3
+      ? 1
+      : date.month <= 6
+      ? 2
+      : date.month <= 9
+      ? 3
+      : 4;
+  return 'Term $term, ${date.year}';
+}
+
+/// "grade 4" + "4 A" becomes "Grade 4A".
+String _classLabel(String grade, String className) {
+  final g = grade.trim();
+  final c = className.trim();
+  final number = RegExp(r'\d+').firstMatch(g)?.group(0);
+  final letters = RegExp(r'[A-Za-z]+$').firstMatch(c)?.group(0);
+  if (number != null && letters != null) {
+    return 'Grade $number${letters.toUpperCase()}';
+  }
+  return '$g $c'.trim();
+}
+
+String _initial(String name) {
+  final trimmed = name.trim();
+  return trimmed.isEmpty ? '?' : trimmed.substring(0, 1).toUpperCase();
+}
+
+int _deductionTotal(Iterable<PointRecord> list) =>
+    list.where((r) => r.points < 0).fold<int>(0, (sum, r) => sum - r.points);
+
+String _shortMonth(int month) => const [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+][month - 1];
+
+String _monthName(int month) => const [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+][month - 1];
+
+// ---------------------------------------------------------------------------
+// Screen (same constructor as before)
+// ---------------------------------------------------------------------------
 
 class BehavioralPointsScreen extends StatelessWidget {
   const BehavioralPointsScreen({
@@ -55,6 +146,10 @@ class BehavioralPointsScreen extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------------
+// List screen
+// ---------------------------------------------------------------------------
+
 class _PointList extends StatelessWidget {
   const _PointList({
     required this.viewModel,
@@ -78,30 +173,18 @@ class _PointList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final weekStart = AttendanceViewModel.weekStartFor(DateTime.now());
-    final weekEnd = weekStart.add(const Duration(days: 7));
-    final weeklyRecords = records.where((record) {
-      return !record.date.isBefore(weekStart) && record.date.isBefore(weekEnd);
-    }).toList();
-    final positive = weeklyRecords
-        .where((record) => record.points > 0)
-        .fold<int>(0, (sum, record) => sum + record.points);
-    final negative = weeklyRecords
+    final deductionRecords = records
         .where((record) => record.points < 0)
-        .fold<int>(0, (sum, record) => sum + record.points);
-
-    final filteredRecords = records.where((record) {
-      return switch (viewModel.pointFilter) {
-        PointFilter.all => true,
-        PointFilter.positive => record.points > 0,
-        PointFilter.negative => record.points < 0,
-      };
-    }).toList();
+        .toList();
 
     return SafeArea(
+      // top: false lets the green app bar reach the top of the screen
+      top: false,
       child: Column(
         children: [
           AppBar(
+            backgroundColor: SchoolTheme.green,
+            foregroundColor: Colors.white,
             title: const Text('Behavioural points'),
             leading: IconButton(
               tooltip: 'Back to Home',
@@ -113,56 +196,17 @@ class _PointList extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: SchoolTheme.paleOrange,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        backgroundImage: AssetImage(
-                          'assets/images/thabo_mokoena.jpg',
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: children.isEmpty
-                            ? const Text('No linked learner profiles.')
-                            : DropdownButton<int>(
-                                isExpanded: true,
-                                value: selectedChild?.learnerId,
-                                hint: const Text('Select a learner'),
-                                items: [
-                                  for (final child in children)
-                                    if (child.learnerId != null)
-                                      DropdownMenuItem(
-                                        value: child.learnerId,
-                                        child: Text(
-                                          '${child.fullName} · ${child.gradeClassLabel}',
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                ],
-                                onChanged: (learnerId) {
-                                  for (final child in children) {
-                                    if (child.learnerId == learnerId) {
-                                      onSelectChild(child);
-                                      break;
-                                    }
-                                  }
-                                },
-                              ),
-                      ),
-                    ],
-                  ),
+                _LearnerHeader(
+                  learners: children,
+                  selected: selectedChild,
+                  onSelect: onSelectChild,
                 ),
                 if (isLoading)
                   const Padding(
                     padding: EdgeInsets.all(18),
-                    child: Center(child: CircularProgressIndicator()),
+                    child: SchoolLoadingIndicator(
+                      message: 'Loading behaviour records...',
+                    ),
                   ),
                 if (errorMessage != null)
                   Padding(
@@ -183,129 +227,52 @@ class _PointList extends StatelessWidget {
                     ),
                   )
                 else ...[
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: SchoolTheme.paleGreen,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Weekly Summary',
-                          style: TextStyle(
-                            color: SchoolTheme.darkGreen,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          '${AttendanceViewModel.formatDate(weekStart)} - '
-                          '${AttendanceViewModel.formatDate(weekEnd.subtract(const Duration(days: 1)))}',
-                          style: const TextStyle(
-                            color: SchoolTheme.muted,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _WeeklyPointMetric(
-                                label: 'Positive',
-                                value: '+$positive',
-                              ),
-                            ),
-                            Expanded(
-                              child: _WeeklyPointMetric(
-                                label: 'Negative',
-                                value: '$negative',
-                              ),
-                            ),
-                            Expanded(
-                              child: _WeeklyPointMetric(
-                                label: 'Net points',
-                                value: '${positive + negative}',
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          isLoading
-                              ? 'Loading records...'
-                              : weeklyRecords.isEmpty
-                              ? 'No points recorded this week.'
-                              : '${weeklyRecords.length} point record${weeklyRecords.length == 1 ? '' : 's'} this week.',
-                          style: const TextStyle(
-                            color: SchoolTheme.muted,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SegmentedButton<PointFilter>(
-                    segments: const [
-                      ButtonSegment(value: PointFilter.all, label: Text('All')),
-                      ButtonSegment(
-                        value: PointFilter.positive,
-                        label: Text('Positive'),
-                      ),
-                      ButtonSegment(
-                        value: PointFilter.negative,
-                        label: Text('Negative'),
-                      ),
-                    ],
-                    selected: {viewModel.pointFilter},
-                    onSelectionChanged: (selection) =>
-                        viewModel.selectPointFilter(selection.first),
-                  ),
                   const SizedBox(height: 14),
-                  for (final record in filteredRecords) ...[
+                  if (!isLoading && errorMessage == null) ...[
+                    _DeductionSummaryCard(
+                      total: _deductionTotal(deductionRecords),
+                      recordCount: deductionRecords.length,
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+                  for (final record in deductionRecords) ...[
                     _PointCard(
                       record: record,
                       onTap: () => viewModel.selectPoint(record),
                     ),
                     const SizedBox(height: 10),
                   ],
-                  if (!isLoading && filteredRecords.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text(
-                        'No points recorded for this learner.',
-                        textAlign: TextAlign.center,
+                  if (!isLoading &&
+                      errorMessage == null &&
+                      deductionRecords.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: SchoolTheme.paleGreen,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline,
+                            color: SchoolTheme.green,
+                            size: 32,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'No behaviour records yet.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Any recorded behaviour offences will appear here.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: SchoolTheme.muted),
+                          ),
+                        ],
                       ),
                     ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      IconButton(
-                        tooltip: 'Download PDF summary',
-                        onPressed: () => _showExportNotice(context),
-                        icon: const Icon(
-                          Icons.picture_as_pdf_outlined,
-                          color: Colors.redAccent,
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: 'Download spreadsheet summary',
-                        onPressed: () => _showExportNotice(context),
-                        icon: const Icon(
-                          Icons.table_view_outlined,
-                          color: SchoolTheme.green,
-                        ),
-                      ),
-                      const Spacer(),
-                      FilledButton(
-                        onPressed: () => _showSummary(context, records),
-                        child: const Text('Summary'),
-                      ),
-                    ],
-                  ),
                 ],
               ],
             ),
@@ -314,75 +281,254 @@ class _PointList extends StatelessWidget {
       ),
     );
   }
+}
 
-  void _showSummary(BuildContext context, List<PointRecord> records) {
-    final weekStart = AttendanceViewModel.weekStartFor(DateTime.now());
-    final weekEnd = weekStart.add(const Duration(days: 7));
-    final weeklyRecords = records.where((record) {
-      return !record.date.isBefore(weekStart) && record.date.isBefore(weekEnd);
-    });
-    final positive = weeklyRecords
-        .where((record) => record.points > 0)
-        .fold<int>(0, (sum, record) => sum + record.points);
-    final negative = weeklyRecords
-        .where((record) => record.points < 0)
-        .fold<int>(0, (sum, record) => sum + record.points);
+class _DeductionSummaryCard extends StatelessWidget {
+  const _DeductionSummaryCard({required this.total, required this.recordCount});
 
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Weekly points summary'),
-        content: Text(
-          '${AttendanceViewModel.formatDate(weekStart)} - '
-          '${AttendanceViewModel.formatDate(weekEnd.subtract(const Duration(days: 1)))}\n\n'
-          'Positive points: +$positive\n'
-          'Negative points: $negative\n'
-          'Net points: ${positive + negative}\n\n'
-          '${weeklyRecords.length} record${weeklyRecords.length == 1 ? '' : 's'} for the selected week.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+  final int total;
+  final int recordCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = recordCount == 1
+        ? '1 offence recorded'
+        : '$recordCount offences recorded';
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.78),
+        border: Border.all(color: _cardBorder),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.remove_circle_outline, color: _demeritRed, size: 30),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Points deducted',
+                  style: TextStyle(
+                    color: SchoolTheme.darkGreen,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: SchoolTheme.muted,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '$total',
+            style: const TextStyle(
+              color: _demeritRed,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  void _showExportNotice(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Reports will be available when points are connected.'),
+class _LearnerHeader extends StatelessWidget {
+  const _LearnerHeader({
+    required this.learners,
+    required this.selected,
+    required this.onSelect,
+  });
+
+  final List<LearnerProfile> learners;
+  final LearnerProfile? selected;
+  final ValueChanged<LearnerProfile> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final child = selected;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: SchoolTheme.paleOrange,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 26,
+            backgroundColor: Colors.white,
+            child: Text(
+              child == null ? '?' : _initial(child.fullName),
+              style: const TextStyle(
+                color: SchoolTheme.green,
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: child == null
+                ? const Text('No linked learner profiles.')
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        child.fullName,
+                        style: const TextStyle(
+                          color: SchoolTheme.darkGreen,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        '${_classLabel('${child.grade}', '${child.className}')}'
+                        ' · ${_termLabel(DateTime.now())}',
+                        style: const TextStyle(
+                          color: SchoolTheme.muted,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+          if (learners.length > 1)
+            PopupMenuButton<LearnerProfile>(
+              tooltip: 'Change learner',
+              icon: const Icon(Icons.unfold_more, color: SchoolTheme.green),
+              onSelected: onSelect,
+              itemBuilder: (context) => [
+                for (final learner in learners)
+                  if (learner.learnerId != null)
+                    PopupMenuItem(
+                      value: learner,
+                      child: Text(learner.fullName),
+                    ),
+              ],
+            ),
+        ],
       ),
     );
   }
 }
 
-class _WeeklyPointMetric extends StatelessWidget {
-  const _WeeklyPointMetric({required this.label, required this.value});
+class _PointCard extends StatelessWidget {
+  const _PointCard({required this.record, required this.onTap});
 
-  final String label;
-  final String value;
+  final PointRecord record;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(color: SchoolTheme.muted, fontSize: 11),
+    final date = record.date;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: _cardBorder),
+          borderRadius: BorderRadius.circular(12),
         ),
-        const SizedBox(height: 3),
-        Text(
-          value,
-          style: const TextStyle(
-            color: SchoolTheme.darkGreen,
-            fontWeight: FontWeight.w800,
-          ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left: icon with the points under it
+            SizedBox(
+              width: 48,
+              child: Column(
+                children: [
+                  Icon(Icons.remove_circle, color: _demeritRed, size: 26),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${record.points.abs()}',
+                    style: const TextStyle(
+                      color: _demeritRed,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const Text(
+                    'deducted',
+                    style: TextStyle(color: SchoolTheme.muted, fontSize: 8),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Middle: date, offence, level
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${date.day.toString().padLeft(2, '0')} '
+                    '${_shortMonth(date.month)} ${date.year} '
+                    '${date.hour.toString().padLeft(2, '0')}:'
+                    '${date.minute.toString().padLeft(2, '0')}',
+                    style: const TextStyle(
+                      color: SchoolTheme.muted,
+                      fontSize: 11,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    record.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _levelLabel(record.detail),
+                    style: const TextStyle(
+                      color: SchoolTheme.muted,
+                      fontSize: 11,
+                    ),
+                  ),
+                  if (record.teacherNote.trim().isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      record.teacherNote.trim(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: SchoolTheme.muted,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Right: teacher initials and arrow
+            CircleAvatar(
+              radius: 14,
+              backgroundColor: SchoolTheme.paleGreen,
+              child: Text(
+                record.teacherInitials,
+                style: const TextStyle(fontSize: 9),
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: SchoolTheme.muted),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -395,13 +541,16 @@ class _PointDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final positive = record.points > 0;
     final date = record.date;
+
     return SafeArea(
+      top: false,
       child: Column(
         children: [
           AppBar(
-            title: const Text('Points Details'),
+            backgroundColor: SchoolTheme.green,
+            foregroundColor: Colors.white,
+            title: const Text('Behaviour Record'),
             leading: IconButton(
               tooltip: 'Back',
               onPressed: onBack,
@@ -415,7 +564,7 @@ class _PointDetails extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFFE0E7E2)),
+                    border: Border.all(color: _cardBorder),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Column(
@@ -424,35 +573,18 @@ class _PointDetails extends StatelessWidget {
                       Row(
                         children: [
                           Icon(
-                            positive ? Icons.add_circle : Icons.remove_circle,
-                            color: positive ? SchoolTheme.green : Colors.red,
+                            Icons.remove_circle,
+                            color: _demeritRed,
                             size: 32,
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '${record.points > 0 ? '+' : ''}${record.points}',
-                            style: TextStyle(
-                              color: positive ? SchoolTheme.green : Colors.red,
+                            '${record.points.abs()} points deducted',
+                            style: const TextStyle(
+                              color: _demeritRed,
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                             ),
-                          ),
-                          const Spacer(),
-                          Chip(
-                            label: Text(
-                              positive ? 'Positive' : 'Level 2 Offence',
-                              style: TextStyle(
-                                color: positive
-                                    ? SchoolTheme.green
-                                    : Colors.red.shade700,
-                                fontSize: 11,
-                              ),
-                            ),
-                            backgroundColor: positive
-                                ? SchoolTheme.paleGreen
-                                : const Color(0xFFFFEEEE),
-                            side: BorderSide.none,
-                            visualDensity: VisualDensity.compact,
                           ),
                         ],
                       ),
@@ -487,13 +619,15 @@ class _PointDetails extends StatelessWidget {
                       _InfoPanel(
                         icon: Icons.notes,
                         title: "Teacher's note",
-                        text: record.teacherNote,
+                        text: record.teacherNote.trim().isEmpty
+                            ? 'No note was provided.'
+                            : record.teacherNote.trim(),
                       ),
                       const SizedBox(height: 14),
                       Card(
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          side: const BorderSide(color: Color(0xFFE0E7E2)),
+                          side: const BorderSide(color: _cardBorder),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: ListTile(
@@ -514,16 +648,13 @@ class _PointDetails extends StatelessWidget {
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                           subtitle: const Text('Teacher'),
-                          trailing: const Icon(Icons.chevron_right),
                         ),
                       ),
                       const SizedBox(height: 14),
                       _InfoPanel(
                         icon: Icons.info_outline,
-                        title: record.detail,
-                        text: positive
-                            ? 'Positive behaviour is recognised as part of the learner points record.'
-                            : 'Level 2 offences are more serious behavioural issues and may result in additional consequences.',
+                        title: 'Offence details',
+                        text: _levelInfo(record),
                       ),
                     ],
                   ),
@@ -543,21 +674,6 @@ class _PointDetails extends StatelessWidget {
       ),
     );
   }
-
-  String _monthName(int month) => const [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ][month - 1];
 }
 
 class _InfoPanel extends StatelessWidget {
@@ -601,104 +717,4 @@ class _InfoPanel extends StatelessWidget {
       ),
     );
   }
-}
-
-class _PointCard extends StatelessWidget {
-  const _PointCard({required this.record, required this.onTap});
-
-  final PointRecord record;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final positive = record.points > 0;
-    final date = record.date;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xFFE0E7E2)),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              positive ? Icons.add_circle : Icons.remove_circle,
-              color: positive ? SchoolTheme.green : Colors.redAccent,
-            ),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${date.day.toString().padLeft(2, '0')} '
-                    '${_shortMonth(date.month)} ${date.year} '
-                    '${date.hour.toString().padLeft(2, '0')}:'
-                    '${date.minute.toString().padLeft(2, '0')}',
-                    style: const TextStyle(
-                      color: SchoolTheme.muted,
-                      fontSize: 11,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    record.title,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  Text(
-                    record.detail,
-                    style: const TextStyle(
-                      color: SchoolTheme.muted,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              children: [
-                CircleAvatar(
-                  radius: 14,
-                  backgroundColor: SchoolTheme.paleGreen,
-                  child: Text(
-                    record.teacherInitials,
-                    style: const TextStyle(fontSize: 9),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  '${record.points > 0 ? '+' : ''}${record.points}',
-                  style: TextStyle(
-                    color: positive ? SchoolTheme.green : Colors.redAccent,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 3),
-            const Icon(Icons.chevron_right, color: SchoolTheme.muted),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _shortMonth(int month) => const [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ][month - 1];
 }

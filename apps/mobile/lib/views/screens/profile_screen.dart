@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -41,198 +43,414 @@ class ProfileScreen extends StatelessWidget {
         ].whereType<String>().where((value) => value.isNotEmpty).join(' ');
 
         return SafeArea(
-          child: Column(
+          child: ListView(
+            padding: EdgeInsets.zero,
             children: [
-              AppBar(
-                title: const Text('Profile'),
-                leading: IconButton(
-                  tooltip: 'Back',
-                  onPressed: onBack,
-                  icon: const Icon(Icons.arrow_back),
-                ),
-                actions: [
-                  IconButton(
-                    tooltip: 'Settings',
-                    onPressed: onOpenSettings,
-                    icon: const Icon(Icons.settings_outlined),
+              SizedBox(
+                height: 294,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(30),
                   ),
-                ],
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    Center(
-                      child: InkWell(
-                        onTap: viewModel.isLoadingAvatar
-                            ? null
-                            : () => _pickProfilePhoto(context),
-                        customBorder: const CircleBorder(),
-                        child: Stack(
-                          children: [
-                            CircleAvatar(
-                              radius: 42,
-                              backgroundColor: SchoolTheme.paleGreen,
-                              backgroundImage: viewModel.avatarUrl == null
-                                  ? null
-                                  : NetworkImage(viewModel.avatarUrl!),
-                              child: viewModel.avatarUrl == null
-                                  ? Text(
-                                      name.isEmpty
-                                          ? 'P'
-                                          : name[0].toUpperCase(),
-                                      style: const TextStyle(
-                                        color: SchoolTheme.green,
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    )
-                                  : null,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [SchoolTheme.darkGreen, SchoolTheme.green],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                      ),
+                      if (viewModel.avatarUrl != null)
+                        Positioned.fill(
+                          child: Opacity(
+                            opacity: 0.24,
+                            child: ImageFiltered(
+                              imageFilter: ImageFilter.blur(
+                                sigmaX: 16,
+                                sigmaY: 16,
+                              ),
+                              child: Transform.flip(
+                                flipX: true,
+                                child: Image.network(
+                                  viewModel.avatarUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, _, _) =>
+                                      const SizedBox.expand(),
+                                ),
+                              ),
                             ),
-                            Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: CircleAvatar(
-                                radius: 15,
-                                backgroundColor: SchoolTheme.green,
-                                child: viewModel.isLoadingAvatar
-                                    ? const SizedBox(
-                                        width: 15,
-                                        height: 15,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Icon(
-                                        Icons.camera_alt,
-                                        size: 15,
-                                        color: Colors.white,
+                          ),
+                        ),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0x44234A32), Color(0xBB124A2E)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: -72,
+                        right: -35,
+                        child: _HeroDecoration(size: 210),
+                      ),
+                      Positioned(
+                        bottom: 15,
+                        left: -88,
+                        child: _HeroDecoration(size: 176),
+                      ),
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        right: 8,
+                        child: Row(
+                          children: [
+                            IconButton(
+                              tooltip: 'Back',
+                              onPressed: onBack,
+                              style: IconButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Colors.white.withValues(
+                                  alpha: 0.12,
+                                ),
+                              ),
+                              icon: const Icon(Icons.arrow_back),
+                            ),
+                            const Expanded(
+                              child: Text(
+                                'My profile',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'Settings',
+                              onPressed: onOpenSettings,
+                              style: IconButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Colors.white.withValues(
+                                  alpha: 0.12,
+                                ),
+                              ),
+                              icon: const Icon(Icons.settings_outlined),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        top: 66,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: InkWell(
+                            onTap: viewModel.isLoadingAvatar
+                                ? null
+                                : () => _pickProfilePhoto(context),
+                            customBorder: const CircleBorder(),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white.withValues(alpha: 0.22),
+                                    border: Border.all(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.65,
                                       ),
+                                    ),
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 43,
+                                    backgroundColor: SchoolTheme.paleGreen,
+                                    child: viewModel.avatarUrl == null
+                                        ? _avatarFallback(name)
+                                        : ClipOval(
+                                            child: Image.network(
+                                              viewModel.avatarUrl!,
+                                              width: 86,
+                                              height: 86,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, _, _) =>
+                                                  _avatarFallback(name),
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                                Positioned(
+                                  right: 1,
+                                  bottom: 1,
+                                  child: Container(
+                                    width: 30,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: SchoolTheme.paleGreen,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: viewModel.isLoadingAvatar
+                                        ? const Padding(
+                                            padding: EdgeInsets.all(6),
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: SchoolTheme.green,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.camera_alt_outlined,
+                                            size: 15,
+                                            color: SchoolTheme.green,
+                                          ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 174,
+                        left: 20,
+                        right: 20,
+                        child: Column(
+                          children: [
+                            Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.1,
+                              ),
+                            ),
+                            const SizedBox(height: 7),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.16),
+                                borderRadius: BorderRadius.circular(30),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.18),
+                                ),
+                              ),
+                              child: Text(
+                                '$guardianRelationship · Parent account',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                    TextButton.icon(
-                      onPressed: viewModel.isLoadingAvatar
-                          ? null
-                          : () => _pickProfilePhoto(context),
-                      icon: const Icon(Icons.photo_camera_outlined, size: 18),
-                      label: Text(
-                        viewModel.avatarUrl == null
-                            ? 'Add profile picture'
-                            : 'Change profile picture',
+                      Positioned(
+                        bottom: 4,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: TextButton.icon(
+                            onPressed: viewModel.isLoadingAvatar
+                                ? null
+                                : () => _pickProfilePhoto(context),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            icon: const Icon(
+                              Icons.photo_camera_outlined,
+                              size: 17,
+                            ),
+                            label: Text(
+                              viewModel.avatarUrl == null
+                                  ? 'Add profile picture'
+                                  : 'Change profile picture',
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    if (viewModel.avatarErrorMessage != null)
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 22, 18, 28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (viewModel.avatarErrorMessage != null) ...[
                       Text(
                         viewModel.avatarErrorMessage!,
-                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.error,
                         ),
                       ),
-                    const SizedBox(height: 12),
-                    Text(
-                      name,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Contact details',
+                          style: TextStyle(
+                            color: SchoolTheme.ink,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => _editContact(
+                            context,
+                            name,
+                            phone,
+                            email,
+                            viewModel.guardianTitle,
+                            guardianRelationship,
+                          ),
+                          icon: const Icon(Icons.edit_outlined, size: 17),
+                          label: const Text('Edit'),
+                        ),
+                      ],
                     ),
-                    Text(
-                      guardianRelationship,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: SchoolTheme.muted),
-                    ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 8),
                     Card(
+                      color: Colors.white,
                       elevation: 0,
+                      margin: EdgeInsets.zero,
                       shape: RoundedRectangleBorder(
-                        side: const BorderSide(color: Color(0xFFE2E7E3)),
-                        borderRadius: BorderRadius.circular(11),
+                        side: const BorderSide(color: Color(0xFFE6ECE8)),
+                        borderRadius: BorderRadius.circular(22),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(18),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Contact Information',
-                              style: TextStyle(
-                                color: SchoolTheme.darkGreen,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
                             _ContactRow(
                               icon: Icons.phone_outlined,
                               label: 'Phone Number',
                               value: Validators.formatPhone(phone),
                             ),
-                            const SizedBox(height: 13),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 14),
+                              child: Divider(
+                                height: 1,
+                                color: Color(0xFFEEF1EF),
+                              ),
+                            ),
                             _ContactRow(
                               icon: Icons.mail_outline,
-                              label: 'Email Address',
+                              label: 'Email address',
                               value: email,
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: () => _editContact(
-                        context,
-                        name,
-                        phone,
-                        email,
-                        viewModel.guardianTitle,
-                        guardianRelationship,
-                      ),
-                      icon: const Icon(Icons.edit_outlined),
-                      label: const Text('Edit Contact Information'),
-                    ),
-                    Card(
-                      color: SchoolTheme.paleGreen,
-                      elevation: 0,
-                      child: ListTile(
-                        leading: const Icon(
-                          Icons.shield_outlined,
-                          color: SchoolTheme.green,
-                        ),
-                        title: const Text(
-                          'My Children',
-                          style: TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                        subtitle: Text(
-                          childLabel.isEmpty
-                              ? 'View and manage children linked to your account.'
-                              : childLabel,
-                        ),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: onOpenChildren,
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: onAddChild,
-                        icon: const Icon(Icons.person_add_alt_1, size: 18),
-                        label: const Text('Add Child'),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Family',
+                      style: TextStyle(
+                        color: SchoolTheme.ink,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 10),
-                    OutlinedButton.icon(
-                      onPressed: () => _signOut(context),
-                      icon: const Icon(Icons.logout),
-                      label: const Text('Log Out'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: SchoolTheme.orange,
-                        side: const BorderSide(color: SchoolTheme.orange),
+                    Card(
+                      color: const Color(0xFFF1F7F3),
+                      elevation: 0,
+                      margin: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        leading: Container(
+                          width: 46,
+                          height: 46,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: const Icon(
+                            Icons.family_restroom_rounded,
+                            color: SchoolTheme.green,
+                          ),
+                        ),
+                        title: const Text(
+                          'My Children',
+                          style: TextStyle(
+                            color: SchoolTheme.ink,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        subtitle: Text(
+                          childLabel.isEmpty
+                              ? 'View and manage linked learners'
+                              : childLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: onOpenChildren,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.tonalIcon(
+                        onPressed: onAddChild,
+                        icon: const Icon(Icons.person_add_alt_1),
+                        label: const Text('Add Child'),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          foregroundColor: SchoolTheme.darkGreen,
+                          backgroundColor: const Color(0xFFEAF5EF),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _signOut(context),
+                        icon: const Icon(Icons.logout_rounded),
+                        label: const Text('Log out'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFB34335),
+                          side: const BorderSide(color: Color(0xFFF0D7D3)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -242,6 +460,17 @@ class ProfileScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _avatarFallback(String name) {
+    return Text(
+      name.isEmpty ? 'P' : name[0].toUpperCase(),
+      style: const TextStyle(
+        color: SchoolTheme.green,
+        fontSize: 32,
+        fontWeight: FontWeight.w700,
+      ),
     );
   }
 
@@ -335,6 +564,27 @@ class ProfileScreen extends StatelessWidget {
         ),
       );
     }
+  }
+}
+
+class _HeroDecoration extends StatelessWidget {
+  const _HeroDecoration({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          color: Colors.white.withValues(alpha: 0.035),
+        ),
+      ),
+    );
   }
 }
 
@@ -495,20 +745,38 @@ class _ContactRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, color: SchoolTheme.green, size: 19),
-        const SizedBox(width: 12),
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: SchoolTheme.paleGreen,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(icon, color: SchoolTheme.green, size: 20),
+        ),
+        const SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: const TextStyle(color: SchoolTheme.muted, fontSize: 12),
+                style: const TextStyle(
+                  color: SchoolTheme.muted,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              const SizedBox(height: 2),
-              Text(value),
+              const SizedBox(height: 3),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: SchoolTheme.ink,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ),

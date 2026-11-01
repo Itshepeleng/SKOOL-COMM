@@ -4,6 +4,7 @@ import '../../app/school_theme.dart';
 import '../../models/learner_profile.dart';
 import '../../models/learner_records.dart';
 import '../../viewmodels/attendance_view_model.dart';
+import '../widgets/school_loading_screen.dart';
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({
@@ -149,7 +150,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     if (_isLoading)
                       const Padding(
                         padding: EdgeInsets.all(18),
-                        child: Center(child: CircularProgressIndicator()),
+                        child: SchoolLoadingIndicator(
+                          message: 'Loading attendance records...',
+                        ),
                       ),
                     if (_errorMessage != null)
                       Padding(

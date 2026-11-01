@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app/school_theme.dart';
 import '../../models/school_models.dart';
 import '../../viewmodels/calendar_view_model.dart';
+import '../widgets/school_loading_screen.dart';
+import '../widgets/next_event_countdown_card.dart';
 
 class RemindersScreen extends StatefulWidget {
   const RemindersScreen({
@@ -42,6 +44,17 @@ class _RemindersScreenState extends State<RemindersScreen> {
       animation: _viewModel,
       builder: (context, _) {
         final reminders = _viewModel.upcomingEvents;
+        final now = DateTime.now();
+
+        final timedEvents =
+            reminders
+                .where(
+                  (event) => event.kind == 'event' && event.date.isAfter(now),
+                )
+                .toList()
+              ..sort((a, b) => a.date.compareTo(b.date));
+
+        final nextEvent = timedEvents.isEmpty ? null : timedEvents.first;
         return SafeArea(
           child: Column(
             children: [
@@ -66,6 +79,17 @@ class _RemindersScreenState extends State<RemindersScreen> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
                   children: [
+                    NextEventCountdownCard(
+                      event: nextEvent,
+                      onViewReminder: nextEvent == null
+                          ? null
+                          : widget.onViewCalendar,
+                      onEventStarted: () {
+                        _viewModel.loadEvents();
+                      },
+                    ),
+                    const SizedBox(height: 20),
+
                     Text(
                       'Upcoming Reminders (${reminders.length})',
                       style: const TextStyle(
@@ -78,7 +102,9 @@ class _RemindersScreenState extends State<RemindersScreen> {
                     if (_viewModel.isLoading)
                       const Padding(
                         padding: EdgeInsets.all(28),
-                        child: Center(child: CircularProgressIndicator()),
+                        child: SchoolLoadingIndicator(
+                          message: 'Loading school reminders...',
+                        ),
                       )
                     else if (_viewModel.errorMessage != null)
                       _LoadError(

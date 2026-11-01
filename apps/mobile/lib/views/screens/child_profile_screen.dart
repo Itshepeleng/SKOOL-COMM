@@ -1,13 +1,15 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/school_theme.dart';
 import '../../viewmodels/auth_view_model.dart';
 import '../../viewmodels/learner_view_model.dart';
 import '../widgets/school_widgets.dart';
-import 'attendance_screen.dart';
+import '../widgets/school_loading_screen.dart';
 import 'main_navigation_screen.dart';
-import 'my_children_screen.dart';
 
 class ChildProfileScreen extends StatefulWidget {
   const ChildProfileScreen({
@@ -40,7 +42,12 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
   final _nameController = TextEditingController();
   final _surnameController = TextEditingController();
   final _idNumberController = TextEditingController();
+  final _verificationCodeController = TextEditingController();
   late final LearnerViewModel _viewModel;
+  Uint8List? _profileImageBytes;
+  String? _profileImageContentType;
+  String? _profileImageError;
+  bool _isPickingImage = false;
   DateTime? _dateOfBirth;
   String _relationship = 'Father';
   String? _grade;
@@ -73,6 +80,7 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
     _idNumberController.dispose();
     if (_ownsViewModel) _viewModel.dispose();
     super.dispose();
+    _verificationCodeController.dispose();
   }
 
   Future<void> _saveProfile() async {
@@ -93,6 +101,7 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
       dateOfBirth: _dateOfBirth!,
       idNumber: _idNumberController.text,
       relationship: _relationship,
+      verificationCode: _verificationCodeController.text.trim(),
       parentAuthId: widget.parentAuthId,
       parentFirstName: widget.parentFirstName,
       parentLastName: widget.parentLastName,
@@ -113,11 +122,35 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
       );
       return;
     }
-    final statusMessage = _viewModel.statusMessage;
-    if (statusMessage != null) {
+
+    String? uploadMessage;
+    final imageBytes = _profileImageBytes;
+    if (imageBytes != null) {
+      final learnerId = _viewModel.selectedLearnerId;
+      final contentType = _profileImageContentType;
+      if (learnerId == null) {
+        uploadMessage =
+            'The child profile was saved, but its picture could not be linked.';
+      } else if (contentType == null) {
+        uploadMessage =
+            'The child profile was saved, but the selected image format is unsupported.';
+      } else {
+        uploadMessage = await _viewModel.uploadLearnerAvatar(
+          learnerId: learnerId,
+          bytes: imageBytes,
+          contentType: contentType,
+        );
+      }
+    }
+    if (!mounted) return;
+    final messages = [
+      _viewModel.statusMessage,
+      ?uploadMessage,
+    ].whereType<String>().where((message) => message.isNotEmpty).toList();
+    if (messages.isNotEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(statusMessage)));
+      ).showSnackBar(SnackBar(content: Text(messages.join('\n'))));
     }
     if (widget.returnToChildren) {
       Navigator.of(context).pop();
@@ -127,61 +160,74 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
     _ownsViewModel = false;
     final navigator = Navigator.of(context);
     final learnerViewModel = _viewModel;
-    navigator.pushAndRemoveUntil(
+    navigator.pushAndRemoveUntil<void>(
       MaterialPageRoute<void>(
-        builder: (_) => MyChildrenScreen(
-          viewModel: learnerViewModel,
-          ownsViewModel: true,
-          onOpenAttendance: (child) => navigator.push(
-            MaterialPageRoute<void>(
-              builder: (_) => AttendanceScreen(
-                child: child,
-                loadAttendance: (learnerId) async {
-                  final loaded = await learnerViewModel.loadAttendanceRecords(
-                    learnerId,
-                  );
-                  if (!loaded ||
-                      learnerViewModel.attendanceLearnerId != learnerId) {
-                    throw StateError(
-                      learnerViewModel.attendanceErrorMessage ??
-                          'Unable to load attendance records.',
-                    );
-                  }
-                  return learnerViewModel.attendanceRecords;
-                },
-              ),
-            ),
-          ),
-          onOpenPoints: (_) => navigator.pushAndRemoveUntil(
-            MaterialPageRoute<void>(
-              builder: (_) => MainNavigationScreen(
-                initialTab: 1,
-                initialChildren: learnerViewModel.children,
-              ),
-            ),
-            (_) => false,
-          ),
-          onAddChild: () => navigator.push(
-            MaterialPageRoute<void>(
-              builder: (_) => ChildProfileScreen(
-                viewModel: learnerViewModel,
-                returnToChildren: true,
-              ),
-            ),
-          ),
-          onSelectTab: (index) => navigator.pushAndRemoveUntil(
-            MaterialPageRoute<void>(
-              builder: (_) => MainNavigationScreen(
-                initialTab: index,
-                initialChildren: learnerViewModel.children,
-              ),
-            ),
-            (_) => false,
-          ),
-        ),
+        builder: (_) =>
+            const SchoolLoadingScreen(message: 'Fetching your dashboard...'),
       ),
       (_) => false,
     );
+    await learnerViewModel.loadChildren();
+    if (!navigator.mounted) {
+      learnerViewModel.dispose();
+      return;
+    }
+    navigator.pushReplacement<void, void>(
+      MaterialPageRoute<void>(
+        builder: (_) => MainNavigationScreen(
+          learnerViewModel: learnerViewModel,
+          childrenAlreadyLoaded: true,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickProfileImage() async {
+    setState(() {
+      _isPickingImage = true;
+      _profileImageError = null;
+    });
+    try {
+      final image = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+      if (image == null || !mounted) return;
+
+      final bytes = await image.readAsBytes();
+      final extension = image.name.split('.').last.toLowerCase();
+      final contentType = switch (image.mimeType?.toLowerCase()) {
+        'image/jpeg' => 'image/jpeg',
+        'image/png' => 'image/png',
+        'image/webp' => 'image/webp',
+        _ => switch (extension) {
+          'jpg' || 'jpeg' => 'image/jpeg',
+          'png' => 'image/png',
+          'webp' => 'image/webp',
+          _ => null,
+        },
+      };
+      if (bytes.isEmpty || bytes.length > 5 * 1024 * 1024) {
+        setState(
+          () => _profileImageError = 'Choose an image smaller than 5 MB.',
+        );
+      } else if (contentType == null) {
+        setState(
+          () => _profileImageError = 'Choose a JPEG, PNG, or WebP image.',
+        );
+      } else {
+        setState(() {
+          _profileImageBytes = bytes;
+          _profileImageContentType = contentType;
+        });
+      }
+    } on Exception catch (error) {
+      if (mounted) {
+        setState(() => _profileImageError = 'Unable to select image: $error');
+      }
+    } finally {
+      if (mounted) setState(() => _isPickingImage = false);
+    }
   }
 
   @override
@@ -212,31 +258,54 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
                       color: const Color(0xFFF5F6F5),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
                         CircleAvatar(
-                          radius: 25,
+                          radius: 28,
                           backgroundColor: SchoolTheme.paleGreen,
-                          child: Icon(
-                            Icons.person_outline,
-                            color: SchoolTheme.green,
-                          ),
+                          backgroundImage: _profileImageBytes == null
+                              ? null
+                              : MemoryImage(_profileImageBytes!),
+                          child: _profileImageBytes == null
+                              ? const Icon(
+                                  Icons.person_outline,
+                                  color: SchoolTheme.green,
+                                )
+                              : null,
                         ),
-                        SizedBox(width: 14),
+                        const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 'Profile picture (optional)',
                                 style: TextStyle(fontWeight: FontWeight.w600),
                               ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Image upload can be added when storage is configured.',
+                              const SizedBox(height: 4),
+                              const Text(
+                                'JPEG, PNG, or WebP · up to 5 MB',
                                 style: TextStyle(
                                   color: SchoolTheme.muted,
                                   fontSize: 12,
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: _isPickingImage
+                                    ? null
+                                    : _pickProfileImage,
+                                icon: _isPickingImage
+                                    ? const SizedBox.square(
+                                        dimension: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Icon(Icons.add_a_photo_outlined),
+                                label: Text(
+                                  _profileImageBytes == null
+                                      ? 'Add picture'
+                                      : 'Change picture',
                                 ),
                               ),
                             ],
@@ -245,6 +314,17 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
                       ],
                     ),
                   ),
+                  if (_profileImageError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        _profileImageError!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 20),
                   if (_viewModel.errorMessage != null)
                     StatusBanner(
@@ -325,14 +405,13 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
                     ),
                   ),
                   _profileField(
-                    controller: _idNumberController,
-                    label: 'ID number',
-                    hint: 'Enter 13-digit ID number',
-                    keyboardType: TextInputType.number,
+                    controller: _verificationCodeController,
+                    label: 'School Verification Code',
+                    hint: 'Enter the code provided by your school',
+
                     validator: (value) {
-                      if (value == null ||
-                          !RegExp(r'^\d{13}$').hasMatch(value.trim())) {
-                        return 'Enter a 13-digit ID number';
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Enter your school verification code';
                       }
                       return null;
                     },
@@ -369,7 +448,8 @@ class _ChildProfileScreenState extends State<ChildProfileScreen> {
                   ),
                   SchoolPrimaryButton(
                     label: 'Submit',
-                    isLoading: _viewModel.isLoading,
+                    isLoading:
+                        _viewModel.isLoading || _viewModel.isUploadingAvatar,
                     onPressed: _saveProfile,
                   ),
                   const SizedBox(height: 12),

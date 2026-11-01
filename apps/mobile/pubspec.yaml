@@ -40,6 +40,7 @@ dependencies:
   image: '>=4.10.0 <4.11.0'
   supabase_flutter: ^2.17.2
   image_picker: ^1.2.4
+  video_player: ^2.14.1
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +70,7 @@ flutter:
   assets:
     - assets/images/
     - assets/logos/
+    - assets/videos/welcome_background.mp4.mp4
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

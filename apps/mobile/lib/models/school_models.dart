@@ -8,6 +8,8 @@ class PointRecord {
     required this.teacherInitials,
     required this.teacherName,
     required this.teacherNote,
+    this.offenceCode = '',
+    this.level = 0,
   });
 
   final int pointId;
@@ -18,6 +20,8 @@ class PointRecord {
   final String teacherInitials;
   final String teacherName;
   final String teacherNote;
+  final String offenceCode;
+  final int level;
 
   factory PointRecord.fromJson(Map<String, dynamic> json) {
     final rawId = json['pointid'];
@@ -29,17 +33,19 @@ class PointRecord {
       );
     }
     final offenceName = json['offencename']?.toString() ?? '';
-    final offenceCode = json['offencecode']?.toString() ?? 'Record';
-    final level = json['level']?.toString();
+    final offenceCode = json['offencecode']?.toString() ?? '';
+    final level = int.tryParse(json['level']?.toString() ?? '') ?? 0;
     return PointRecord(
       pointId: rawId.toInt(),
       date: DateTime.parse(rawDate.toString()),
       title: offenceName.isEmpty ? 'Behaviour record' : offenceName,
-      detail: level == null ? offenceCode : 'Level $level · $offenceCode',
+      detail: offenceCode.isEmpty ? 'Record' : 'Level $level · $offenceCode',
       points: rawPoints.toInt(),
       teacherInitials: json['teacher_initials']?.toString() ?? '',
       teacherName: json['teacher_name']?.toString() ?? 'School staff',
       teacherNote: json['reason']?.toString() ?? '',
+      offenceCode: offenceCode,
+      level: level,
     );
   }
 }
@@ -137,4 +143,5 @@ class SchoolEvent {
       colorValue: 0xFFE64B58,
     ),
   ];
+
 }

@@ -1,21 +1,25 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../viewmodels/auth_view_model.dart';
-import '../../viewmodels/dashboard_view_model.dart';
-import '../../viewmodels/learner_view_model.dart';
-import '../../viewmodels/messages_view_model.dart';
 import '../../models/learner_profile.dart';
 import '../../models/learner_records.dart';
-import '../widgets/school_widgets.dart';
+import '../../viewmodels/auth_view_model.dart';
+import '../../viewmodels/dashboard_view_model.dart';
+import '../../viewmodels/inbox_view_model.dart';
+import '../../viewmodels/learner_view_model.dart';
+import '../../viewmodels/messages_view_model.dart';
+import '../widgets/glass_widget.dart';
+import '../widgets/school_loading_screen.dart';
 import 'attendance_screen.dart';
 import 'behavioral_points_screen.dart';
 import 'calendar_screen.dart';
 import 'child_profile_screen.dart';
 import 'dashboard_screen.dart';
+import 'message_popup.dart';
 import 'messages_screen.dart';
 import 'my_children_screen.dart';
-import 'news_screen.dart';
 import 'profile_screen.dart';
 import 'reminders_screen.dart';
 import 'settings_screen.dart';
@@ -25,10 +29,14 @@ class MainNavigationScreen extends StatefulWidget {
     super.key,
     this.initialTab = 0,
     this.initialChildren = const [],
+    this.learnerViewModel,
+    this.childrenAlreadyLoaded = false,
   });
 
   final int initialTab;
   final List<LearnerProfile> initialChildren;
+  final LearnerViewModel? learnerViewModel;
+  final bool childrenAlreadyLoaded;
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
@@ -38,6 +46,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late final DashboardViewModel _viewModel;
   late final AuthViewModel _authViewModel;
   late final LearnerViewModel _learnerViewModel;
+  late final InboxViewModel _inbox;
+  late final MessagesViewModel _newsVm;
+  bool _popupOpen = false;
+  int? _loadingTab;
 
   @override
   void initState() {
@@ -45,11 +57,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _viewModel = DashboardViewModel()..selectedTab = widget.initialTab;
     final client = Supabase.instance.client;
     _authViewModel = AuthViewModel(client.auth, client: client);
-    _learnerViewModel = LearnerViewModel(Supabase.instance.client)
-      ..seedRegisteredChildren(widget.initialChildren);
+    _learnerViewModel =
+        widget.learnerViewModel ??
+        (LearnerViewModel(client)
+          ..seedRegisteredChildren(widget.initialChildren));
     _authViewModel.loadAvatar();
     // Let the first frame render before the initial Supabase request updates listeners.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadChildren());
+    if (!widget.childrenAlreadyLoaded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _loadChildren());
+    }
+    _inbox = InboxViewModel(client)
+      ..addListener(_onInbox)
+      ..start();
+    _newsVm = MessagesViewModel(client)..loadAnnouncements();
   }
 
   @override
@@ -57,6 +77,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _viewModel.dispose();
     _authViewModel.dispose();
     _learnerViewModel.dispose();
+    _inbox.dispose();
+    _newsVm.dispose();
     super.dispose();
   }
 
@@ -67,18 +89,30 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         _viewModel,
         _authViewModel,
         _learnerViewModel,
+        _inbox,
       ]),
       builder: (context, _) {
+        if (_loadingTab != null) {
+          final message = _loadingTab == 2
+              ? 'Fetching your messages...'
+              : 'Fetching your profile...';
+          return SchoolLoadingScreen(message: message);
+        }
+
         final screen = switch (_viewModel.selectedTab) {
           0 => DashboardScreen(
             parentName: _authViewModel.dashboardName,
             parentAvatarUrl: _authViewModel.avatarUrl,
             onOpenPoints: _openPoints,
-            onOpenMessages: _openMessages,
+            onOpenMessages: () => _selectTab(2),
             onOpenAttendance: _openAttendance,
             onOpenReminders: () => _viewModel.selectTab(3),
             onOpenSettings: _openSettings,
             onOpenCalendar: _openCalendar,
+            onOpenProfile: () => _selectTab(4),
+            inbox: _inbox,
+            news: _newsVm,
+            onOpenNews: () => _selectTab(2),
           ),
           1 => BehavioralPointsScreen(
             viewModel: _viewModel,
@@ -94,7 +128,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             isLoading: _learnerViewModel.isLoadingBehaviour,
             errorMessage: _learnerViewModel.behaviourErrorMessage,
           ),
-          2 => NewsScreen(onBack: () => _selectTab(0)),
+          2 => MessagesScreen(
+            onBack: () => _selectTab(0),
+            inbox: _inbox,
+            announcements: _newsVm,
+          ),
           3 => RemindersScreen(
             onBack: () => _selectTab(0),
             onViewCalendar: _openCalendar,
@@ -110,25 +148,27 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         };
 
         return Scaffold(
+          extendBody: true,
           body: screen,
-          bottomNavigationBar: SchoolBottomNavigation(
+          bottomNavigationBar: GlassBottomNavigation(
             selectedIndex: _viewModel.selectedTab,
             onSelected: _selectTab,
+            messagesBadge: _inbox.unreadCount,
           ),
         );
       },
     );
   }
 
-  void _openMessages() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => MessagesScreen(
-          viewModel: MessagesViewModel(Supabase.instance.client),
-          onBack: () => Navigator.of(context).maybePop(),
-        ),
-      ),
-    );
+  void _onInbox() {
+    if (_popupOpen || !mounted) return;
+    final message = _inbox.nextPopup();
+    if (message == null) return;
+    _popupOpen = true;
+    showIncomingMessagePopup(context, message, _inbox).whenComplete(() {
+      _popupOpen = false;
+      _onInbox();
+    });
   }
 
   void _openAttendance() {
@@ -143,7 +183,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void _openCalendar() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => CalendarScreen(client: Supabase.instance.client),
+        builder: (_) => CalendarScreen(
+          client: Supabase.instance.client,
+          onSelectTab: (index) {
+            Navigator.of(context).pop();
+            _selectTab(index);
+          },
+        ),
       ),
     );
   }
@@ -210,10 +256,30 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _selectTab(int index) {
+    if (_loadingTab != null) return;
+    if (index == 2 || index == 4) {
+      setState(() => _loadingTab = index);
+      _viewModel.selectTab(index);
+      unawaited(_loadTab(index));
+      return;
+    }
+
     _viewModel.selectTab(index);
     final learnerId = _learnerViewModel.selectedLearnerId;
     if (index == 1 && learnerId != null) {
       _learnerViewModel.loadBehaviouralRecords(learnerId);
+    }
+  }
+
+  Future<void> _loadTab(int index) async {
+    try {
+      if (index == 2) {
+        await Future.wait([_inbox.load(), _newsVm.loadAnnouncements()]);
+      } else {
+        await _authViewModel.loadAvatar();
+      }
+    } finally {
+      if (mounted) setState(() => _loadingTab = null);
     }
   }
 

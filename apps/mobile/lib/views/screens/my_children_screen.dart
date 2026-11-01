@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/school_theme.dart';
 import '../../models/learner_profile.dart';
 import '../../viewmodels/learner_view_model.dart';
+import '../widgets/school_loading_screen.dart';
 import '../widgets/school_widgets.dart';
 
 class MyChildrenScreen extends StatefulWidget {
@@ -112,7 +113,9 @@ class _MyChildrenScreenState extends State<MyChildrenScreen> {
                 ),
                 const SizedBox(height: 20),
                 if (viewModel.isLoading && viewModel.children.isEmpty)
-                  const Center(child: CircularProgressIndicator())
+                  const SchoolLoadingIndicator(
+                    message: 'Loading linked learners...',
+                  )
                 else if (viewModel.errorMessage != null &&
                     viewModel.children.isEmpty)
                   Center(

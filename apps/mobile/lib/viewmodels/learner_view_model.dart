@@ -17,6 +17,7 @@ class LearnerViewModel extends ChangeNotifier {
   int? attendanceLearnerId;
   int? behaviouralLearnerId;
   bool isLoading = false;
+  bool isUploadingAvatar = false;
   bool isLoadingAttendance = false;
   bool isLoadingBehaviour = false;
   String? errorMessage;
@@ -238,6 +239,7 @@ class LearnerViewModel extends ChangeNotifier {
     required DateTime dateOfBirth,
     required String idNumber,
     required String relationship,
+    required String verificationCode,
     String? parentAuthId,
     String? parentFirstName,
     String? parentLastName,
@@ -276,24 +278,14 @@ class LearnerViewModel extends ChangeNotifier {
       _parentEmail = resolvedEmail;
       _parentPhone = resolvedPhone;
       final response = await _client.rpc(
-        'register_parent_and_learner',
+        'register_parent_with_code',
         params: {
-          'p_auth_id': authId,
+          'p_code': verificationCode.trim().toUpperCase(),
           'p_first_name': resolvedFirstName,
           'p_last_name': resolvedLastName.isEmpty
               ? resolvedFirstName
               : resolvedLastName,
-          'p_email': resolvedEmail,
           'p_phone': resolvedPhone,
-          'p_learner_first_name': firstName.trim(),
-          'p_learner_last_name': lastName.trim(),
-          'p_grade': grade.trim(),
-          'p_class': className.trim(),
-          'p_dob':
-              '${dateOfBirth.year.toString().padLeft(4, '0')}-'
-              '${dateOfBirth.month.toString().padLeft(2, '0')}-'
-              '${dateOfBirth.day.toString().padLeft(2, '0')}',
-          'p_idnumber': idNumber.trim(),
           'p_relationship': relationship,
         },
       );
@@ -305,25 +297,7 @@ class LearnerViewModel extends ChangeNotifier {
       }
       final status = response['status']?.toString().toLowerCase();
       if (status == 'success') {
-        if (user?.id == authId) {
-          try {
-            await _client.auth.updateUser(
-              UserAttributes(data: {'guardian_relationship': relationship}),
-            );
-          } on AuthException catch (error) {
-            statusMessage =
-                'Learner linked, but the parent relationship could not be '
-                'updated: ${error.message}';
-          } on Exception catch (error) {
-            statusMessage =
-                'Learner linked, but the parent relationship could not be '
-                'updated: $error';
-          }
-        } else {
-          statusMessage =
-              'Learner linked. The parent relationship will be synced after '
-              'you sign in.';
-        }
+        statusMessage = response['message']?.toString();
         final returnedLearnerId =
             response['learnerid'] ?? response['learner_id'];
         final registeredLearner = LearnerProfile.fromJson({
@@ -358,17 +332,63 @@ class LearnerViewModel extends ChangeNotifier {
         );
       }
     } on PostgrestException catch (error) {
+      debugPrint('REGISTRATION POSTGREST ERROR: ${error.message}');
+      debugPrint('REGISTRATION ERROR CODE: ${error.code}');
+      debugPrint('REGISTRATION DETAILS: ${error.details}');
+      debugPrint('REGISTRATION HINT: ${error.hint}');
       errorMessage = 'Unable to save the learner profile: ${error.message}';
     } on FormatException catch (error) {
+      debugPrint('REGISTRATION FORMAT ERROR: $error');
       errorMessage = error.message;
     } on StateError catch (error) {
+      debugPrint('REGISTRATION STATE ERROR: $error');
       errorMessage = error.message;
     } on Exception catch (error) {
+      debugPrint('REGISTRATION ERROR: $error');
       errorMessage = 'Unable to save the learner profile: $error';
     } finally {
       isLoading = false;
       _notifyListeners();
     }
     return false;
+  }
+
+  Future<String?> uploadLearnerAvatar({
+    required int learnerId,
+    required Uint8List bytes,
+    required String contentType,
+  }) async {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      return 'Sign in to upload your child’s profile picture.';
+    }
+    if (learnerId <= 0 || bytes.isEmpty || bytes.length > 5 * 1024 * 1024) {
+      return 'Choose a valid image smaller than 5 MB.';
+    }
+    if (!const {
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+    }.contains(contentType)) {
+      return 'Choose a JPEG, PNG, or WebP image.';
+    }
+
+    isUploadingAvatar = true;
+    _notifyListeners();
+    try {
+      await _client.storage
+          .from('child-avatars')
+          .uploadBinary(
+            '${user.id}/$learnerId/avatar',
+            bytes,
+            fileOptions: FileOptions(contentType: contentType, upsert: true),
+          );
+      return null;
+    } on Exception catch (error) {
+      return 'Unable to upload the child profile picture: $error';
+    } finally {
+      isUploadingAvatar = false;
+      _notifyListeners();
+    }
   }
 }

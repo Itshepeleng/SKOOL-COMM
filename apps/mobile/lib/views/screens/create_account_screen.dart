@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../app/school_theme.dart';
 
 import '../../utils/validators.dart';
 import '../../viewmodels/auth_view_model.dart';
@@ -99,7 +98,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           parentFirstName: parentFirstName,
           parentLastName: parentLastName,
           parentEmail: Validators.normalizeEmail(_emailController.text),
-          parentPhone: Validators.normalizePhone(_phoneController.text) ??
+          parentPhone:
+              Validators.normalizePhone(_phoneController.text) ??
               _phoneController.text.trim(),
         ),
       ),
@@ -118,165 +118,152 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               padding: const EdgeInsets.all(24),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 480),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                                            Center(
-                        child: Container(
-                          width: 170,
-                          height: 170,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            border: Border.all(
-                              color: SchoolTheme.green,
-                              width: 2,
+                child: AutofillGroup(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Center(child: SchoolLogo(compact: true)),
+                        const SizedBox(height: 28),
+                        const ScreenIntro(
+                          title: 'Create Account',
+                          subtitle:
+                              'Join our school community. Fill in your details to stay updated, progress and more.',
+                        ),
+                        const SizedBox(height: 18),
+                        if (_viewModel.errorMessage != null)
+                          StatusBanner(
+                            message: _viewModel.errorMessage!,
+                            isError: true,
+                          ),
+                        if (_viewModel.statusMessage != null)
+                          StatusBanner(
+                            message: _viewModel.statusMessage!,
+                            isError: false,
+                          ),
+                        _field(
+                          controller: _nameController,
+                          hint: 'e.g. Alex Mokoena',
+                          icon: Icons.person_outline,
+                          keyboardType: TextInputType.name,
+                          autofillHints: const [AutofillHints.name],
+                          validator: _required,
+                        ),
+                        _field(
+                          controller: _emailController,
+                          hint: 'e.g. alex@example.com',
+                          icon: Icons.mail_outline,
+                          keyboardType: TextInputType.emailAddress,
+                          autocorrect: false,
+                          autofillHints: const [AutofillHints.email],
+                          validator: Validators.email,
+                        ),
+                        _field(
+                          controller: _phoneController,
+                          hint: 'e.g. 082 123 4567',
+                          icon: Icons.phone_outlined,
+                          keyboardType: TextInputType.phone,
+                          autocorrect: false,
+                          autofillHints: const [AutofillHints.telephoneNumber],
+                          validator: Validators.phone,
+                        ),
+                        _field(
+                          controller: _passwordController,
+                          hint: 'Create a new password',
+                          icon: Icons.lock_outline,
+                          obscureText: _obscurePassword,
+                          suffixIcon: IconButton(
+                            tooltip: _obscurePassword
+                                ? 'Show password'
+                                : 'Hide password',
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.10),
-                                blurRadius: 16,
-                                offset: const Offset(0, 6),
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
+                          ),
+                          enableSuggestions: false,
+                          autofillHints: const [AutofillHints.newPassword],
+                          helperText:
+                              'Use at least 8 characters. Avoid reusing a password.',
+                          validator: (value) {
+                            if (value == null || value.length < 8) {
+                              return 'Use at least 8 characters';
+                            }
+                            return null;
+                          },
+                        ),
+                        _field(
+                          controller: _confirmPasswordController,
+                          hint: 'Confirm password',
+                          icon: Icons.lock_outline,
+                          obscureText: _obscureConfirmPassword,
+                          suffixIcon: IconButton(
+                            tooltip: _obscureConfirmPassword
+                                ? 'Show password'
+                                : 'Hide password',
+                            onPressed: () => setState(
+                              () => _obscureConfirmPassword =
+                                  !_obscureConfirmPassword,
+                            ),
+                            icon: Icon(
+                              _obscureConfirmPassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
+                          ),
+                          enableSuggestions: false,
+                          autofillHints: const [AutofillHints.newPassword],
+                          validator: (value) {
+                            if (value != _passwordController.text) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
+                          },
+                        ),
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: _acceptedTerms,
+                              onChanged: (value) => setState(
+                                () => _acceptedTerms = value ?? false,
                               ),
-                            ],
-                          ),
-                          alignment: Alignment.center,
-                          child: SizedBox(
-                            width: 135,
-                            child: Image.asset(
-                              'assets/logos/school_logo.jpg',
-                              fit: BoxFit.contain,
                             ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-                      const ScreenIntro(
-                        title: 'Create Account',
-                        subtitle:
-                            'Join our school community. Fill in your details to stay updated, progress and more.',
-                      ),
-                      const SizedBox(height: 18),
-                      if (_viewModel.errorMessage != null)
-                        StatusBanner(
-                          message: _viewModel.errorMessage!,
-                          isError: true,
-                        ),
-                      if (_viewModel.statusMessage != null)
-                        StatusBanner(
-                          message: _viewModel.statusMessage!,
-                          isError: false,
-                        ),
-                      _field(
-                        controller: _nameController,
-                        hint: 'Full name',
-                        icon: Icons.person_outline,
-                        validator: _required,
-                      ),
-                      _field(
-                        controller: _emailController,
-                        hint: 'Email address',
-                        icon: Icons.mail_outline,
-                        keyboardType: TextInputType.emailAddress,
-                        validator: Validators.email,
-                      ),
-                      _field(
-                        controller: _phoneController,
-                        hint: 'Phone number',
-                        icon: Icons.phone_outlined,
-                        keyboardType: TextInputType.phone,
-                        validator: Validators.phone,
-                      ),
-                      _field(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        suffixIcon: IconButton(
-                          tooltip: _obscurePassword
-                              ? 'Show password'
-                              : 'Hide password',
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
-                        ),
-                        hint: 'Create password',
-                        icon: Icons.lock_outline,
-                        validator: (value) {
-                          if (value == null || value.length < 8) {
-                            return 'Use at least 8 characters';
-                          }
-                          return null;
-                        },
-                      ),
-                      _field(
-                        controller: _confirmPasswordController,
-                        hint: 'Confirm password',
-                        icon: Icons.lock_outline,
-                        obscureText: _obscureConfirmPassword,
-                        suffixIcon: IconButton(
-                          tooltip: _obscureConfirmPassword
-                              ? 'Show password'
-                              : 'Hide password',
-                          onPressed: () => setState(
-                            () => _obscureConfirmPassword =
-                                !_obscureConfirmPassword,
-                          ),
-                          icon: Icon(
-                            _obscureConfirmPassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value != _passwordController.text) {
-                            return 'Passwords do not match';
-                          }
-                          return null;
-                        },
-                      ),
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _acceptedTerms,
-                            onChanged: (value) =>
-                                setState(() => _acceptedTerms = value ?? false),
-                          ),
-                          Expanded(
-                            child: Wrap(
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                const Text('I agree to the '),
-                                TextButton(
-                                  onPressed: () =>
-                                      TermsAndConditionsScreen.open(context),
-                                  style: TextButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: Size.zero,
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
+                            Expanded(
+                              child: Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  const Text('I agree to the '),
+                                  TextButton(
+                                    onPressed: () =>
+                                        TermsAndConditionsScreen.open(context),
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: Size.zero,
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: const Text('Terms & Conditions'),
                                   ),
-                                  child: const Text('Terms & Conditions'),
-                                ),
-                                const Text('.'),
-                              ],
+                                  const Text('.'),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      SchoolPrimaryButton(
-                        label: 'Next',
-                        icon: Icons.arrow_forward,
-                        backgroundColor: const Color(0xFFF58220),
-                        isLoading: _viewModel.isLoading,
-                        onPressed: _createAccount,
-                      ),
-                    ],
+                          ],
+                        ),
+                        SchoolPrimaryButton(
+                          label: 'Next',
+                          icon: Icons.arrow_forward,
+                          backgroundColor: const Color(0xFFF58220),
+                          isLoading: _viewModel.isLoading,
+                          onPressed: _createAccount,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -295,6 +282,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     TextInputType? keyboardType,
     bool obscureText = false,
     Widget? suffixIcon,
+    bool autocorrect = true,
+    bool enableSuggestions = true,
+    Iterable<String>? autofillHints,
+    String? helperText,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -302,10 +293,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         controller: controller,
         keyboardType: keyboardType,
         obscureText: obscureText,
+        enableSuggestions: enableSuggestions,
+        autocorrect: obscureText ? false : autocorrect,
+        autofillHints: autofillHints,
         decoration: InputDecoration(
           prefixIcon: Icon(icon),
           hintText: hint,
           suffixIcon: suffixIcon,
+          helperText: helperText,
         ),
         validator: validator,
       ),

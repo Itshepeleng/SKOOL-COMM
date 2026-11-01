@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../app/school_theme.dart';
 
 import '../../utils/validators.dart';
 import '../../viewmodels/auth_view_model.dart';
+import '../../viewmodels/learner_view_model.dart';
+import '../widgets/school_loading_screen.dart';
 import '../widgets/school_widgets.dart';
 import 'create_account_screen.dart';
 import 'main_navigation_screen.dart';
@@ -44,9 +45,38 @@ class _LoginScreenState extends State<LoginScreen> {
       password: _passwordController.text,
     );
     if (!mounted || response?.session == null) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => const MainNavigationScreen()),
+    final navigator = Navigator.of(context);
+    final client = Supabase.instance.client;
+    final learnerViewModel = LearnerViewModel(client);
+    navigator.pushAndRemoveUntil<void>(
+      PageRouteBuilder<void>(
+        pageBuilder: (_, _, _) =>
+            const SchoolLoadingScreen(message: 'Fetching your dashboard...'),
+        transitionsBuilder: (_, animation, _, child) {
+          final slide = Tween<Offset>(
+            begin: const Offset(0.04, 0),
+            end: Offset.zero,
+          ).animate(animation);
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(position: slide, child: child),
+          );
+        },
+      ),
       (_) => false,
+    );
+    await learnerViewModel.loadChildren();
+    if (!navigator.mounted) {
+      learnerViewModel.dispose();
+      return;
+    }
+    navigator.pushReplacement<void, void>(
+      MaterialPageRoute<void>(
+        builder: (_) => MainNavigationScreen(
+          learnerViewModel: learnerViewModel,
+          childrenAlreadyLoaded: true,
+        ),
+      ),
     );
   }
 
@@ -54,142 +84,130 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _viewModel,
-      builder: (context, _) => Scaffold(
-        appBar: AppBar(title: const Text('Log In')),
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                                            Center(
-                        child: Container(
-                          width: 170,
-                          height: 170,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            border: Border.all(
-                              color: SchoolTheme.green,
-                              width: 2,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.10),
-                                blurRadius: 16,
-                                offset: const Offset(0, 6),
+      builder: (context, _) => _viewModel.isLoading
+          ? const SchoolLoadingScreen(message: 'Signing in to your school...')
+          : Scaffold(
+              appBar: AppBar(title: const Text('Log In')),
+              body: SafeArea(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 440),
+                      child: AutofillGroup(
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Center(child: SchoolLogo(compact: true)),
+                              const SizedBox(height: 34),
+                              const ScreenIntro(
+                                title: 'Log In',
+                                subtitle:
+                                    'Welcome back! Please log in to your account to continue.',
+                              ),
+                              const SizedBox(height: 22),
+                              if (_viewModel.errorMessage != null)
+                                StatusBanner(
+                                  message: _viewModel.errorMessage!,
+                                  isError: true,
+                                ),
+                              TextFormField(
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.next,
+                                autofillHints: const [AutofillHints.email],
+                                decoration: const InputDecoration(
+                                  prefixIcon: Icon(Icons.mail_outline),
+                                  hintText: 'Email address',
+                                ),
+                                validator: (value) {
+                                  if (value == null || !value.contains('@')) {
+                                    return 'Enter a valid email address';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _passwordController,
+                                obscureText: _obscurePassword,
+                                textInputAction: TextInputAction.done,
+                                autofillHints: const [AutofillHints.password],
+                                enableSuggestions: false,
+                                autocorrect: false,
+                                onFieldSubmitted: (_) => _signIn(),
+                                decoration: InputDecoration(
+                                  prefixIcon: const Icon(Icons.lock_outline),
+                                  hintText: 'Password',
+                                  suffixIcon: IconButton(
+                                    tooltip: _obscurePassword
+                                        ? 'Show password'
+                                        : 'Hide password',
+                                    onPressed: () => setState(
+                                      () =>
+                                          _obscurePassword = !_obscurePassword,
+                                    ),
+                                    icon: Icon(
+                                      _obscurePassword
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                    ),
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Enter your password';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: _rememberMe,
+                                    onChanged: (value) => setState(
+                                      () => _rememberMe = value ?? false,
+                                    ),
+                                  ),
+                                  const Text('Remember me'),
+                                  const Spacer(),
+                                  TextButton(
+                                    onPressed: _showForgotPasswordDialog,
+                                    child: const Text('Forgot Password?'),
+                                  ),
+                                ],
+                              ),
+                              SchoolPrimaryButton(
+                                label: 'Log In',
+                                icon: Icons.arrow_forward,
+                                isLoading: _viewModel.isLoading,
+                                onPressed: _signIn,
+                              ),
+                              const SizedBox(height: 14),
+                              Center(
+                                child: TextButton(
+                                  onPressed: () => Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) =>
+                                          const CreateAccountScreen(),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Don't have an account? Create Account",
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                          alignment: Alignment.center,
-                          child: SizedBox(
-                            width: 135,
-                            child: Image.asset(
-                              'assets/logos/school_logo.jpg',
-                              fit: BoxFit.contain,
-                            ),
-                          ),
                         ),
                       ),
-                      const SizedBox(height: 34),
-                      const ScreenIntro(
-                        title: 'Log In',
-                        subtitle:
-                            'Welcome back! Please log in to your account to continue.',
-                      ),
-                      const SizedBox(height: 22),
-                      if (_viewModel.errorMessage != null)
-                        StatusBanner(
-                          message: _viewModel.errorMessage!,
-                          isError: true,
-                        ),
-                      TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.mail_outline),
-                          hintText: 'Email address',
-                        ),
-                        validator: Validators.email,
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        textInputAction: TextInputAction.done,
-                        onFieldSubmitted: (_) => _signIn(),
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          hintText: 'Password',
-                          suffixIcon: IconButton(
-                            tooltip: _obscurePassword
-                                ? 'Show password'
-                                : 'Hide password',
-                            onPressed: () => setState(
-                              () => _obscurePassword = !_obscurePassword,
-                            ),
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                            ),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Enter your password';
-                          }
-                          return null;
-                        },
-                      ),
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _rememberMe,
-                            onChanged: (value) =>
-                                setState(() => _rememberMe = value ?? false),
-                          ),
-                          const Text('Remember me'),
-                          const Spacer(),
-                          TextButton(
-                            onPressed: _showForgotPasswordDialog,
-                            child: const Text('Forgot Password?'),
-                          ),
-                        ],
-                      ),
-                      SchoolPrimaryButton(
-                        label: 'Log In',
-                        icon: Icons.arrow_forward,
-                        isLoading: _viewModel.isLoading,
-                        onPressed: _signIn,
-                      ),
-                      const SizedBox(height: 14),
-                      Center(
-                        child: TextButton(
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => const CreateAccountScreen(),
-                            ),
-                          ),
-                          child: const Text(
-                            "Don't have an account? Create Account",
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ),
-      ),
     );
   }
 
