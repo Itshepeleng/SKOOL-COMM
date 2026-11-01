@@ -1,18 +1,27 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SkoolComm.Domain.Interfaces;
+using SkoolComm.Domain.Models;
 
 namespace SkoolComm.Web.Controllers
 {
     public class DashboardController : Controller
     {
-        private readonly IAttendanceService _learnerSource;   // used only to read the learners
-        private readonly IStaffService _staffService;
+        private readonly ISchoolStatsService _stats;
+        private readonly IStaffService _staff;
+        private readonly IAnnouncementService _announcements;
+        private readonly IActivityService _activity;
 
-        public DashboardController(IAttendanceService attendanceService, IStaffService staffService)
+        public DashboardController(
+            ISchoolStatsService stats,
+            IStaffService staff,
+            IAnnouncementService announcements,
+            IActivityService activity)
         {
-            _learnerSource = attendanceService;
-            _staffService = staffService;
+            _stats = stats;
+            _staff = staff;
+            _announcements = announcements;
+            _activity = activity;
         }
 
         public async Task<IActionResult> Teacher()
@@ -21,6 +30,16 @@ namespace SkoolComm.Web.Controllers
                 return RedirectToAction("Login", "Account");
 
             await LoadCounts();
+
+            try
+            {
+                ViewBag.Recent = (await _announcements.GetAllAsync()).Take(5).ToList();
+            }
+            catch
+            {
+                ViewBag.Recent = new List<Announcement>();
+            }
+
             return View();
         }
 
@@ -29,11 +48,32 @@ namespace SkoolComm.Web.Controllers
             if (HttpContext.Session.GetString("LoggedIn") != "true")
                 return RedirectToAction("Login", "Account");
 
-            // Teachers can't open the administrator dashboard
             if (HttpContext.Session.GetString("UserRole") != "administrator")
                 return RedirectToAction("Teacher");
 
             await LoadCounts();
+
+            try
+            {
+                var staff = await _staff.GetAllAsync();
+                ViewBag.TeacherCount = staff.Count(s =>
+                    s.Role.Equals("teacher", StringComparison.OrdinalIgnoreCase) &&
+                    s.Status.Equals("active", StringComparison.OrdinalIgnoreCase));
+            }
+            catch
+            {
+                ViewBag.TeacherCount = null;
+            }
+
+            try
+            {
+                ViewBag.Activity = await _activity.GetRecentAsync(6);
+            }
+            catch
+            {
+                ViewBag.Activity = new List<ActivityItem>();
+            }
+
             return View();
         }
 
@@ -41,18 +81,14 @@ namespace SkoolComm.Web.Controllers
         {
             try
             {
-                var learners = await _learnerSource.GetLearnersAsync();
-                ViewBag.LearnerCount = learners.Count;
-
-                var staff = await _staffService.GetAllAsync();
-                ViewBag.TeacherCount = staff.Count(s =>
-                    s.Role.Equals("teacher", StringComparison.OrdinalIgnoreCase) &&
-                    s.Status.Equals("active", StringComparison.OrdinalIgnoreCase));
+                var counts = await _stats.GetCountsAsync();
+                ViewBag.LearnerCount = counts.Learners;
+                ViewBag.ParentCount = counts.Parents;
             }
             catch
             {
                 ViewBag.LearnerCount = null;
-                ViewBag.TeacherCount = null;
+                ViewBag.ParentCount = null;
             }
         }
     }

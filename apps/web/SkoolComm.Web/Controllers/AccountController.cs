@@ -27,6 +27,12 @@ namespace SkoolComm.Web.Controllers
             string password,
             string role)
         {
+            ViewBag.SelectedRole =
+                string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase)
+                    ? "admin"
+                    : "teacher";
+            ViewBag.Email = email?.Trim() ?? "";
+
             if (string.IsNullOrWhiteSpace(email) ||
                 string.IsNullOrWhiteSpace(password))
             {
@@ -68,7 +74,6 @@ namespace SkoolComm.Web.Controllers
                 return View();
             }
 
-            // Use the staff member's real name when we can find it
             string loginEmail = result.Email ?? email.Trim();
             string displayName = loginEmail;
 
@@ -84,7 +89,7 @@ namespace SkoolComm.Web.Controllers
                 }
                 catch
                 {
-                    // keep the email as the display name if the lookup fails
+                    // Keep the email as the display name if the lookup fails.
                 }
             }
 
@@ -95,9 +100,7 @@ namespace SkoolComm.Web.Controllers
 
             if (result.StaffId.HasValue)
             {
-                HttpContext.Session.SetInt32(
-                    "StaffId",
-                    result.StaffId.Value);
+                HttpContext.Session.SetInt32("StaffId", result.StaffId.Value);
             }
 
             return actualRole == "administrator"

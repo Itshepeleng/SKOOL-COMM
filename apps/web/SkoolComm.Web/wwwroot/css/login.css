@@ -141,6 +141,51 @@
             box-shadow: 0 0 0 2px rgba(232, 119, 34, .5);
         }
 
+/* ---------- Password visibility button ---------- */
+.password-input-wrap {
+    position: relative;
+}
+
+.login-field .password-input-wrap input {
+    padding-right: 48px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: var(--green-light);
+    cursor: pointer;
+}
+
+    .password-toggle svg {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .password-toggle:hover {
+        color: #fff;
+    }
+
+    .password-toggle:focus-visible {
+        outline: 2px solid var(--orange);
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+
 .login-options {
     display: flex;
     align-items: center;

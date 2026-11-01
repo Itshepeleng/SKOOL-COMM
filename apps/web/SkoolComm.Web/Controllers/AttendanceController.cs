@@ -92,8 +92,13 @@ namespace SkoolComm.Web.Controllers
             // Only the three agreed words are accepted
             var allowed = new[] { "present", "absent", "late" };
             entries = entries
-                .Where(e => allowed.Contains((e.Status ?? "").ToLowerInvariant()))
-                .ToList();
+    .Where(e => allowed.Contains((e.Status ?? "").ToLowerInvariant()))
+    .ToList();
+
+            foreach (var entry in entries)
+            {
+                entry.Class = cls;
+            }
 
             if (entries.Count == 0)
             {

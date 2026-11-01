@@ -1,0 +1,131 @@
+﻿@model SkoolComm.Domain.Models.MessagesPageModel
+@{
+    ViewData["Title"] = "Messages & Engagement";
+
+    string successMsg = TempData["Success"]?.ToString() ?? "";
+    string errorMsg = (TempData["Error"]?.ToString() ?? "") + (ViewBag.Error as string ?? "");
+    string toastClass = errorMsg != "" ? "toast error" : successMsg != "" ? "toast success" : "toast success hidden";
+    string toastText = errorMsg != "" ? errorMsg : successMsg;
+
+    var learnersJson = System.Text.Json.JsonSerializer.Serialize(
+        Model.AllLearners.Select(l => new { id = l.LearnerId, name = l.LastName + ", " + l.FirstName, cls = l.Class }));
+}
+
+@functions {
+    static string When(DateTimeOffset t)
+    {
+        TimeZoneInfo tz;
+        try { tz = TimeZoneInfo.FindSystemTimeZoneById("South Africa Standard Time"); }
+        catch { tz = TimeZoneInfo.Local; }
+
+        var local = TimeZoneInfo.ConvertTime(t, tz);
+        var today = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, tz).Date;
+        if (local.Date == today) return "Today, " + local.ToString("HH:mm");
+        if (local.Date == today.AddDays(-1)) return "Yesterday, " + local.ToString("HH:mm");
+        return local.ToString("d MMM, HH:mm");
+    }
+}
+
+<div class="page-wide" id="messagesPage">
+
+    <div id="msgToast" class="@toastClass"><span>@toastText</span></div>
+
+    <div class="msg-layout">
+
+        <!-- Left: compose -->
+        <section class="msg-card">
+            <h2 class="msg-title">Send a message</h2>
+            <p class="small muted">Contact parents directly and track when they read it.</p>
+
+            <form method="post" asp-controller="Messages" asp-action="Send" id="sendForm" class="msg-form">
+
+                <label class="msg-label" for="msgClass">Recipients</label>
+                <select id="msgClass" class="input" data-learners="@learnersJson">
+                    <option value="ALL">All parents</option>
+                    @foreach (var c in Model.Classes)
+                    {
+                        <option value="@c">@c</option>
+                    }
+                </select>
+                <select id="msgLearner" class="input hidden" style="margin-top:8px;"></select>
+                <input type="hidden" name="audience" id="msgAudience" value="ALL" />
+
+                <label class="msg-label" for="msgSubject">Subject</label>
+                <input type="text" name="subject" id="msgSubject" class="input" maxlength="120"
+                       placeholder="What is this message about?" />
+
+                <label class="msg-label" for="msgBody">Message</label>
+                <textarea name="body" id="msgBody" class="input msg-body" maxlength="1000" rows="8"
+                          placeholder="Write your message to parents..."></textarea>
+                <div class="msg-count small faint"><span id="msgCount">0</span> characters</div>
+
+                <button type="submit" id="msgSend" class="btn btn-primary msg-send" disabled>Send Message</button>
+            </form>
+        </section>
+
+        <!-- Right: stats and engagement -->
+        <div class="msg-side">
+            <div class="msg-stats">
+                <div class="msg-stat">
+                    <span class="msg-stat-label green">Messages Sent</span>
+                    <strong>@Model.MessagesSent</strong>
+                </div>
+                <div class="msg-stat">
+                    <span class="msg-stat-label orange">Overall Read Rate</span>
+                    <strong>@Model.OverallReadRate%</strong>
+                </div>
+                <div class="msg-stat">
+                    <span class="msg-stat-label">Unread</span>
+                    <strong>@Model.TotalUnread</strong>
+                </div>
+            </div>
+
+            <section class="msg-card">
+                <div class="row-between">
+                    <div>
+                        <h2 class="msg-title">Message engagement</h2>
+                        <p class="small muted">See which communications have been seen or remain unread.</p>
+                    </div>
+                    <select id="msgFilter" class="input msg-filter">
+                        <option value="all">All</option>
+                        <option value="unread">Has unread</option>
+                        <option value="seen">All seen</option>
+                    </select>
+                </div>
+
+                <div class="msg-list">
+                    @if (Model.Items.Count == 0)
+                    {
+                        <p class="center faint" style="padding:24px 0;">No messages sent yet.</p>
+                    }
+                    @foreach (var m in Model.Items)
+                    {
+                        <div class="msg-item" data-state="@(m.Unread > 0 ? "unread" : "seen")">
+                            <div class="row-between">
+                                <strong class="msg-item-title">@m.Subject</strong>
+                                @if (m.Unread > 0)
+                                {
+                                    <span class="badge badge-orange">@m.Unread unread</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-green">All seen</span>
+                                }
+                            </div>
+                            <div class="small faint">@m.Audience · @When(m.SentAt)</div>
+                            <div class="msg-bar-row">
+                                <div class="msg-bar"><div class="msg-fill" style="width:@(m.ReadRate)%"></div></div>
+                                <span class="small muted">@m.ReadRate%</span>
+                            </div>
+                            <div class="small faint">@m.Seen seen · @m.Unread unread · @m.Delivered delivered</div>
+                        </div>
+                    }
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/messages.js" asp-append-version="true"></script>
+}
