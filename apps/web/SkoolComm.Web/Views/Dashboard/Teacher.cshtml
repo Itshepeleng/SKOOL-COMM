@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿@{
     ViewData["Title"] = "Dashboard";
     var userName = Context.Session.GetString("UserName") ?? "Teacher";
@@ -33,17 +34,30 @@
         "result" => "Results",
         _ => "Announcement"
     };
+=======
+﻿@using SkoolComm.Domain.Models
+@{
+    ViewData["Title"] = "Dashboard";
+    var userName = Context.Session.GetString("UserName") ?? "Teacher";
+    var recent = ViewBag.Recent as List<Announcement> ?? new List<Announcement>();
+    var now = DateTime.Now;
+    int term = now.Month <= 3 ? 1 : now.Month <= 6 ? 2 : now.Month <= 9 ? 3 : 4;
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
 }
 
 <div class="stack">
 
+<<<<<<< HEAD
     <!-- Welcome row -->
+=======
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
     <div class="row-between">
         <div>
             <h2 class="page-title">Welcome back, @userName</h2>
             <p class="page-sub">Here is what is happening at Wilgehof today.</p>
         </div>
         <div class="card" style="padding:10px 16px;text-align:right;">
+<<<<<<< HEAD
             <div style="font-size:14px;font-weight:600;">Term 2, Week 8</div>
             <div class="small muted">Grade 5A · 32 Learners</div>
         </div>
@@ -54,6 +68,17 @@
         <div class="stat-card green">
             <div class="stat-icon green">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="6" r="3" stroke="white" stroke-width="1.5" fill="none"/><path d="M2 17c0-3.3 2.2-5 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/><circle cx="13" cy="6" r="3" stroke="white" stroke-width="1.5" fill="none"/><path d="M18 17c0-3.3-2.2-5-5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+=======
+            <div style="font-size:14px;font-weight:600;">Term @term, @now.Year</div>
+            <div class="small muted">@(ViewBag.LearnerCount ?? "–") learners</div>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <div class="stat-card green">
+            <div class="stat-icon green">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="6" r="3" stroke="white" stroke-width="1.5" fill="none" /><path d="M2 17c0-3.3 2.2-5 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" /><circle cx="13" cy="6" r="3" stroke="white" stroke-width="1.5" fill="none" /><path d="M18 17c0-3.3-2.2-5-5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" /></svg>
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
             </div>
             <div class="stat-value">@(ViewBag.LearnerCount ?? "–")</div>
             <div class="stat-label">Total Learners</div>
@@ -62,6 +87,7 @@
 
         <div class="stat-card orange">
             <div class="stat-icon orange">
+<<<<<<< HEAD
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="white" stroke-width="1.5" fill="none"/><path d="M4 18c0-3.9 2.7-7 6-7s6 3.1 6 7" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
             </div>
             <div class="stat-value">250</div>
@@ -71,11 +97,22 @@
     </div>
 
     <!-- Quick actions + recent activity -->
+=======
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="white" stroke-width="1.5" fill="none" /><path d="M4 18c0-3.9 2.7-7 6-7s6 3.1 6 7" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" /></svg>
+            </div>
+            <div class="stat-value">@(ViewBag.ParentCount ?? "–")</div>
+            <div class="stat-label">Total Parents</div>
+            <div class="stat-sub">Registered on the parent app</div>
+        </div>
+    </div>
+
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
     <div class="grid-3">
 
         <div class="card">
             <h3>Quick Actions</h3>
             <div class="stack-sm">
+<<<<<<< HEAD
 
                 <a asp-controller="Attendance" asp-action="Index" class="quick-btn">
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9l4 4 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -94,6 +131,24 @@
                     New Announcement
                 </a>
 
+=======
+                <a asp-controller="Attendance" asp-action="Index" class="quick-btn">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9l4 4 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    Take Attendance
+                </a>
+                <a asp-controller="Behavioural" asp-action="Index" class="quick-btn">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l2 4 4.5.7-3.3 3.2.8 4.5L9 12.3l-4 2.1.8-4.5L2.5 6.7l4.5-.7L9 2z" fill="currentColor" /></svg>
+                    Record Behaviour
+                </a>
+                <a asp-controller="Announcements" asp-action="Index" class="quick-btn">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 6a2 2 0 012-2h6a2 2 0 012 2v5a2 2 0 01-2 2H7l-3 3V6z" fill="currentColor" /></svg>
+                    New Announcement
+                </a>
+                <a asp-controller="Messages" asp-action="Index" class="quick-btn">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 4.5A1.5 1.5 0 014.5 3h9A1.5 1.5 0 0115 4.5v7a1.5 1.5 0 01-1.5 1.5H7l-4 3v-3.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /></svg>
+                    Messages &amp; Engagement
+                </a>
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
             </div>
         </div>
 
@@ -103,6 +158,7 @@
                 <a asp-controller="Announcements" asp-action="Index" class="link-btn">View all</a>
             </div>
 
+<<<<<<< HEAD
             <div>
                 @foreach (var a in activity)
                 {
@@ -116,6 +172,24 @@
                     </div>
                 }
             </div>
+=======
+            @if (recent.Count == 0)
+            {
+                <p class="small faint" style="padding:12px 0;">No announcements yet.</p>
+            }
+
+            @foreach (var a in recent)
+            {
+                <div class="list-row">
+                    <span class="dot" style="background:#ca8a04;margin-top:7px;"></span>
+                    <div style="flex:1;min-width:0;">
+                        <p>@a.Title</p>
+                        <span class="tiny faint">@a.DatePosted.ToString("d MMM yyyy, HH:mm")</span>
+                    </div>
+                    <span class="badge badge-yellow" style="align-self:flex-start;">@a.TargetAudience</span>
+                </div>
+            }
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
         </div>
 
     </div>

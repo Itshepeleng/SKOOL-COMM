@@ -15,6 +15,91 @@
         text.Length > 140 ? text.Substring(0, 140).TrimEnd() + "…" : text;
 }
 
+<<<<<<< HEAD
+=======
+<style>
+    .announcement-open {
+        display: block;
+        width: 100%;
+        border: 0;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+
+        .announcement-open:hover {
+            filter: brightness(0.97);
+        }
+
+    .announcement-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+
+    .announcement-dialog {
+        width: min(720px, calc(100vw - 32px));
+        max-height: 86vh;
+        margin: auto;
+        padding: 0;
+        overflow-y: auto;
+        border: 0;
+        border-radius: 16px;
+        color: inherit;
+        background: white;
+        box-shadow: 0 20px 60px rgb(0 0 0 / 25%);
+    }
+
+        .announcement-dialog::backdrop {
+            background: rgb(15 23 42 / 58%);
+            backdrop-filter: blur(2px);
+        }
+
+    .announcement-dialog-header {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 22px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        background: white;
+    }
+
+    .announcement-dialog-body {
+        padding: 22px 24px 28px;
+    }
+
+    .announcement-message {
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+        line-height: 1.7;
+    }
+
+    .announcement-close {
+        flex-shrink: 0;
+    }
+
+    @@media (max-width: 600px) {
+        .announcement-dialog {
+            width: calc(100vw - 20px);
+            max-height: 90vh;
+            border-radius: 12px;
+        }
+
+        .announcement-dialog-header,
+        .announcement-dialog-body {
+            padding: 18px;
+        }
+    }
+</style>
+
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
 <div class="page-wide stack" id="annPage">
 
     <div id="annToast" class="@toastClass">
@@ -61,7 +146,11 @@
             </div>
         </form>
 
+<<<<<<< HEAD
         <!-- ============ Recent announcements (from Supabase) ============ -->
+=======
+        <!-- ============ Recent announcements ============ -->
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
         <div class="card col-span-2">
             <h3 style="margin-bottom:16px;">Recent Announcements</h3>
 
@@ -73,6 +162,7 @@
 
                 @foreach (var a in Model)
                 {
+<<<<<<< HEAD
                     <div class="record-box">
                         <div class="row-between" style="align-items:flex-start;gap:8px;margin-bottom:4px;">
                             <p style="font-size:14px;font-weight:600;line-height:1.35;">@a.Title</p>
@@ -81,6 +171,60 @@
                         <p class="small muted" style="white-space:pre-line;line-height:1.5;">@Preview(a.Content)</p>
                         <div class="tiny faint" style="margin-top:6px;">@a.DatePosted.ToString("d MMM yyyy, HH:mm", inv)</div>
                     </div>
+=======
+                    var dialogId = $"announcementDialog_{a.AnnouncementId}";
+                    var titleId = $"announcementTitle_{a.AnnouncementId}";
+
+                    <button type="button"
+                            class="record-box announcement-open"
+                            data-dialog-id="@dialogId"
+                            aria-haspopup="dialog"
+                            aria-controls="@dialogId">
+                        <span class="announcement-heading">
+                            <span style="font-size:14px;font-weight:600;line-height:1.35;">
+                                @a.Title
+                            </span>
+                            <span class="badge badge-green" style="flex-shrink:0;">
+                                @a.TargetAudience
+                            </span>
+                        </span>
+
+                        <span class="small muted" style="white-space:pre-line;line-height:1.5;">
+                            @Preview(a.Content)
+                        </span>
+
+                        <span class="tiny faint" style="display:block;margin-top:6px;">
+                            @a.DatePosted.ToString("d MMM yyyy, HH:mm", inv)
+                            · Click to read full message
+                        </span>
+                    </button>
+
+                    <dialog class="announcement-dialog"
+                            id="@dialogId"
+                            aria-labelledby="@titleId">
+                        <div class="announcement-dialog-header">
+                            <div>
+                                <h2 id="@titleId" style="margin:0 0 10px;">
+                                    @a.Title
+                                </h2>
+                                <span class="badge badge-green">@a.TargetAudience</span>
+                                <div class="tiny faint" style="margin-top:8px;">
+                                    @a.DatePosted.ToString("d MMM yyyy, HH:mm", inv)
+                                </div>
+                            </div>
+
+                            <button type="button"
+                                    class="btn btn-outline announcement-close"
+                                    data-close-dialog>
+                                Close
+                            </button>
+                        </div>
+
+                        <div class="announcement-dialog-body">
+                            <p class="small muted announcement-message">@a.Content</p>
+                        </div>
+                    </dialog>
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
                 }
             </div>
         </div>
@@ -90,4 +234,30 @@
 
 @section Scripts {
     <script src="~/js/announcements.js" asp-append-version="true"></script>
+<<<<<<< HEAD
+=======
+
+    <script>
+        document.querySelectorAll("[data-dialog-id]").forEach(function (button) {
+            button.addEventListener("click", function () {
+                const dialog = document.getElementById(button.dataset.dialogId);
+                if (dialog instanceof HTMLDialogElement) {
+                    dialog.showModal();
+                }
+            });
+        });
+
+        document.querySelectorAll(".announcement-dialog").forEach(function (dialog) {
+            dialog.querySelector("[data-close-dialog]")?.addEventListener("click", function () {
+                dialog.close();
+            });
+
+            dialog.addEventListener("click", function (event) {
+                if (event.target === dialog) {
+                    dialog.close();
+                }
+            });
+        });
+    </script>
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
 }

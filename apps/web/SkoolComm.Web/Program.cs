@@ -19,7 +19,11 @@ Console.WriteLine($"SUPABASE URL LOADED: {supabaseUrl}");
 
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+<<<<<<< HEAD
 
+=======
+builder.Services.AddScoped<ILearnerCodeService, SupabaseLearnerCodeService>();
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
 var supabaseOptions = new SupabaseOptions
 {
     AutoConnectRealtime = false
@@ -35,7 +39,14 @@ builder.Services.AddScoped<IAttendanceService, SupabaseAttendanceService>();
 builder.Services.AddScoped<IEventService, SupabaseEventService>();
 builder.Services.AddScoped<IBehaviourService, SupabaseBehaviourService>();
 builder.Services.AddScoped<IStaffService, SupabaseStaffService>();
+<<<<<<< HEAD
 
+=======
+builder.Services.AddScoped<IMessageService, SupabaseMessageService>();
+builder.Services.AddScoped<ISchoolStatsService, SupabaseSchoolStatsService>();
+builder.Services.AddScoped<IActivityService, SupabaseActivityService>();
+builder.Services.AddScoped<IParentService, SupabaseParentService>();
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
 
 
 

@@ -1,3 +1,9 @@
 <Solution>
+<<<<<<< HEAD
+=======
+  <Project Path="../SkoolComm.Application/SkoolComm.Application.csproj" />
+  <Project Path="../SkoolComm.Domain/SkoolComm.Domain.csproj" />
+  <Project Path="../SkoolComm.Infrastructure/SkoolComm.Infrastructure.csproj" />
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
   <Project Path="SkoolComm.Web.csproj" />
 </Solution>

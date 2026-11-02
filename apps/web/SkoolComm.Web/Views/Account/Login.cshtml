@@ -1,6 +1,10 @@
 ﻿@{
     Layout = null;
     ViewData["Title"] = "Login";
+<<<<<<< HEAD
+=======
+    var selectedRole = (ViewBag.SelectedRole as string) ?? "teacher";
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
 }
 
 <!DOCTYPE html>
@@ -13,6 +17,7 @@
 </head>
 
 <body class="login-wrap">
+<<<<<<< HEAD
 
     <!-- LEFT PANEL: green, with the form -->
     <section class="login-left">
@@ -21,6 +26,11 @@
 
             <!-- School crest -->
             <svg width="80" height="80" viewBox="0 0 72 72" fill="none">
+=======
+    <section class="login-left">
+        <div class="login-top">
+            <svg width="80" height="80" viewBox="0 0 72 72" fill="none" aria-hidden="true">
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
                 <path d="M36 4L8 16V40C8 55 20 66 36 70C52 66 64 55 64 40V16L36 4Z" fill="#1a5c2e" />
                 <path d="M36 10L14 20V40C14 52 24 61 36 65C48 61 58 52 58 40V20L36 10Z" fill="#133f20" />
                 <path d="M36 10L14 20V40C14 52 24 61 36 65C48 61 58 52 58 40V20L36 10Z" fill="none" stroke="#e87722" stroke-width="1.5" />
@@ -38,6 +48,7 @@
             </div>
 
             <form id="loginForm" method="post" action="/Account/Login" class="login-form">
+<<<<<<< HEAD
 
                 <!-- Role buttons -->
                 <div class="role-row">
@@ -46,14 +57,35 @@
                 </div>
 
                 <input type="hidden" id="roleInput" name="role" value="teacher" />
+=======
+                <div class="role-row">
+                    <button type="button"
+                            class="role-btn role-button @(selectedRole == "teacher" ? "active" : "")"
+                            data-role="teacher">
+                        Teacher
+                    </button>
+                    <button type="button"
+                            class="role-btn role-button @(selectedRole == "admin" ? "active" : "")"
+                            data-role="admin">
+                        Administrator
+                    </button>
+                </div>
+
+                <input type="hidden" id="roleInput" name="role" value="@selectedRole" />
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
 
                 <div class="login-field">
                     <label for="email">Email address</label>
                     <input type="email" id="email" name="email"
+<<<<<<< HEAD
+=======
+                           value="@(ViewBag.Email ?? "")"
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
                            placeholder="Enter your email address"
                            autocomplete="username" required />
                 </div>
 
+<<<<<<< HEAD
 
 
                 <div class="login-field">
@@ -61,6 +93,27 @@
                     <input type="password" id="password" name="password"
                            placeholder="Enter your password"
                            autocomplete="current-password" />
+=======
+                <div class="login-field">
+                    <label for="password">Password</label>
+                    <div class="password-input-wrap">
+                        <input type="password" id="password" name="password"
+                               placeholder="Enter your password"
+                               autocomplete="current-password" required />
+
+                        <button type="button" id="togglePassword"
+                                class="password-toggle"
+                                aria-label="Show password"
+                                aria-controls="password"
+                                aria-pressed="false">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />
+                                <circle cx="12" cy="12" r="3" />
+                                <path id="passwordEyeSlash" d="M3 3l18 18" style="display:none;" />
+                            </svg>
+                        </button>
+                    </div>
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
                 </div>
 
                 <div class="login-options">
@@ -77,7 +130,10 @@
                      class="login-message @(ViewBag.Error != null ? "show error" : "")">
                     @ViewBag.Error
                 </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
             </form>
         </div>
 
@@ -85,10 +141,15 @@
             <div class="motto">Learn &nbsp;·&nbsp; Grow &nbsp;·&nbsp; Achieve</div>
             <div class="copy">© 2026 Wilgehof Primary School</div>
         </div>
+<<<<<<< HEAD
 
     </section>
 
     <!-- RIGHT PANEL: school photo -->
+=======
+    </section>
+
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
     <section class="login-right">
         <img src="~/images/Wilgehof.jpeg" asp-append-version="true" alt="Wilgehof Primary School" />
         <div class="login-overlay">
@@ -100,6 +161,9 @@
     </section>
 
     <script src="~/js/login.js" asp-append-version="true"></script>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
 </body>
 </html>

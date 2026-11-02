@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <Reference Include="SkoolComm.Domain">
       <HintPath>..\lib\SkoolComm.Domain.dll</HintPath>
       <Private>true</Private>
@@ -40,10 +41,21 @@
       <HintPath>..\lib\Supabase.Postgrest.dll</HintPath>
       <Private>true</Private>
     </Reference>
+=======
+    <ProjectReference Include="..\SkoolComm.Application\SkoolComm.Application.csproj" />
+    <ProjectReference Include="..\SkoolComm.Infrastructure\SkoolComm.Infrastructure.csproj" />
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Views\Results\" />
   </ItemGroup>
 
+<<<<<<< HEAD
+=======
+  <ItemGroup>
+    <None Include=".github\copilot-instructions.md" />
+  </ItemGroup>
+
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
 </Project>

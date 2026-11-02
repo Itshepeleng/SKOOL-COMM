@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @{
     ViewData["Title"] = "Manage Users";
 }
@@ -359,3 +360,200 @@
     </div>
 
 </div>
+=======
+@model List<SkoolComm.Domain.Models.StaffProfile>
+@using SkoolComm.Domain.Models
+@{
+    ViewData["Title"] = "Users";
+    int me = ViewBag.CurrentStaffId ?? 0;
+    var parents = ViewBag.Parents as List<ParentProfile> ?? new List<ParentProfile>();
+
+    string successMsg = TempData["Success"]?.ToString() ?? "";
+    string errorMsg = (TempData["Error"]?.ToString() ?? "") + (ViewBag.Error as string ?? "");
+    string toastClass = errorMsg != "" ? "toast error"
+                      : successMsg != "" ? "toast success"
+                      : "toast success hidden";
+    string toastText = errorMsg != "" ? errorMsg : successMsg;
+
+    string Cap(string t) =>
+        string.IsNullOrEmpty(t) ? "" : char.ToUpper(t[0]) + t.Substring(1).ToLower();
+}
+
+<div class="page-wide stack" id="usersPage">
+
+    <div id="usrToast" class="@toastClass">
+        <span id="usrToastText">@toastText</span>
+    </div>
+
+    <!-- Tabs, search and Add -->
+    <div class="row-between">
+        <div class="tabs">
+            <button type="button" class="tab" data-tab="parents">Parents</button>
+            <button type="button" class="tab active" data-tab="staff">Staff</button>
+        </div>
+
+        <div class="row gap-3" id="staffTools">
+            <div class="search-wrap">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.5" /><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+                <input type="text" id="usrSearch" class="input" style="padding-left:36px;width:210px;background:#fff;" placeholder="Search users..." />
+            </div>
+            <button type="button" id="usrAdd" class="btn btn-primary btn-sm">+ Add User</button>
+        </div>
+    </div>
+
+    <!-- ============ STAFF TAB ============ -->
+    <div id="panel-staff" class="stack">
+
+        <form method="post" asp-controller="Users" asp-action="SaveStaff" class="card card-lg hidden" id="staffForm">
+            <h3 id="staffFormTitle">Add New Staff Member</h3>
+            <input type="hidden" name="id" id="stId" />
+
+            <div class="grid-2">
+                <div>
+                    <label class="lbl" for="stFirst">First Name</label>
+                    <input type="text" name="firstName" id="stFirst" class="input" placeholder="First name" />
+                </div>
+                <div>
+                    <label class="lbl" for="stLast">Last Name</label>
+                    <input type="text" name="lastName" id="stLast" class="input" placeholder="Surname" />
+                </div>
+                <div>
+                    <label class="lbl" for="stEmail">Email Address</label>
+                    <input type="email" name="email" id="stEmail" class="input" placeholder="user@wilgehof.edu.za" />
+                </div>
+                <div>
+                    <label class="lbl" for="stRole">Role</label>
+                    <select name="role" id="stRole" class="select">
+                        <option value="teacher">Teacher</option>
+                        <option value="administrator">Administrator</option>
+                    </select>
+                </div>
+            </div>
+
+            <p class="small faint" id="stNote" style="margin-top:12px;"></p>
+
+            <div class="row gap-3" style="justify-content:flex-end;margin-top:16px;">
+                <button type="button" id="stCancel" class="btn btn-outline">Cancel</button>
+                <button type="submit" id="stSave" class="btn btn-primary" disabled>Add User</button>
+            </div>
+        </form>
+
+        <div class="table-wrap">
+            <table class="tbl">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="staffRows">
+                    @if (Model.Count == 0)
+                    {
+                        <tr><td colspan="5" class="center faint">No staff found.</td></tr>
+                    }
+
+                    @foreach (var s in Model)
+                    {
+                        bool active = s.Status.Equals("active", StringComparison.OrdinalIgnoreCase);
+                        string search = (s.FirstName + " " + s.LastName + " " + s.Email + " " + s.Role).ToLowerInvariant();
+
+                        <tr class="staff-row @(active ? "" : "inactive")" data-search="@search">
+                            <td>
+                                <div class="row gap-3">
+                                    <div class="avatar" style="width:32px;height:32px;font-size:12px;background:#e8f4ec;color:#1a5c2e;">
+                                        @(s.LastName.Length > 0 ? s.LastName.Substring(0, 1).ToUpper() : "?")
+                                    </div>
+                                    <span style="font-weight:600;">@s.LastName, @s.FirstName</span>
+                                </div>
+                            </td>
+                            <td class="muted">@s.Email</td>
+                            <td><span class="badge role-@s.Role.ToLower()">@Cap(s.Role)</span></td>
+                            <td><span class="badge @(active ? "badge-green" : "badge-grey")">@Cap(s.Status)</span></td>
+                            <td>
+                                <div class="row gap-3" style="justify-content:flex-end;">
+                                    <button type="button" class="link-btn edit-btn"
+                                            data-id="@s.StaffId" data-first="@s.FirstName" data-last="@s.LastName"
+                                            data-email="@s.Email" data-role="@s.Role.ToLower()">
+                                        Edit
+                                    </button>
+
+                                    @if (s.StaffId == me)
+                                    {
+                                        <span class="tiny faint">You</span>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="link-btn status-toggle @(active ? "danger" : "grey")"
+                                                data-id="@s.StaffId" data-name="@s.LastName, @s.FirstName"
+                                                data-active="@(active ? "true" : "false")">
+                                            @(active ? "Deactivate" : "Activate")
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ============ PARENTS TAB ============ -->
+    <div id="panel-parents" class="hidden">
+        <div class="card">
+            <h3>Parents</h3>
+
+            @if (ViewBag.ParentError != null)
+            {
+                <p class="toast error">@ViewBag.ParentError</p>
+            }
+            else if (parents.Count == 0)
+            {
+                <p class="small faint">No parent records found.</p>
+            }
+            else
+            {
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Registered</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var parent in parents)
+                            {
+                                <tr>
+                                    <td>@parent.LastName, @parent.FirstName</td>
+                                    <td class="muted">@parent.Email</td>
+                                    <td>@(string.IsNullOrWhiteSpace(parent.Phone) ? "—" : parent.Phone)</td>
+                                    <td>@Cap(parent.Status)</td>
+                                    <td>@parent.CreatedAt.ToString("d MMM yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Hidden form used by Activate / Deactivate -->
+    <form method="post" asp-controller="Users" asp-action="SetStaffStatus" id="statusForm">
+        <input type="hidden" name="id" id="stsId" />
+        <input type="hidden" name="active" id="stsActive" />
+    </form>
+
+</div>
+
+@section Scripts {
+    <script src="~/js/users.js" asp-append-version="true"></script>
+}
+>>>>>>> 2c9515b (Initial upload of SkoolComm.Web)
