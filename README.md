@@ -4,7 +4,7 @@
 
 Skool-Comm is a school-parent communication system designed for Wilgehof primary school. It consists of a Flutter mobile application for parents and guardians, an ASP.NET Core web application for teachers and administrators, and a shared Supabase backend.
 
-The system centralises school communication by allowing parents and guardians to view announcements, attendance records, behavioural points, reminders, school events and the year plan.Parents can also update their contact information and register their profiles. Registration is automatic and immediate upon signup.
+The system centralises school communication by allowing parents and guardians to view announcements, attendance records, behavioural points, reminders, school events and the year plan. Parents can also update their contact information and register their profiles. Registration is automatic and immediate upon signup.
 
 Teachers and administrators use the web application to manage announcements, attendance and school events. Teachers record behavioural points, while administrators manage user accounts, events, and the year plan. The system also supports parent engagement tracking to monitor announcement views and event responses.
 
@@ -28,7 +28,6 @@ The web application allows teachers and administrators to:
 - Record learner behavioural points through the teacher role.
 - Manage school events and the year plan.
 - Track parent engagement with announcements.
-
 
 Administrators can also manage user accounts and approve or reject parent profiles.
 
@@ -85,7 +84,7 @@ Project-specific configuration, including Supabase settings, must be supplied se
 ### Must-Have Features
 
 - Secure registration, login and role-based access for parents, teachers and administrators.
-- Automatic parent profile registration 
+- Automatic parent profile registration.
 - User management by administrators.
 - Announcement management.
 - In-app reminders for parents.
@@ -156,7 +155,7 @@ SKOOL-COMM/
 └── README.md
 ```
 
-The structure above describes the intended organisation of the repository. Only files actually committed to GitHub should be considered available.
+The structure above describes the intended organisation of the repository. Only files actually committed to GitHub should be considered available. Visual Studio build folders (`.vs/`, `bin/`, `obj/`) are excluded through `.gitignore` and are not part of the repository.
 
 ---
 
@@ -193,19 +192,29 @@ The structure above describes the intended organisation of the repository. Only 
 
 ## Project Status
 
-**Current Phase:** Phase 3 – System Development and Implementation
+**Current Phase:** Phase 3 – System Development and Implementation (nearing completion)
 
-Phase 3 activities include:
-- Set up and Implement the Shared Supabase.
-- Develop the Flutter Mobile Application.
-- Develop the ASP.NET Web Application.
-- Integrate the Mobile and Web Applications.
-- Demonstrate the Integrated Prototype.
-- Update Project Documentation and Tools.
-- Final Demonstration.
-- Group Progress Checkpoint.
+**Last updated:** 2 November 2026
+
+### Completed
+
+- **Phase 1 – Requirements & Planning:** Complete.
+- **Phase 2 – Architecture, UML, ERD & UI:** Complete.
+- **Phase 3 – Development & Demonstration:** Development, integration and testing are complete:
+  - Supabase development and database integration.
+  - Flutter development.
+  - ASP.NET development.
+  - System integration.
+  - Manual system testing.
+  - Stakeholder evaluation.
+  - Bug corrections and refinement.
+  - Prototype completion.
+  - Final documentation and presentation preparation.
+
+### Remaining
+
+- Phase 3 presentation and defence.
 
 ---
 
 The repository will be maintained throughout the project as development and documentation progress.
-
