@@ -5,7 +5,8 @@
 /.vs
 /apps/web/SkoolComm.Web/.vs
 
-# Local/generated legacy artifacts
+# Local/generated legacy artifacts and stale root-level files
+/README.md
 /application.il
 /application.res
 /domain.il
