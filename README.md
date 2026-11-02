@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Skool-Comm is a school-parent communication system designed for Wilgehof Primary School. It consists of a Flutter mobile application for parents and guardians, an ASP.NET Core web application for teachers and administrators, and a shared Supabase backend.
+Skool-Comm is a school-parent communication system designed for Wilgehof primary school. It consists of a Flutter mobile application for parents and guardians, an ASP.NET Core web application for teachers and administrators, and a shared Supabase backend.
 
 The system centralises school communication by allowing parents and guardians to view announcements, attendance records, behavioural points, reminders, school events and the year plan.Parents can also update their contact information and register their profiles. Registration is automatic and immediate upon signup.
 
